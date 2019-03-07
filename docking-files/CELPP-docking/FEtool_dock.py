@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-__author__ = 'j5wagner@ucsd.edu'
+__author__ = 'germano.heinzelmann@ufsc.br'
 
 
 from d3r.celppade.custom_dock import Dock
