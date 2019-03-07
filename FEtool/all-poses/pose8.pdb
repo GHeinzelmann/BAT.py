@@ -1,0 +1,19 @@
+REMARK   4 XXXX COMPLIES WITH FORMAT V. 2.0
+ATOM      1  C   LIG A  11      15.233  12.237  -2.667  0.00  0.00      pose C  
+ATOM      2  C   LIG A  11      15.950  12.199  -3.872  0.00  0.00      pose C  
+ATOM      3  C   LIG A  11      15.322  11.782  -5.044  0.00  0.00      pose C  
+ATOM      4  O   LIG A  11      15.977  11.745  -6.122  0.00  0.00      pose O  
+ATOM      5  N   LIG A  11      14.009  11.409  -5.011  0.00  0.00      pose N  
+ATOM      6  C   LIG A  11      13.327  10.958  -6.225  0.00  0.00      pose C  
+ATOM      7  N   LIG A  11      13.317  11.465  -3.871  0.00  0.00      pose N  
+ATOM      8  C   LIG A  11      13.868  11.875  -2.696  0.00  0.00      pose C  
+ATOM      9  C   LIG A  11      12.994  11.948  -1.507  0.00  0.00      pose C  
+ATOM     10  C   LIG A  11      12.307  13.139  -1.216  0.00  0.00      pose C  
+ATOM     11  C   LIG A  11      11.505  13.229  -0.075  0.00  0.00      pose C  
+ATOM     12  C   LIG A  11      11.394  12.139   0.792  0.00  0.00      pose C  
+ATOM     13  C   LIG A  11      12.091  10.958   0.522  0.00  0.00      pose C  
+ATOM     14  C   LIG A  11      12.895  10.863  -0.619  0.00  0.00      pose C  
+ATOM     15  N   LIG A  11      15.889  12.574  -1.426  0.00  0.00      pose N  
+ATOM     16  C   LIG A  11      17.100  11.910  -0.953  0.00  0.00      pose C  
+ATOM     17  H   LIG A  11      15.492  13.321  -0.815  0.00  0.00      pose H  
+TER      18      LIG A  11 

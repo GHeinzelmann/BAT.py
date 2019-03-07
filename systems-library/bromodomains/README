@@ -1,0 +1,7 @@
+Parameters for the BRD4-1, BRD4-2, CREBBP and BAZ2B bromodomains
+
+
+All structures listed here use the same reference pdb file (reference.pdb)
+
+The variables to bet set in the input file for each of them is given in separate .in files
+

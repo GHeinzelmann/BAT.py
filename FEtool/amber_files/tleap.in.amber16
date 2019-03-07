@@ -1,0 +1,7 @@
+source leaprc.protein.ff14SB
+source leaprc.gaff
+
+# Load the dummy atom parameters
+loadamberparams dum.frcmod
+DUM = loadmol2 dum.mol2
+

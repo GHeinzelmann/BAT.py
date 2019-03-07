@@ -1,0 +1,19 @@
+# Input variables for the second bromodomain of BRD4
+
+
+# Ligand anchor search definitions
+
+l1_x            = 0.00     # x distance from H1 to center of L1 strike zone
+l1_y            = -6.25    # y distance from H1 to center of L1 strike zone             
+l1_z            = 8.50     # minimum z distance between H1 and L1
+l1_range        = 2.50     # Initial search range (strike zone) of the first ligand anchor L1 
+min_adis        = 4.00     # minimum distance between anchors
+max_adis        = 8.00     # maximum distance between anchors
+
+# Protein anchors, using original sequence 
+
+H1 = :403@CA
+H2 = :424@CA
+H3 = :450@CA
+
+

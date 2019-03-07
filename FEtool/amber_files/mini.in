@@ -1,0 +1,25 @@
+*******************************************************
+*****************************       mini.in
+*******************************************************
+Minimizing.
+ &cntrl
+  imin = 1,
+  ntx = 1, 
+  ntpr = 50,
+  maxcyc = 1000,
+  ncyc = 1000,
+  irest = 0,
+  ntf = 1,
+  ntc = 1,
+  ntb = 1,
+  cut = 9.0,
+  ntr = 1,
+  restraint_wt = 50.0,
+  restraintmask = ':1-3 | _L1_ | _L2_ | _L3_',
+  nmropt = 1,
+  pencut = -1,
+ /
+ &wt type = 'END', /
+DISANG=disang.rest
+LISTOUT=POUT
+

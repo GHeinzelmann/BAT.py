@@ -1,0 +1,33 @@
+*******************************************************
+*****************************       therm2.in
+*******************************************************
+Thermalizing, NVT.
+ &cntrl
+  imin = 0,
+  ntx = 5,
+  irest = 1,
+  ntpr = 500,
+  ntwr = 25000,
+  ntwx = 0,
+  ioutfm = 1,
+  iwrap = 1,
+  ntf = 2,
+  ntc = 2,
+  cut = 9.0,
+  ntt = 3,
+  gamma_ln = 1.0,
+  ig = -1,
+  ntp = 0,
+  nstlim = 25000,
+  dt = 0.004,
+  ntr = 1,
+  restraint_wt = 50.0,
+  restraintmask = ':1-3 | _L1_ | _L2_ | _L3_',
+  nmropt = 1,
+  pencut = -1,
+ /
+ &wt type='TEMP0', istep1=0,    istep2=25000,  value1=10.0, value2= _temperature_, /
+ &wt type = 'END', /
+DISANG=disang.rest
+LISTOUT=POUT
+

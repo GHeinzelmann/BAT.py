@@ -1,0 +1,33 @@
+heating
+ &cntrl
+   imin = 0, nstlim = 50000, irest = 0, ntx = 1, dt = 0.004,
+   ntt = 1, temp0 = _temperature_, tempi = 50.0, tautp = 1.0,
+   ntc = 2, ntf = 1,
+   ntb = 1,
+   ioutfm = 1, iwrap = 1,
+   nmropt = 1,
+   pencut = -1
+   ntr = 1,
+   restraint_wt = 50.0,
+   restraintmask = ':1-3',
+   ntwe = 1000, ntwx = 1000, ntpr = 1000, ntwr = 5000,
+   icfe = 1, clambda = lbd_val,
+   logdvdl = 0,
+   timask1 = ':mk1', timask2 = ':mk2',
+   ifsc=0, crgmask = ':mk2',
+ /
+
+ &ewald
+ /
+
+ &wt
+   type='TEMP0',
+   istep1 = 0, istep2 = 30000,
+   value1 = 50.0, value2 = _temperature_
+ /
+
+ &wt type = 'END'
+ /
+DISANG=disang.rest
+LISTOUT=POUT
+

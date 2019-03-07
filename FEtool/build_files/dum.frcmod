@@ -1,0 +1,15 @@
+Parameters for a "Lead-like" Dummy Atom
+MASS
+Pb     210.00
+
+BOND
+
+ANGLE
+
+DIHE
+
+IMPROPER
+
+NONBON
+  Pb       0.000     0.0000000
+
