@@ -19,7 +19,7 @@ AmberTools16 or later - http://ambermd.org/AmberTools.php
 
 _pmemd.cuda_ software from AMBER16 (APR only) or AMBER18 (DD and APR) - http://ambermd.org/GetAmber.php 
 
-The folder ./all-poses contains an example of system input files, with a docked receptor from the 5uez crystal structure (hiTanimoto-5uf0_5uez_docked.pdb), as well as 9 poses for the ligand with the 5uf0 crystal structure (pose0.pdb to pose8.pdb). The docking files were generated and converted to .pdb using Autodock Vina and AutodockTools, following a protocol adapted from the CELPP challenge tutorial (https://docs.google.com/document/d/1iJcPUktbdrRftAA8cuVa32Ri1TPr2XvZVqTccDja2OM). Inside the ./all-poses folder there is also the original crystal structure file for 5uf0. Below we show an example of using these files to calculate the standard binding free energies of the top 5 docked poses and the crystal structure, with all the necessary steps in the calculation. 
+The folder ./FEtool/all-poses contains an example of system input files, with a docked receptor from the 5uez crystal structure (hiTanimoto-5uf0_5uez_docked.pdb), as well as 9 docked poses for the ligand with the 5uf0 crystal structure (pose0.pdb to pose8.pdb). The docking files were generated and converted to .pdb using Autodock Vina and AutodockTools, following a protocol adapted from the CELPP challenge tutorial (https://docs.google.com/document/d/1iJcPUktbdrRftAA8cuVa32Ri1TPr2XvZVqTccDja2OM). Inside the ./all-poses folder there is also the original crystal structure file for 5uf0. Below we show an example of using these files to calculate the standard binding free energies of the top 5 docked poses and the crystal structure, with all the necessary steps in the calculation. 
 
 # Running a sample calculation
 
