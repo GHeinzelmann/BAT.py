@@ -9,15 +9,15 @@ FEtool.py can perform binding free energy calculations by a physical route, thro
 
 To use FEtool.py, download the files from this repository, which already contain an example for ligand binding to the second bromodomain of the BRD4 protein - BRD4(2). In order to perform all the steps from FEtool.py, the following programs must be installed and in your path:
 
-VMD (Visual Molecular Dynamics) - https://www.ks.uiuc.edu/Development/Download/download.cgi?PackageName=VMD
+VMD (Visual Molecular Dynamics) [1] - https://www.ks.uiuc.edu/Development/Download/download.cgi?PackageName=VMD
 
-Openbabel - http://openbabel.org/wiki/Category:Installation
+Openbabel [2] - http://openbabel.org/wiki/Category:Installation
 
-MUSTANG v3.2.3 (MUltiple (protein) STructural AligNment alGorithm) - http://lcb.infotech.monash.edu.au/mustang/
+MUSTANG v3.2.3 (MUltiple (protein) STructural AligNment alGorithm) [3] - http://lcb.infotech.monash.edu.au/mustang/
 
-AmberTools16 or later - http://ambermd.org/AmberTools.php
+AmberTools16 or later [4] - http://ambermd.org/AmberTools.php
 
-_pmemd.cuda_ software from AMBER16 (APR only) or AMBER18 (DD and APR) - http://ambermd.org/GetAmber.php 
+_pmemd.cuda_ software from AMBER16 (APR only) or AMBER18 (DD and APR) [4] - http://ambermd.org/GetAmber.php 
 
 The folder ./FEtool/all-poses contains an example of system input files, with a docked receptor from the 5uez crystal structure (hiTanimoto-5uf0_5uez_docked.pdb), as well as 9 docked poses for the ligand with the 5uf0 crystal structure (pose0.pdb to pose8.pdb). The docking files were generated and converted to .pdb using Autodock Vina and AutodockTools, following a protocol adapted from the CELPP challenge tutorial (https://docs.google.com/document/d/1iJcPUktbdrRftAA8cuVa32Ri1TPr2XvZVqTccDja2OM). Inside the ./all-poses folder there is also the original crystal structure file for 5uf0. Below we show an example of using these files to calculate the standard binding free energies of the top 5 docked poses and the crystal structure, with all the necessary steps in the calculation. 
 
@@ -83,6 +83,18 @@ Germano Heinzelmann <br/>
 Departamento de Física, Universidade Federal de Santa Catarina <br/>
 Florianópolis - SC  88040-970 Brasil <br/>
 email: germanohei@gmail.com <br/>
+
+# References
+
+1. W. Humphrey, A. Dalke and K. Schulten. (1996)  "VMD - Visual Molecular Dynamics", Journal of Molecular Graphics, 14, 33-38.
+
+2. N. M. O'Boyle, M. Banck, C. A. James, C. Morley, T. Vandermeersch, and G. R. HutchisonEmail. (2011) "Open Babel: An open chemical toolbox." Journal of Cheminformatics, 3, 33.
+
+3. A. S. Konagurthu, J. Whisstock, P. J. Stuckey, and A. M. Lesk. (2006) “MUSTANG: A multiple structural alignment algorithm”. Proteins, 64, 559-574.
+
+4. D.A. Case, I.Y. Ben-Shalom, S.R. Brozell, D.S. Cerutti, T.E. Cheatham, III, V.W.D. Cruzeiro, T.A. Darden, R.E. Duke, D. Ghoreishi, M.K. Gilson, H. Gohlke, A.W. Goetz, D. Greene, R Harris, N. Homeyer, S. Izadi, A. Kovalenko, T. Kurtzman, T.S. Lee, S. LeGrand, P. Li, C. Lin, J. Liu, T. Luchko, R. Luo, D.J. Mermelstein, K.M. Merz, Y. Miao, G. Monard, C. Nguyen, H. Nguyen, I. Omelyan, A. Onufriev, F. Pan, R. Qi, D.R. Roe, A. Roitberg, C. Sagui, S. Schott-Verdugo, J. Shen, C.L. Simmerling, J. Smith, R. Salomon-Ferrer, J. Swails, R.C. Walker, J. Wang, H. Wei, R.M. Wolf, X. Wu, L. Xiao, D.M. York and P.A. Kollman (2018), AMBER 2018, University of California, San Francisco.
+
+
 
 
 
