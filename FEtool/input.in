@@ -16,9 +16,9 @@ ligand_name     = DOK   # Arbitrary if using docked poses
 
 # Protein anchors, using original sequence 
 
-H1 = :403@CA          
-H2 = :424@CA
-H3 = :450@CA
+P1 = :403@CA          
+P2 = :424@CA
+P3 = :450@CA
 
 # Variables for setting up equilibrium and free energy calculations, also used on analysis       
 

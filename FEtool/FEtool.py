@@ -123,11 +123,11 @@ for i in range(0, len(lines)):
 	    calc_type = lines[i][1].lower()
 	elif lines[i][0] == 'celpp_receptor':
 	    celp_st = lines[i][1]
-	elif lines[i][0] == 'h1':
+	elif lines[i][0] == 'p1':
 	    H1 = lines[i][1]
-	elif lines[i][0] == 'h2':
+	elif lines[i][0] == 'p2':
 	    H2 = lines[i][1]
-	elif lines[i][0] == 'h3':
+	elif lines[i][0] == 'p3':
 	    H3 = lines[i][1]
 	elif lines[i][0] == 'ligand_name':
 	    mol = lines[i][1]
