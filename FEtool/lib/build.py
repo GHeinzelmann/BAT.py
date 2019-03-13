@@ -80,10 +80,10 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
       with open("prep.tcl", "wt") as fout:
 	for line in fin:
 	  fout.write(line.replace('MMM', mol).replace('mmm', mol.lower()).replace('P1A', p1_vmd).replace('FIRST','1').replace('LAST',str(recep_resid_num)).replace('STAGE','equil').replace('XDIS','%4.2f' %l1_x).replace('YDIS','%4.2f' %l1_y).replace('ZDIS','%4.2f' %l1_z).replace('RANG','%4.2f' %l1_range).replace('DMAX','%4.2f' %max_adis).replace('DMIN','%4.2f' %min_adis))
-    with open('%s.pdb' %pose) as f:
-	data=f.read().replace('LIG','%s' %mol)
-    with open('%s.pdb' %pose, "w") as f:
-	f.write(data)
+#    with open('%s.pdb' %pose) as f:
+#	data=f.read().replace('LIG','%s' %mol)
+#    with open('%s.pdb' %pose, "w") as f:
+#	f.write(data)
 
 
     # Get parameters and adjust files
