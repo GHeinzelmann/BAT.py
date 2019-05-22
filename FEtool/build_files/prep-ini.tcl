@@ -20,7 +20,7 @@ set mat {}
 
 foreach i $tot {
 set t [atomselect top "resname MMM and name $i"]
-set p [atomselect top "protein and resid P1A and name CA"]
+set p [atomselect top "protein and resid P1A and name NN"]
 set d1 [measure center $t weight mass]
 set d2 [measure center $p weight mass]
 set diff [vecsub $d1 $d2]
@@ -55,7 +55,7 @@ exit
 }
 
 set m [atomselect top "resname MMM and name $aa1"]
-set p [atomselect top "protein resid P1A and name CA"]
+set p [atomselect top "protein resid P1A and name NN"]
 set d1 [measure center $m weight mass]
 set d2 [measure center $p weight mass]
 set diff [vecsub $d1 $d2]
@@ -83,7 +83,7 @@ mol delete all
 mol load pdb dum1.pdb
 mol load pdb $filpdb
 set a [atomselect 3 all]
-set b [atomselect 4 "protein and resid P1A and name CA"]
+set b [atomselect 4 "protein and resid P1A and name NN"]
 set c [atomselect 4 "resname MMM and name $aa1"]
 set d1 [vecsub [measure center $b weight mass] [measure center $c weight mass]]
 set d2 [lindex $d1 2]
@@ -129,7 +129,7 @@ mol delete all
 mol load pdb dum1.pdb
 mol load pdb $filpdb
 set a [atomselect 9 all]
-set b [atomselect 10 "protein and resid P1A and name CA"]
+set b [atomselect 10 "protein and resid P1A and name NN"]
 set c [atomselect 10 "resname MMM and name $aa1"]
 set d1 [vecsub [measure center $b weight mass] [measure center $c weight mass]]
 set d2 [lindex $d1 2]

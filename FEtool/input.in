@@ -24,7 +24,7 @@ P3 = :450@CA
 
 fe_type = all  # Type of free energy calculations (all, rest, dd, pmf, dd-rest, pmf-rest, custom)
 
-components = [ c l t a ] # Used with custom option for fe_type
+components = [ r l a c ] # Used with custom option for fe_type
 
 release_eq = [ 5.00 2.50 1.00 0.50 0.20 0.10 0.05 0.02 0.00 ]   # Equilibrium gradual release weights
 
@@ -120,12 +120,13 @@ f_steps2	= 200000   # Number of steps for window component f (production)
 rec_bb		= yes       # Use protein backbone dihedrals conformational restraints
 bb_start        = 379       # First residue of the restrained range (original protein numbering)
 bb_end          = 389       # Last residue of the restrained range
+bb_equil        = no       # Keep this backbone section rigid during equilibration 
 
 # Ligand anchor search definitions
 
-l1_x            = 0.00     # x distance from H1 to center of L1 strike zone
-l1_y            = -6.25    # y distance from H1 to center of L1 strike zone             
-l1_z            = 8.50     # minimum z distance between H1 and L1
+l1_x            = 0.00     # x distance from P1 to center of L1 strike zone
+l1_y            = -6.25    # y distance from P1 to center of L1 strike zone             
+l1_z            = 8.50     # minimum z distance between P1 and L1
 l1_range        = 2.50     # Initial search range (strike zone) of the first ligand anchor L1 
 min_adis        = 4.00     # minimum distance between anchors
 max_adis        = 8.00     # maximum distance between anchors

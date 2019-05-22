@@ -9,7 +9,7 @@ import subprocess as sp
 import sys as sys
 import scripts as scripts
 
-def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp):
+def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil):
 
     rst = []
     atm_num = []
@@ -233,7 +233,10 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, com
     # For preparation or free energy, get pull distance and equilibrium values for protein backbone restraints
     if (stage == 'prep'):
       vals[9+nd] = float(vals[9+nd]) + trans_dist
-      shutil.copy('../../equil/'+pose+'/assign.dat', './assign-eq.dat')
+      if (bb_equil == 'yes'):
+        shutil.copy('../../equil/'+pose+'/assign.dat', './assign-eq.dat')
+      else:
+        shutil.copy('./assign.dat', './assign-eq.dat')
       with open('./assign-eq.dat') as fin:
 	lines = (line.rstrip() for line in fin)
 	lines = list(line for line in lines if line) # Non-blank lines in a list   
@@ -256,7 +259,10 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, com
     if stage == 'equil':
       rdf = rest[0]
       raf = rest[1]
-      rdhf = rest[2]
+      if bb_equil == 'yes':
+        rdhf = rest[2]
+      else:
+        rdhf = 0
       rdsf = rest[3]
       ldf = 2*weight*rest[4]/100
       laf = weight*rest[5]/100

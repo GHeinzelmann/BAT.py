@@ -79,7 +79,7 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
     with open("prep-ini.tcl", "rt") as fin:
       with open("prep.tcl", "wt") as fout:
 	for line in fin:
-	  fout.write(line.replace('MMM', mol).replace('mmm', mol.lower()).replace('P1A', p1_vmd).replace('FIRST','1').replace('LAST',str(recep_resid_num)).replace('STAGE','equil').replace('XDIS','%4.2f' %l1_x).replace('YDIS','%4.2f' %l1_y).replace('ZDIS','%4.2f' %l1_z).replace('RANG','%4.2f' %l1_range).replace('DMAX','%4.2f' %max_adis).replace('DMIN','%4.2f' %min_adis))
+	  fout.write(line.replace('MMM', mol).replace('mmm', mol.lower()).replace('NN', h1_atom).replace('P1A', p1_vmd).replace('FIRST','1').replace('LAST',str(recep_resid_num)).replace('STAGE','equil').replace('XDIS','%4.2f' %l1_x).replace('YDIS','%4.2f' %l1_y).replace('ZDIS','%4.2f' %l1_z).replace('RANG','%4.2f' %l1_range).replace('DMAX','%4.2f' %max_adis).replace('DMIN','%4.2f' %min_adis))
 #    with open('%s.pdb' %pose) as f:
 #	data=f.read().replace('LIG','%s' %mol)
 #    with open('%s.pdb' %pose, "w") as f:
@@ -308,6 +308,7 @@ def build_prep(pose, mol, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis):
 
     # Get protein first anchor residue number and protein last residue number from equil simulations
     p1_resid = P1.split('@')[0][1:]
+    p1_atom = P1.split('@')[1]
     rec_res = int(recep_last) + 3
     p1_vmd = p1_resid
 
@@ -315,7 +316,7 @@ def build_prep(pose, mol, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis):
     with open("prep-ini.tcl", "rt") as fin:
       with open("prep.tcl", "wt") as fout:
 	for line in fin:
-	  fout.write(line.replace('MMM', mol).replace('mmm', mol.lower()).replace('P1A', p1_vmd).replace('FIRST','4').replace('LAST',str(rec_res)).replace('STAGE','prep').replace('XDIS','%4.2f' %l1_x).replace('YDIS','%4.2f' %l1_y).replace('ZDIS','%4.2f' %l1_z).replace('RANG','%4.2f' %l1_range).replace('DMAX','%4.2f' %max_adis).replace('DMIN','%4.2f' %min_adis))
+	  fout.write(line.replace('MMM', mol).replace('mmm', mol.lower()).replace('NN', p1_atom).replace('P1A', p1_vmd).replace('FIRST','4').replace('LAST',str(rec_res)).replace('STAGE','prep').replace('XDIS','%4.2f' %l1_x).replace('YDIS','%4.2f' %l1_y).replace('ZDIS','%4.2f' %l1_z).replace('RANG','%4.2f' %l1_range).replace('DMAX','%4.2f' %max_adis).replace('DMIN','%4.2f' %min_adis))
 
     # Align to reference structure using mustang
     sp.call('mustang-3.2.3 -p ./ -i reference.pdb complex.pdb -o aligned -r ON', shell=True)
