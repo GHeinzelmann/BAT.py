@@ -92,28 +92,28 @@ l_steps1	= 500000   # Number of steps per window for component l (equilibrium)
 l_steps2	= 1000000  # Number of steps for window component l (production)             
 
 t_steps1	= 500000   # Number of steps per window for component t (equilibrium)
-t_steps2	= 500000   # Number of steps for window component t (production)     
+t_steps2	= 1000000   # Number of steps for window component t (production)     
 
-u_steps1	= 1000000  # Number of steps per window for component u (equilibrium)
-u_steps2	= 2000000  # Number of steps for window component u (production)     
+u_steps1	= 2000000  # Number of steps per window for component u (equilibrium)
+u_steps2	= 4000000  # Number of steps for window component u (production)     
 
 c_steps1	= 1000000  # Number of steps per window for component c (equilibrium)
 c_steps2	= 2000000  # Number of steps for window component c (production)     
 
-r_steps1	= 500000   # Number of steps per window for component r (equilibrium) 
-r_steps2	= 1000000  # Number of steps for window component r (production)     
+r_steps1	= 1000000   # Number of steps per window for component r (equilibrium) 
+r_steps2	= 2000000  # Number of steps for window component r (production)     
 
-e_steps1	= 100000   # Number of steps per window for component e (equilibrium) 
-e_steps2	= 200000   # Number of steps for window component e (production)     
+e_steps1	= 200000   # Number of steps per window for component e (equilibrium) 
+e_steps2	= 400000   # Number of steps for window component e (production)     
 
-v_steps1	= 1000000  # Number of steps per window for component v (equilibrium) 
-v_steps2	= 2000000  # Number of steps for window component v (production)     
+v_steps1	= 2000000  # Number of steps per window for component v (equilibrium) 
+v_steps2	= 4000000  # Number of steps for window component v (production)     
 
-w_steps1	= 500000   # Number of steps per window for component w (equilibrium) 
-w_steps2	= 500000   # Number of steps for window component w (production)     
+w_steps1	= 1000000   # Number of steps per window for component w (equilibrium) 
+w_steps2	= 2000000   # Number of steps for window component w (production)     
 
-f_steps1	= 100000   # Number of steps per window for component f (equilibrium) 
-f_steps2	= 200000   # Number of steps for window component f (production)     
+f_steps1	= 200000   # Number of steps per window for component f (equilibrium) 
+f_steps2	= 400000   # Number of steps for window component f (production)     
 
 # Conformational restraints on the protein backbone
 
