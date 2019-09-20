@@ -1,30 +1,30 @@
 *******************************************************
 *****************************       mdin
 *******************************************************
-Production 5.00 ns, NPT.
+Production runs ligand only
  &cntrl
   imin = 0,
   ntx = 5,
   irest = 1,
-  ntpr = 5000,
-  ntwr = 5000,
-  ntwe = 5000,
+  ntpr = _ntpr_,
+  ntwr = _ntwr_,
+  ntwe = _ntwe_,
   ntxo = 1,
-  ntwx = 2500,
+  ntwx = _ntwx_,
   ntwprt = _num-atoms_,
   ioutfm = 1,
   iwrap = 1,
   ntf = 2,
   ntc = 2,
-  cut = 9.0,
+  cut = _cutoff_,
   ntt = 3,
   temp0 = _temperature_,
-  gamma_ln = 1.0,
+  gamma_ln = _gamma_ln_,
   ig = -1,
   ntp = 1,
-  barostat = 2,
+  barostat = _barostat_,
   nstlim = _num-steps_,
-  dt = 0.004,
+  dt = _step_,
   nmropt = 1,
   pencut = -1,
  /

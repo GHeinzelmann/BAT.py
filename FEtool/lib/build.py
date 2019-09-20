@@ -9,7 +9,7 @@ import subprocess as sp
 import sys as sys
 import scripts as scripts
 
-def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis):
+def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ligand_ff):
 
 
     # Create equilibrium directory
@@ -91,9 +91,12 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
       sp.call('babel -i pdb '+pose+'.pdb -o pdb '+mol.lower()+'.pdb -d', shell=True)
     sp.call('babel -i pdb '+mol.lower()+'.pdb -o pdb '+mol.lower()+'-h.pdb -h', shell=True)
     if not os.path.exists('../ff/%s.mol2' %mol.lower()):
-      sp.call('antechamber -i '+mol.lower()+'-h.pdb -fi pdb -o '+mol.lower()+'.mol2 -fo mol2 -c bcc -s 2 -at gaff', shell=True)
+      sp.call('antechamber -i '+mol.lower()+'-h.pdb -fi pdb -o '+mol.lower()+'.mol2 -fo mol2 -c bcc -s 2 -at '+ligand_ff.lower()+'', shell=True)
     if not os.path.exists('../ff/%s.frcmod' %mol.lower()):
-      sp.call('parmchk2 -i '+mol.lower()+'.mol2 -f mol2 -o '+mol.lower()+'.frcmod -s 1', shell=True)
+      if ligand_ff == 'gaff':
+        sp.call('parmchk2 -i '+mol.lower()+'.mol2 -f mol2 -o '+mol.lower()+'.frcmod -s 1', shell=True)
+      elif ligand_ff == 'gaff2':
+        sp.call('parmchk2 -i '+mol.lower()+'.mol2 -f mol2 -o '+mol.lower()+'.frcmod -s 2', shell=True)
     sp.call('antechamber -i '+mol.lower()+'-h.pdb -fi pdb -o '+mol.lower()+'.pdb -fo pdb', shell=True)
 
     # Create raw complex and clean it
@@ -479,7 +482,7 @@ def build_prep(pose, mol, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis):
 
     return 'all'
 
-def build_apr(hmr, mol, pose, comp, win, trans_dist, pull_spacing):
+def build_apr(hmr, mol, pose, comp, win, trans_dist, pull_spacing, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt):
 
     # Get parameters from preparation
     if (comp == 'v' or comp == 'w'):
@@ -497,47 +500,36 @@ def build_apr(hmr, mol, pose, comp, win, trans_dist, pull_spacing):
       shutil.copy('../../../prep/ff/dum.mol2', '../ff/')
       shutil.copy('../../../prep/ff/dum.frcmod', '../ff/')
       
-
-    if not os.path.exists('amber_files'):
+    # Copy and replace simulation files for the first window
+    if int(win) == 0:
+      if os.path.exists('amber_files'):
+	shutil.rmtree('./amber_files')
       if (comp == 'v' or comp == 'w'):
-        try:
-          shutil.copytree('../../../../amber_files', './amber_files')
-        # Directories are the same
-        except shutil.Error as e:
+	try:
+	  shutil.copytree('../../../../amber_files', './amber_files')
+	# Directories are the same
+	except shutil.Error as e:
 	  print('Directory not copied. Error: %s' % e)
-        # Any error saying that the directory doesn't exist
-        except OSError as e:
-          print('Directory not copied. Error: %s' % e)
+	# Any error saying that the directory doesn't exist
+	except OSError as e:
+	  print('Directory not copied. Error: %s' % e)
       else:
-        try:
-          shutil.copytree('../../../amber_files', './amber_files')
-        # Directories are the same
-        except shutil.Error as e:
+	try:
+	  shutil.copytree('../../../amber_files', './amber_files')
+	# Directories are the same
+	except shutil.Error as e:
 	  print('Directory not copied. Error: %s' % e)
-        # Any error saying that the directory doesn't exist
-        except OSError as e:
+	# Any error saying that the directory doesn't exist
+	except OSError as e:
 	  print('Directory not copied. Error: %s' % e)
-    if hmr == 'no': 
-      replacement = 'dt = 0.002'
       for dname, dirs, files in os.walk('./amber_files'):
-        for fname in files:
-          fpath = os.path.join(dname, fname)
-          with open(fpath) as f:
-            s = f.read()
-            s = s.replace('dt = 0.004', replacement)
-          with open(fpath, "w") as f:
-            f.write(s)
-    elif hmr == 'yes': 
-      replacement = 'dt = 0.004'
-      for dname, dirs, files in os.walk('./amber_files'):
-        for fname in files:
-          fpath = os.path.join(dname, fname)
-          with open(fpath) as f:
-            s = f.read()
-            s = s.replace('dt = 0.002', replacement)
-          with open(fpath, "w") as f:
-            f.write(s)
-
+	for fname in files:
+	  fpath = os.path.join(dname, fname)
+	  with open(fpath) as f:
+	    s = f.read()
+	    s = s.replace('_step_', dt).replace('_ntpr_', ntpr).replace('_ntwr_', ntwr).replace('_ntwe_', ntwe).replace('_ntwx_', ntwx).replace('_cutoff_', cut).replace('_gamma_ln_', gamma_ln).replace('_barostat_', barostat).replace('_receptor_ff_', receptor_ff).replace('_ligand_ff_', ligand_ff)
+	  with open(fpath, "w") as f:
+	    f.write(s)
 
     if not os.path.exists('run_files'):
       if (comp == 'v' or comp == 'w'):
@@ -684,7 +676,7 @@ def build_apr(hmr, mol, pose, comp, win, trans_dist, pull_spacing):
         for file in glob.glob('../r00/*'):
 	  shutil.copy(file, './')
 
-def build_dec(hmr, mol, pose, comp, win, water_model):
+def build_dec(hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt):
 
     if not os.path.exists('../../ff'):
       os.makedirs('../../ff')
@@ -693,34 +685,24 @@ def build_dec(hmr, mol, pose, comp, win, water_model):
     shutil.copy('../../../../prep/ff/dum.mol2', '../../ff/')
     shutil.copy('../../../../prep/ff/dum.frcmod', '../../ff/')
 
-
-    if not os.path.exists('amber_files'):
+    # Copy and replace simulation files for the first window
+    if int(win) == 0:
+      if os.path.exists('amber_files'):
+	shutil.rmtree('./amber_files')
       try:
-        shutil.copytree('../../../../amber_files', './amber_files')
+	shutil.copytree('../../../../amber_files', './amber_files')
       # Directories are the same
       except shutil.Error as e:
-        print('Directory not copied. Error: %s' % e)
-        # Any error saying that the directory doesn't exist
+	print('Directory not copied. Error: %s' % e)
+	# Any error saying that the directory doesn't exist
       except OSError as e:
-        print('Directory not copied. Error: %s' % e)
-    if hmr == 'no': 
-      replacement = 'dt = 0.002'
+	print('Directory not copied. Error: %s' % e)
       for dname, dirs, files in os.walk('./amber_files'):
 	for fname in files:
 	  fpath = os.path.join(dname, fname)
 	  with open(fpath) as f:
 	    s = f.read()
-	    s = s.replace('dt = 0.004', replacement)
-	  with open(fpath, "w") as f:
-	    f.write(s)
-    elif hmr == 'yes': 
-      replacement = 'dt = 0.004'
-      for dname, dirs, files in os.walk('./amber_files'):
-	for fname in files:
-	  fpath = os.path.join(dname, fname)
-	  with open(fpath) as f:
-	    s = f.read()
-	    s = s.replace('dt = 0.002', replacement)
+	    s = s.replace('_step_', dt).replace('_ntpr_', ntpr).replace('_ntwr_', ntwr).replace('_ntwe_', ntwe).replace('_ntwx_', ntwx).replace('_cutoff_', cut).replace('_gamma_ln_', gamma_ln).replace('_barostat_', barostat).replace('_receptor_ff_', receptor_ff).replace('_ligand_ff_', ligand_ff)
 	  with open(fpath, "w") as f:
 	    f.write(s)
 
@@ -881,38 +863,28 @@ def build_dec(hmr, mol, pose, comp, win, water_model):
 	  shutil.copy(file, './')
     
 
-def create_box(hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, stage):
+def create_box(hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt):
     
+    # Copy and replace simulation files
     if stage != 'fe':
-      if not os.path.exists('amber_files'):
-	try:
-	  shutil.copytree('../amber_files', './amber_files')
-	# Directories are the same
-	except shutil.Error as e:
-	  print('Directory not copied. Error: %s' % e)
-	# Any error saying that the directory doesn't exist
-	except OSError as e:
-	  print('Directory not copied. Error: %s' % e)
-      if hmr == 'no': 
-        replacement = 'dt = 0.002'
-        for dname, dirs, files in os.walk('./amber_files'):
-	  for fname in files:
-	    fpath = os.path.join(dname, fname)
-	    with open(fpath) as f:
-	      s = f.read()
-	      s = s.replace('dt = 0.004', replacement)
-	    with open(fpath, "w") as f:
-	      f.write(s)
-      elif hmr == 'yes': 
-        replacement = 'dt = 0.004'
-        for dname, dirs, files in os.walk('./amber_files'):
-	  for fname in files:
-	    fpath = os.path.join(dname, fname)
-	    with open(fpath) as f:
-	      s = f.read()
-	      s = s.replace('dt = 0.002', replacement)
-	    with open(fpath, "w") as f:
-	      f.write(s)
+      if os.path.exists('amber_files'):
+	shutil.rmtree('./amber_files')
+      try:
+	shutil.copytree('../amber_files', './amber_files')
+      # Directories are the same
+      except shutil.Error as e:
+	print('Directory not copied. Error: %s' % e)
+      # Any error saying that the directory doesn't exist
+      except OSError as e:
+	print('Directory not copied. Error: %s' % e)
+      for dname, dirs, files in os.walk('./amber_files'):
+	for fname in files:
+	  fpath = os.path.join(dname, fname)
+	  with open(fpath) as f:
+	    s = f.read()
+	    s = s.replace('_step_', dt).replace('_ntpr_', ntpr).replace('_ntwr_', ntwr).replace('_ntwe_', ntwe).replace('_ntwx_', ntwx).replace('_cutoff_', cut).replace('_gamma_ln_', gamma_ln).replace('_barostat_', barostat).replace('_receptor_ff_', receptor_ff).replace('_ligand_ff_', ligand_ff)
+	  with open(fpath, "w") as f:
+	    f.write(s)
       os.chdir(pose)
 
     # Copy tleap files that are used for restraint generation and analysis

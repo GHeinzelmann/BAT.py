@@ -1,5 +1,5 @@
-source leaprc.protein.ff14SB
-source leaprc.gaff
+source leaprc._receptor_ff_
+source leaprc._ligand_ff_
 
 # Load the dummy atom parameters
 loadamberparams dum.frcmod
