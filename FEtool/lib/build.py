@@ -1062,7 +1062,7 @@ def create_box(hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x,
     if stage != 'fe':
       os.chdir('../')
    
-def ligand_box(mol, lig_box, water_model, neut, ion_lig, comp):
+def ligand_box(mol, lig_box, water_model, neut, ion_lig, comp, ligand_ff):
     # Define volume density for different water models
     if water_model == 'TIP3P':
        water_box = water_model.upper()+'BOX'
@@ -1081,7 +1081,7 @@ def ligand_box(mol, lig_box, water_model, neut, ion_lig, comp):
 
     # Write and run tleap file
     tleap_solvate = open('tleap_solvate.in', 'a')
-    tleap_solvate.write('source leaprc.gaff\n\n')        
+    tleap_solvate.write('source leaprc.'+ligand_ff+'\n\n')        
     tleap_solvate.write('# Load the ligand parameters\n')        
     tleap_solvate.write('loadamberparams %s.frcmod\n'%(mol.lower()))
     tleap_solvate.write('%s = loadmol2 %s.mol2\n\n'%(mol.upper(), mol.lower()))

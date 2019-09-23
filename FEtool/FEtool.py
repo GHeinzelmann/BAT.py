@@ -494,7 +494,7 @@ elif stage == 'fe':
             print('window: %s%02d weight: %s' %(comp, int(win), str(weight)))
 	    build.build_apr(hmr, mol, pose, comp, win, trans_dist, pull_spacing, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt)
             print('Creating box for ligand only...')
-	    build.ligand_box(mol, lig_box, water_model, neut, ion_lig, comp)
+	    build.ligand_box(mol, lig_box, water_model, neut, ion_lig, comp, ligand_ff)
 	    setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil)
 	    setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, c_steps1, c_steps2, rng)
           else:
@@ -558,7 +558,7 @@ elif stage == 'fe':
             print('window: %s%02d lambda: %s' %(comp, int(win), str(weight)))
 	    build.build_apr(hmr, mol, pose, comp, win, trans_dist, pull_spacing, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt)
             print('Creating box for ligand only...')
-	    build.ligand_box(mol, lig_box, water_model, neut, ion_lig, comp)
+	    build.ligand_box(mol, lig_box, water_model, neut, ion_lig, comp, ligand_ff)
 	    setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil)
 	    setup.dec_files(temperature, mol, num_sim, pose, comp, win, stage, w_steps1, w_steps2, weight, lambdas)
           else:
@@ -599,7 +599,7 @@ elif stage == 'fe':
             print('window: %s%02d lambda: %s' %(comp, int(win), str(weight)))
 	    build.build_dec(hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt)
             print('Creating box for ligand decharging in bulk...')
-	    build.ligand_box(mol, lig_box, water_model, neut, ion_lig, comp)
+	    build.ligand_box(mol, lig_box, water_model, neut, ion_lig, comp, ligand_ff)
 	    setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil)
 	    setup.dec_files(temperature, mol, num_sim, pose, comp, win, stage, f_steps1, f_steps2, weight, lambdas)
           else:
