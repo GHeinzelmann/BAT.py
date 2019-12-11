@@ -1,0 +1,13 @@
+#!/bin/tcsh
+
+#PBS -l walltime=1:00:00,nodes=1:ppn=4 -q home-gibbs -A mgilson-gibbs
+#PBS -j oe -r n -m n 
+#PBS -N Create_system
+
+### Set Environment
+source /home/gheinzel/APRsetup.csh
+
+### Execute
+cd $PBS_O_WORKDIR
+python APRprotein.py -i input.in -s pull
+

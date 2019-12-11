@@ -1,0 +1,42 @@
+#!/bin/tcsh
+
+#PBS -l walltime=30:00:00,nodes=1:ppn=2:gpu -q home-gibbs -A mgilson-gibbs
+#PBS -j oe -r n -m n 
+#PBS -N STAGE-POSE
+
+### Set Environment
+module swap intel gnu
+module load python
+module load scipy/2.7
+setenv PATH "/home/henrikse/gnu44-bin:/opt/mvapich2/gnu/ib/bin:$PATH"
+setenv CUDA_HOME "/opt/cuda/7.5.18"
+setenv LD_LIBRARY_PATH "${CUDA_HOME}/lib64:/opt/mvapich2/gnu/ib/lib:$LD_LIBRARY_PATH"
+source /home/gheinzel/nielamber.csh
+
+### Copy input files to scratch folder
+cd $PBS_O_WORKDIR
+rsync -au ./ $TMPDIR/
+cd $TMPDIR
+
+### Execute
+$AMBERHOME/bin/pmemd.cuda -O -i heat.in -p full.hmr.prmtop -c full.inpcrd -o md-heat.out -r md-heat.rst7 -x md-heat.nc -ref full.inpcrd
+sleep 10
+$AMBERHOME/bin/pmemd.cuda -O -i eqnpt.in -p full.hmr.prmtop -c md-heat.rst7 -o eqnpt.out -r eqnpt.rst7 -x traj000.nc -ref full.inpcrd
+sleep 10
+$AMBERHOME/bin/pmemd.cuda -O -i eqnpt.in -p full.hmr.prmtop -c eqnpt.rst7 -o eqnpt01.out -r eqnpt01.rst7 -x traj001.nc -ref full.inpcrd
+sleep 10
+$AMBERHOME/bin/pmemd.cuda -O -i eqnpt.in -p full.hmr.prmtop -c eqnpt01.rst7 -o eqnpt02.out -r eqnpt02.rst7 -x traj002.nc -ref full.inpcrd
+sleep 10
+$AMBERHOME/bin/pmemd.cuda -O -i eqnpt.in -p full.hmr.prmtop -c eqnpt02.rst7 -o eqnpt03.out -r eqnpt03.rst7 -x traj003.nc -ref full.inpcrd
+sleep 10
+$AMBERHOME/bin/pmemd.cuda -O -i eqnpt.in -p full.hmr.prmtop -c eqnpt03.rst7 -o eqnpt04.out -r eqnpt04.rst7 -x traj004.nc -ref full.inpcrd
+sleep 10
+$AMBERHOME/bin/pmemd.cuda -O -i mdin-00 -p full.hmr.prmtop -c eqnpt04.rst7 -o md-00.out -r md00.rst7 -x md00.nc -ref full.inpcrd
+sleep 10
+$AMBERHOME/bin/pmemd.cuda -O -i mdin-01 -p full.hmr.prmtop -c md00.rst7 -o md-01.out -r md01.rst7 -x md01.nc -ref full.inpcrd
+sleep 10
+$AMBERHOME/bin/pmemd.cuda -O -i mdin-02 -p full.hmr.prmtop -c md01.rst7 -o md-02.out -r md02.rst7 -x md02.nc -ref full.inpcrd
+
+### Copy back to Original Work Dir.
+rsync -au ./ $PBS_O_WORKDIR/
+

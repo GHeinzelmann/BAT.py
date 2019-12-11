@@ -1,0 +1,11 @@
+@<TRIPOS>MOLECULE
+DUM
+    1     0     1     0     1
+SMALL
+USER_CHARGES
+@<TRIPOS>ATOM
+  1 Pb      0.000000    0.000000    0.000000 Pb    1 DUM     0.0000 ****
+@<TRIPOS>BOND
+@<TRIPOS>SUBSTRUCTURE
+      1  DUM              1 ****               0 ****  ****
+

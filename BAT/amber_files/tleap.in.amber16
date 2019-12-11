@@ -1,0 +1,7 @@
+source leaprc._receptor_ff_
+source leaprc._ligand_ff_
+
+# Load the dummy atom parameters
+loadamberparams dum.frcmod
+DUM = loadmol2 dum.mol2
+

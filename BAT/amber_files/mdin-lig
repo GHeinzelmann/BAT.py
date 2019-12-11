@@ -1,0 +1,34 @@
+*******************************************************
+*****************************       mdin
+*******************************************************
+Production runs ligand only
+ &cntrl
+  imin = 0,
+  ntx = 5,
+  irest = 1,
+  ntpr = _ntpr_,
+  ntwr = _ntwr_,
+  ntwe = _ntwe_,
+  ntxo = 1,
+  ntwx = _ntwx_,
+  ntwprt = _num-atoms_,
+  ioutfm = 1,
+  iwrap = 1,
+  ntf = 2,
+  ntc = 2,
+  cut = _cutoff_,
+  ntt = 3,
+  temp0 = _temperature_,
+  gamma_ln = _gamma_ln_,
+  ig = -1,
+  ntp = 1,
+  barostat = _barostat_,
+  nstlim = _num-steps_,
+  dt = _step_,
+  nmropt = 1,
+  pencut = -1,
+ /
+ &wt type = 'END', /
+DISANG=disang_file.rest
+LISTOUT=POUT
+
