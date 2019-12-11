@@ -10,7 +10,7 @@ import sys as sys
 
 def help_message():
     print('Use the flags -i and -s for the input file and current stage of the calculations')
-    print('Example: python APRprotein.py -i input.in -s equil')
+    print('Example: python BAT.py -i input.in -s equil')
 
 def write_tleap(mol, water_model, water_box, buff, buffer_x, buffer_y, tleap_remove=None):
     shutil.copy('tleap.in', 'tmp_tleap.in')
