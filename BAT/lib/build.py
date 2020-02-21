@@ -9,7 +9,7 @@ import subprocess as sp
 import sys as sys
 import scripts as scripts
 
-def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ligand_ff):
+def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_zm, l1_range, min_adis, max_adis, ligand_ff):
 
 
     # Create equilibrium directory
@@ -79,7 +79,7 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
     with open("prep-ini.tcl", "rt") as fin:
       with open("prep.tcl", "wt") as fout:
 	for line in fin:
-	  fout.write(line.replace('MMM', mol).replace('mmm', mol.lower()).replace('NN', h1_atom).replace('P1A', p1_vmd).replace('FIRST','1').replace('LAST',str(recep_resid_num)).replace('STAGE','equil').replace('XDIS','%4.2f' %l1_x).replace('YDIS','%4.2f' %l1_y).replace('ZDIS','%4.2f' %l1_z).replace('RANG','%4.2f' %l1_range).replace('DMAX','%4.2f' %max_adis).replace('DMIN','%4.2f' %min_adis))
+	  fout.write(line.replace('MMM', mol).replace('mmm', mol.lower()).replace('NN', h1_atom).replace('P1A', p1_vmd).replace('FIRST','1').replace('LAST',str(recep_resid_num)).replace('STAGE','equil').replace('XDIS','%4.2f' %l1_x).replace('YDIS','%4.2f' %l1_y).replace('ZDIS','%4.2f' %l1_z).replace('ZMAX','%4.2f' %l1_zm).replace('RANG','%4.2f' %l1_range).replace('DMAX','%4.2f' %max_adis).replace('DMIN','%4.2f' %min_adis))
 #    with open('%s.pdb' %pose) as f:
 #	data=f.read().replace('LIG','%s' %mol)
 #    with open('%s.pdb' %pose, "w") as f:
@@ -272,7 +272,7 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
 
     return 'all'
 
-def build_prep(pose, mol, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis):
+def build_prep(pose, mol, fwin, l1_x, l1_y, l1_z, l1_zm, l1_range, min_adis, max_adis):
 
     # Create prepare directory
     if not os.path.exists('prep'):
@@ -319,7 +319,7 @@ def build_prep(pose, mol, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis):
     with open("prep-ini.tcl", "rt") as fin:
       with open("prep.tcl", "wt") as fout:
 	for line in fin:
-	  fout.write(line.replace('MMM', mol).replace('mmm', mol.lower()).replace('NN', p1_atom).replace('P1A', p1_vmd).replace('FIRST','4').replace('LAST',str(rec_res)).replace('STAGE','prep').replace('XDIS','%4.2f' %l1_x).replace('YDIS','%4.2f' %l1_y).replace('ZDIS','%4.2f' %l1_z).replace('RANG','%4.2f' %l1_range).replace('DMAX','%4.2f' %max_adis).replace('DMIN','%4.2f' %min_adis))
+	  fout.write(line.replace('MMM', mol).replace('mmm', mol.lower()).replace('NN', p1_atom).replace('P1A', p1_vmd).replace('FIRST','4').replace('LAST',str(rec_res)).replace('STAGE','prep').replace('XDIS','%4.2f' %l1_x).replace('YDIS','%4.2f' %l1_y).replace('ZDIS','%4.2f' %l1_z).replace('ZMAX','%4.2f' %l1_zm).replace('RANG','%4.2f' %l1_range).replace('DMAX','%4.2f' %max_adis).replace('DMIN','%4.2f' %min_adis))
 
     # Align to reference structure using mustang
     sp.call('mustang-3.2.3 -p ./ -i reference.pdb complex.pdb -o aligned -r ON', shell=True)
@@ -1062,7 +1062,7 @@ def create_box(hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x,
     if stage != 'fe':
       os.chdir('../')
    
-def ligand_box(mol, lig_box, water_model, neut, ion_lig, comp, ligand_ff):
+def ligand_box(mol, lig_buffer, water_model, neut, ion_lig, comp, ligand_ff):
     # Define volume density for different water models
     if water_model == 'TIP3P':
        water_box = water_model.upper()+'BOX'
@@ -1093,7 +1093,7 @@ def ligand_box(mol, lig_box, water_model, neut, ion_lig, comp, ligand_ff):
     tleap_solvate.write('savepdb model vac.pdb\n')
     tleap_solvate.write('saveamberparm model vac.prmtop vac.inpcrd\n\n')
     tleap_solvate.write('# Create water box with chosen model\n')
-    tleap_solvate.write('solvatebox model ' + water_box + ' '+str(lig_box)+'\n\n')
+    tleap_solvate.write('solvatebox model ' + water_box + ' '+str(lig_buffer)+'\n\n')
     if (neut == 'no'):
         tleap_solvate.write('# Add ions for neutralization/ionization\n')
         tleap_solvate.write('addionsrand model %s %d\n' % (ion_lig[0], ion_lig[2]))

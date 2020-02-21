@@ -199,8 +199,8 @@ for i in range(0, len(lines)):
 	    buffer_x = scripts.check_input('float', lines[i][1], input_file, lines[i][0]) 
 	elif lines[i][0] == 'buffer_y':
 	    buffer_y = scripts.check_input('float', lines[i][1], input_file, lines[i][0]) 
-	elif lines[i][0] == 'lig_box':
-	    lig_box = scripts.check_input('float', lines[i][1], input_file, lines[i][0]) 
+	elif lines[i][0] == 'lig_buffer':
+	    lig_buffer = scripts.check_input('float', lines[i][1], input_file, lines[i][0]) 
 	elif lines[i][0] == 'rec_distance_force':
 	    rec_distance_force = scripts.check_input('float', lines[i][1], input_file, lines[i][0]) 
 	elif lines[i][0] == 'rec_angle_force':
@@ -223,6 +223,8 @@ for i in range(0, len(lines)):
 	    l1_y = scripts.check_input('float', lines[i][1], input_file, lines[i][0]) 
 	elif lines[i][0] == 'l1_z':
 	    l1_z = scripts.check_input('float', lines[i][1], input_file, lines[i][0]) 
+	elif lines[i][0] == 'l1_zm':
+	    l1_zm = scripts.check_input('float', lines[i][1], input_file, lines[i][0]) 
 	elif lines[i][0] == 'l1_range':
 	    l1_range = scripts.check_input('float', lines[i][1], input_file, lines[i][0]) 
 	elif lines[i][0] == 'min_adis':
@@ -372,7 +374,7 @@ if stage == 'equil':
     # Get number of simulations
     num_sim = len(release_eq)
     # Create aligned initial complex
-    anch = build.build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ligand_ff)
+    anch = build.build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_zm, l1_range, min_adis, max_adis, ligand_ff)
     if anch == 'anch1':
       aa1_poses.append(pose)
       os.chdir('../')
@@ -418,7 +420,7 @@ elif stage == 'prep':
     rng = num_sim - 1
     # Create aligned initial complex
     fwin = len(release_eq) - 1
-    anch = build.build_prep(pose, mol, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis)
+    anch = build.build_prep(pose, mol, fwin, l1_x, l1_y, l1_z, l1_zm, l1_range, min_adis, max_adis)
     if anch == 'anch1':
       aa1_poses.append(pose)
       os.chdir('../')
@@ -494,7 +496,7 @@ elif stage == 'fe':
             print('window: %s%02d weight: %s' %(comp, int(win), str(weight)))
 	    build.build_apr(hmr, mol, pose, comp, win, trans_dist, pull_spacing, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt)
             print('Creating box for ligand only...')
-	    build.ligand_box(mol, lig_box, water_model, neut, ion_lig, comp, ligand_ff)
+	    build.ligand_box(mol, lig_buffer, water_model, neut, ion_lig, comp, ligand_ff)
 	    setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil)
 	    setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, c_steps1, c_steps2, rng)
           else:
@@ -558,7 +560,7 @@ elif stage == 'fe':
             print('window: %s%02d lambda: %s' %(comp, int(win), str(weight)))
 	    build.build_apr(hmr, mol, pose, comp, win, trans_dist, pull_spacing, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt)
             print('Creating box for ligand only...')
-	    build.ligand_box(mol, lig_box, water_model, neut, ion_lig, comp, ligand_ff)
+	    build.ligand_box(mol, lig_buffer, water_model, neut, ion_lig, comp, ligand_ff)
 	    setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil)
 	    setup.dec_files(temperature, mol, num_sim, pose, comp, win, stage, w_steps1, w_steps2, weight, lambdas)
           else:
@@ -599,7 +601,7 @@ elif stage == 'fe':
             print('window: %s%02d lambda: %s' %(comp, int(win), str(weight)))
 	    build.build_dec(hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt)
             print('Creating box for ligand decharging in bulk...')
-	    build.ligand_box(mol, lig_box, water_model, neut, ion_lig, comp, ligand_ff)
+	    build.ligand_box(mol, lig_buffer, water_model, neut, ion_lig, comp, ligand_ff)
 	    setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil)
 	    setup.dec_files(temperature, mol, num_sim, pose, comp, win, stage, f_steps1, f_steps2, weight, lambdas)
           else:

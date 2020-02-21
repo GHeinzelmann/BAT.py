@@ -16,6 +16,7 @@ set ran RANG
 set dmax DMAX
 set dmin DMIN
 set dini ZDIS
+set dzmx ZMAX
 set mat {}
 
 foreach i $tot {
@@ -28,7 +29,7 @@ foreach {x1 y1 z1} $diff {break}
 set xl $x1
 set yl $y1
 set zl $z1
-if {[expr $zl > $dini] && [expr abs([expr $x1 - $xd]) < $ran] && [expr abs([expr $y1 - $yd]) < $ran ]} {
+if {[expr $zl > $dini] && [expr $zl < $dzmx] && [expr abs([expr $x1 - $xd]) < $ran] && [expr abs([expr $y1 - $yd]) < $ran ]} {
 lappend mat $i
 }
 }

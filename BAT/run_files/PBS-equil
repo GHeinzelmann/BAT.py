@@ -15,8 +15,6 @@ source /home/gheinzel/nielamber.csh
 
 ### Copy input files to scratch folder
 cd $PBS_O_WORKDIR
-rsync -au ./ $TMPDIR/
-cd $TMPDIR
 
 ### Execute
 $AMBERHOME/bin/pmemd.cuda -O -i mini.in -p full.hmr.prmtop -c full.inpcrd -o mini.out -r mini.rst7 -x mini.nc -ref full.inpcrd
@@ -48,5 +46,4 @@ sleep 10
 end
 
 ### Copy back to Original Work Dir.
-rsync -au ./ $PBS_O_WORKDIR/
 

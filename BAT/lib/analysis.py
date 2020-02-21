@@ -852,7 +852,7 @@ def fe_dd(comp, pose, mode, lambdas, weights, dd_type, rest_file, temperature):
       for i in range(0, len(dvdl)):
 	print ('%-10s%6.5f,  %-8s%9.5f' % ('lambda =', float(lambdas[i]), 'dvdl =', float(dvdl[i])))
 
-      for i in range(k):
+      for i in range(K):
 	deltag = deltag + dvdl[i]*weights[i]
 
       print ('\n%-8s %9.5f' % ('deltaG  ', float(deltag)))

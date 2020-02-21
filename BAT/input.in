@@ -24,7 +24,7 @@ P3 = :450@CA
 
 fe_type = all  # Type of free energy calculations (all, rest, dd, pmf, dd-rest, pmf-rest, custom)
 
-components = [ r l a c ] # Used with custom option for fe_type
+components = [ u e v f w ] # Used with custom option for fe_type
 
 release_eq = [ 5.00 2.50 1.00 0.50 0.20 0.10 0.05 0.02 0.00 ]   # Equilibrium gradual release weights
 
@@ -63,7 +63,7 @@ water_model     = TIP3P   # Water model (SPCE, TIP4PEW or TIP3P)
 num_waters      = 13000  # NUmber of waters in the system
 buffer_x        = 12     # Box solvation buffers in the x axis
 buffer_y        = 12     # Box solvation buffers in the y axis 
-lig_box         = 15     # Buffer size for the three axes of the ligand-only box
+lig_buffer      = 15     # Buffer size for the three axes of the ligand-only box
 
 # Counterions 
 
@@ -127,6 +127,7 @@ bb_equil        = yes       # Keep this backbone section rigid during equilibrat
 l1_x            = 0.00     # x distance from P1 to center of L1 strike zone
 l1_y            = -6.25    # y distance from P1 to center of L1 strike zone             
 l1_z            = 8.50     # minimum z distance between P1 and L1
+l1_zm           = 20.0     # maximum z distance between P1 and L1
 l1_range        = 2.50     # Initial search range (strike zone) of the first ligand anchor L1 
 min_adis        = 4.00     # minimum distance between anchors
 max_adis        = 8.00     # maximum distance between anchors
