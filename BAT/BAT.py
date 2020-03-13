@@ -322,6 +322,7 @@ elif fe_type == 'dd-rest':
 # Pull ligand out or not
 if pull_ligand == 'no':
   translate_apr = [ 0.00 ]
+  pull_spacing = 1.0
 
 # Do not apply protein backbone restraints
 if rec_bb == 'no':
