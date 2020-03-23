@@ -84,7 +84,7 @@ Departamento de Física, Universidade Federal de Santa Catarina <br/>
 Florianópolis - SC  88040-970 Brasil <br/>
 email: germanohei@gmail.com <br/>
 
-# Acknowlegments
+# Acknowledgments
 
 Germano Heinzelmann thanks FAPESC and CNPq for the research grants.
 
