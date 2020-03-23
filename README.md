@@ -84,6 +84,10 @@ Departamento de Física, Universidade Federal de Santa Catarina <br/>
 Florianópolis - SC  88040-970 Brasil <br/>
 email: germanohei@gmail.com <br/>
 
+# Acknowlegments
+
+Germano Heinzelmann thanks FAPESC and CNPq for the research grants.
+
 # References
 
 1. W. Humphrey, A. Dalke and K. Schulten. (1996)  "VMD - Visual Molecular Dynamics", Journal of Molecular Graphics, 14, 33-38.
