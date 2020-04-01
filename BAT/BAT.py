@@ -16,7 +16,7 @@ poses_list = []
 poses_def = []
 release_eq = []
 translate_apr = []
-attach_apr = []
+attach_rest = []
 lambdas = []  
 weights = []  
 components = []  
@@ -257,10 +257,10 @@ for i in range(0, len(lines)):
 	    strip_line = lines[i][1].strip('\'\"-,.:;#()][').split()
 	    for j in range(0, len(strip_line)):
 		translate_apr.append(scripts.check_input('float', strip_line[j], input_file, lines[i][0]))
-	elif lines[i][0] == 'attach_apr':
+	elif lines[i][0] == 'attach_rest':
 	    strip_line = lines[i][1].strip('\'\"-,.:;#()][').split()
 	    for j in range(0, len(strip_line)):
-		attach_apr.append(scripts.check_input('float', strip_line[j], input_file, lines[i][0]))
+		attach_rest.append(scripts.check_input('float', strip_line[j], input_file, lines[i][0]))
 	elif lines[i][0] == 'lambdas':
 	    strip_line = lines[i][1].strip('\'\"-,.:;#()][').split()
 	    for j in range(0, len(strip_line)):
@@ -323,6 +323,7 @@ elif fe_type == 'dd-rest':
 if pull_ligand == 'no':
   translate_apr = [ 0.00 ]
   pull_spacing = 1.0
+  prep_steps2 = 0  
 
 # Do not apply protein backbone restraints
 if rec_bb == 'no':
@@ -490,8 +491,8 @@ elif stage == 'fe':
           os.makedirs('rest')
         os.chdir('rest')
 	trans_dist = 0
-	for k in range(0, len(attach_apr)):
-	  weight = attach_apr[k]
+	for k in range(0, len(attach_rest)):
+	  weight = attach_rest[k]
 	  win = k
           if int(win) == 0:
             print('window: %s%02d weight: %s' %(comp, int(win), str(weight)))
@@ -512,8 +513,8 @@ elif stage == 'fe':
           os.makedirs('rest')
         os.chdir('rest')
 	trans_dist = translate_apr[-1]
-	for k in range(0, len(attach_apr)):
-	  weight = attach_apr[k]
+	for k in range(0, len(attach_rest)):
+	  weight = attach_rest[k]
 	  win = k
           if int(win) == 0:
             print('window: %s%02d weight: %s' %(comp, int(win), str(weight)))
@@ -616,8 +617,8 @@ elif stage == 'fe':
           os.makedirs('rest')
         os.chdir('rest')
 	trans_dist = 0
-	for k in range(0, len(attach_apr)):
-	  weight = attach_apr[k]
+	for k in range(0, len(attach_rest)):
+	  weight = attach_rest[k]
 	  win = k
           print('window: %s%02d weight: %s' %(comp, int(win), str(weight)))
 	  build.build_apr(hmr, mol, pose, comp, win, trans_dist, pull_spacing, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt)
@@ -631,5 +632,5 @@ elif stage == 'analysis':
   # Free energies MBAR/TI and analytical calculations
   for i in range(0, len(poses_def)):
     pose = poses_def[i]
-    analysis.fe_values(blocks, components, temperature, pose, attach_apr, translate_apr, lambdas, weights, dd_type, rest)
+    analysis.fe_values(blocks, components, temperature, pose, attach_rest, translate_apr, lambdas, weights, dd_type, rest)
     os.chdir('../../')

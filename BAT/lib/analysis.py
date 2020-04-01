@@ -12,7 +12,7 @@ from akima.akima import interpolate
 from pymbar import pymbar # multistate Bennett acceptance ratio
 from pymbar import timeseries # timeseries analysis
 
-def fe_values(blocks, components, temperature, pose, attach_apr, translate_apr, lambdas, weights, dd_type, rest):
+def fe_values(blocks, components, temperature, pose, attach_rest, translate_apr, lambdas, weights, dd_type, rest):
 
 
     # Set initial values to zero
@@ -27,7 +27,7 @@ def fe_values(blocks, components, temperature, pose, attach_apr, translate_apr, 
       comp = components[i]
       if comp == 'a' or comp == 'l' or comp == 't' or comp == 'c' or comp == 'r':
         os.chdir('rest')
-	for j in range(0, len(attach_apr)):
+	for j in range(0, len(attach_rest)):
 	  data = []
 	  win = j
 	  os.chdir('%s%02d' %(comp, int(win)))
