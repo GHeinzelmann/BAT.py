@@ -272,44 +272,61 @@ def fe_values(blocks, components, temperature, pose, attach_rest, translate_apr,
       comp = components[i]
       if comp == 'a' or comp == 'l' or comp == 't' or comp == 'c' or comp == 'r':
         os.chdir('rest')
-        with open('./data/mbar-'+comp+'-sub.dat', "r") as f_in:
-	  lines = (line.rstrip() for line in f_in)
-	  lines = list(line for line in lines if line)
-	  data = lines[-1]
-	  splitdata = data.split()
+	b_data = [] 
+	for k in range(0, blocks):
+	  with open('./data/mbar-'+comp+'-b%02d.dat' %(k+1), "r") as f_in:
+	    lines = (line.rstrip() for line in f_in)
+	    lines = list(line for line in lines if line)
+	    data = lines[-1]
+	    splitdata = data.split()
+	    b_data.append(float(splitdata[1]))
 	  if comp == 'c':
-	    sd_c = float(splitdata[2])
+	    sd_c = np.std(b_data)
 	  elif comp == 'a':
-	    sd_a = float(splitdata[2])
+	    sd_a = np.std(b_data)
 	  elif comp == 't':
-	    sd_t = float(splitdata[2])
+	    sd_t = np.std(b_data)
 	  elif comp == 'l':
-	    sd_l = float(splitdata[2])
+	    sd_l = np.std(b_data)
 	  elif comp == 'r':
-	    sd_r = float(splitdata[2])
+	    sd_r = np.std(b_data)
         os.chdir('../')
       elif comp == 'u':
         os.chdir('pmf')
-        with open('./data/mbar-'+comp+'-sub.dat', "r") as f_in:
-	  lines = (line.rstrip() for line in f_in)
-	  lines = list(line for line in lines if line)
-	  data = lines[-1]
-	  splitdata = data.split()
-	  sd_u = float(splitdata[2])
+	b_data = [] 
+	for k in range(0, blocks):
+	  with open('./data/mbar-'+comp+'-b%02d.dat' %(k+1), "r") as f_in:
+	    lines = (line.rstrip() for line in f_in)
+	    lines = list(line for line in lines if line)
+	    data = lines[-1]
+	    splitdata = data.split()
+	    b_data.append(float(splitdata[1]))
+	    sd_u = np.std(b_data)
         os.chdir('../')
       elif comp == 'e' or comp == 'v': 
         os.chdir('dd')
         os.chdir('site')
         if dd_type == 'mbar':
-	  with open('./data/mbar-'+comp+'-sub.dat', "r") as f_in:
-	    lines = (line.rstrip() for line in f_in)
-	    lines = list(line for line in lines if line)
-	    data = lines[-1]
-	    splitdata = data.split()
-	    if comp == 'e':
-	      sd_e = float(splitdata[2])
-	    elif comp == 'v':
-	      sd_v = float(splitdata[2])
+	  if comp == 'e':
+	    b_data = [] 
+	    for k in range(0, blocks):
+	      with open('./data/mbar-'+comp+'-b%02d.dat' %(k+1), "r") as f_in:
+		lines = (line.rstrip() for line in f_in)
+		lines = list(line for line in lines if line)
+		data = lines[-1]
+		splitdata = data.split()
+		b_data.append(float(splitdata[1]))
+	    sd_e = np.std(b_data)
+	  elif comp == 'v':
+	    b_data = [] 
+	    for k in range(0, blocks):
+	      with open('./data/mbar-'+comp+'-b%02d.dat' %(k+1), "r") as f_in:
+		lines = (line.rstrip() for line in f_in)
+		lines = list(line for line in lines if line)
+		data = lines[-1]
+		splitdata = data.split()
+		b_data.append(float(splitdata[1]))
+	    sd_v = np.std(b_data)
         elif dd_type == 'ti':
 	  if comp == 'e':
             b_data = [] 
@@ -336,15 +353,26 @@ def fe_values(blocks, components, temperature, pose, attach_rest, translate_apr,
         os.chdir('dd')
         os.chdir('bulk')
         if dd_type == 'mbar':
-	  with open('./data/mbar-'+comp+'-sub.dat', "r") as f_in:
-	    lines = (line.rstrip() for line in f_in)
-	    lines = list(line for line in lines if line)
-	    data = lines[-1]
-	    splitdata = data.split()
-	    if comp == 'f':
-	      sd_f = float(splitdata[2])
-	    elif comp == 'w':
-	      sd_w = float(splitdata[2])
+	  if comp == 'f':
+	    b_data = [] 
+	    for k in range(0, blocks):
+	      with open('./data/mbar-'+comp+'-b%02d.dat' %(k+1), "r") as f_in:
+		lines = (line.rstrip() for line in f_in)
+		lines = list(line for line in lines if line)
+		data = lines[-1]
+		splitdata = data.split()
+		b_data.append(float(splitdata[1]))
+	    sd_f = np.std(b_data)
+	  elif comp == 'w':
+	    b_data = [] 
+	    for k in range(0, blocks):
+	      with open('./data/mbar-'+comp+'-b%02d.dat' %(k+1), "r") as f_in:
+		lines = (line.rstrip() for line in f_in)
+		lines = list(line for line in lines if line)
+		data = lines[-1]
+		splitdata = data.split()
+		b_data.append(float(splitdata[1]))
+	    sd_w = np.std(b_data)
         elif dd_type == 'ti':
 	  if comp == 'f':
             b_data = [] 
