@@ -56,14 +56,14 @@ lig_discf_force      =   5.0  # Ligand conformational distance spring constant -
 # Water model, number and box size in the x and y direction
 
 water_model     = TIP3P   # Water model (SPCE, TIP4PEW or TIP3P)
-num_waters      = 13000  # NUmber of waters in the system
-buffer_x        = 12     # Box solvation buffers in the x axis
-buffer_y        = 12     # Box solvation buffers in the y axis 
-lig_buffer      = 15     # Buffer size for the three axes of the ligand-only box
+num_waters      = 13000   # Number of waters in the system
+buffer_x        = 12      # Box solvation buffer in the x axis
+buffer_y        = 12      # Box solvation buffer in the y axis 
+lig_buffer      = 15      # Buffer size for the three axes of the ligand-only box
 
 # Counterions 
 
-neutralize_only = no     # neutralize only or also ionize
+neutralize_only = no     # neutralize only or also ionize (yes or no)
 cation = Na+             # cation for neutralization/ionization                
 anion = Cl-              # anion  for neutralization/ionization   
 num_cations = 32         # number of extra cations after neutralization
@@ -71,7 +71,7 @@ num_cat_ligbox = 8       # number of extra cations after neutralization for liga
 
 # Simulation parameters
 
-hmr             = yes       # Use hydrogen mass repartitioning with a 4 fs time step (yes or no)
+hmr             = yes       # Use hydrogen mass repartitioning (yes or no)
 
 Temperature	= 298.15    # Temperature of simulation and analysis 
 
@@ -80,32 +80,32 @@ eq_steps2	= 15000000  # Number of steps for equilibration after release
 
 prep_steps1	= 1000000   # Number of steps for initial preparation
 
-a_steps1	= 500000   # Number of steps per window for component a (equilibrium)
-a_steps2	= 1000000  # Number of steps for window component a (production) 
+a_steps1	= 500000    # Number of steps per window for component a (equilibrium)
+a_steps2	= 1000000   # Number of steps for window component a (production) 
 
-l_steps1	= 500000   # Number of steps per window for component l (equilibrium)  
-l_steps2	= 1000000  # Number of steps for window component l (production)             
+l_steps1	= 500000    # Number of steps per window for component l (equilibrium)  
+l_steps2	= 1000000   # Number of steps for window component l (production)             
 
-t_steps1	= 500000   # Number of steps per window for component t (equilibrium)
+t_steps1	= 500000    # Number of steps per window for component t (equilibrium)
 t_steps2	= 1000000   # Number of steps for window component t (production)     
 
-c_steps1	= 1000000  # Number of steps per window for component c (equilibrium)
-c_steps2	= 2000000  # Number of steps for window component c (production)     
+c_steps1	= 1000000   # Number of steps per window for component c (equilibrium)
+c_steps2	= 2000000   # Number of steps for window component c (production)     
 
 r_steps1	= 1000000   # Number of steps per window for component r (equilibrium) 
-r_steps2	= 2000000  # Number of steps for window component r (production)     
+r_steps2	= 2000000   # Number of steps for window component r (production)     
 
-e_steps1	= 200000   # Number of steps per window for component e (equilibrium) 
-e_steps2	= 400000   # Number of steps for window component e (production)     
+e_steps1	= 200000    # Number of steps per window for component e (equilibrium) 
+e_steps2	= 400000    # Number of steps for window component e (production)     
 
-v_steps1	= 2000000  # Number of steps per window for component v (equilibrium) 
-v_steps2	= 4000000  # Number of steps for window component v (production)     
+v_steps1	= 2000000   # Number of steps per window for component v (equilibrium) 
+v_steps2	= 4000000   # Number of steps for window component v (production)     
 
 w_steps1	= 1000000   # Number of steps per window for component w (equilibrium) 
 w_steps2	= 2000000   # Number of steps for window component w (production)     
 
-f_steps1	= 200000   # Number of steps per window for component f (equilibrium) 
-f_steps2	= 400000   # Number of steps for window component f (production)     
+f_steps1	= 200000    # Number of steps per window for component f (equilibrium) 
+f_steps2	= 400000    # Number of steps for window component f (production)     
 
 # Conformational restraints on the protein backbone
 
@@ -133,9 +133,9 @@ ntwx = 2500                # write coordinates to trajectory file every ntwx ste
 cut = 9.0                  # cutoff for nonbonded interactions 
 gamma_ln = 1.0             # collision frequency in ps^-1 for Langevin Dynamics (temperature control)
 barostat = 2               # type of barostat to keep the pressure constant (1 = Berendsen-default /2 - Monte Carlo)
-dt = 0.004                 # simulation ime step in ps
+dt = 0.004                 # simulation time step in ps
 
 # Force field options for receptor and ligand
 
 receptor_ff = protein.ff14SB   # Force field for receptor atoms
-ligand_ff = gaff              # Force field for ligand atoms (gaff or gaff2 available)
+ligand_ff = gaff               # Force field for ligand atoms (gaff or gaff2 available)
