@@ -41,7 +41,7 @@ This command will create an ./equil folder, with one folder inside for each of t
 
 ## Preparation
 
-The second stage starts from the equilibrated system, rebuilding the latter, as well as redefining the dummy/anchor atoms and the restraints for use in the free energy calculation. If the APR method is to be used, the ligand in this stage is pulled from the binding site towards the solvent, generating states that will be used in the APR procedure. If double decoupling is be performed no pulling is needed, but we will include both APR and DD in this example. To run this stage, type in the program main folder:
+The second stage starts from the equilibrated system, rebuilding the latter, as well as redefining the dummy/anchor atoms and the restraints for use in the free energy calculation. To run this stage, type in the program main folder:
 
 python BAT.py -i input.in -s prep
 
@@ -51,11 +51,11 @@ python BAT.py -i input.in -s prep
 
 ### Simulations
 
-Starting from the states created in the prep stage, we can now perform the binding free energy calculations, which will be located inside the ./fe folder. In this example we will do both APR and DD, even though DD is more suitable for this type of calculation. Again in the program main folder, type:
+Starting from the states created in the prep stage, we can now perform the binding free energy calculations, which will be located inside the ./fe folder. In this example we will use the double decoupling method with retraints to obtain the binding free energies, which is more suitable for this type of calculation. Again in the program main folder, type:
 
 python BAT.py -i input.in -s fe
 
-For each pose or crystal structure, a folder will be created inside ./fe, and inside there will be three folders: ./pmf, ./restraints and ./dd. The restraints folder contains all the simulations needed for the application/removal of restraints. The ./pmf folder contains the folders for the "pull" process of APR, calculated using umbrella sampling. The ./dd folder contains the coupling/decoupling of the ligand electrostatic/LJ interactions, both in the binding site and in bulk. A script called run-all.bash, inside the ./run_files folder, can be used to run these simulatons quickly using the PBS scripts provided. A similar script can be written to do the same, using your particular running protocol. 
+For each pose or crystal structure, a folder will be created inside ./fe, and inside there will be two folders, ./restraints and ./dd. The restraints folder contains all the simulations needed for the application/removal of restraints. The ./dd folder contains the coupling/decoupling of the ligand electrostatic/LJ interactions, both in the binding site and in bulk. A script called run-all.bash, inside the ./run_files folder, can be used to run these simulatons quickly using the PBS scripts provided. A similar script can be written to do the same, using your particular running protocol. 
 
 ### Analysis
 
@@ -63,13 +63,17 @@ Once all of the simulations are concluded, it is time to process the output file
 
 python BAT.py -i input.in -s analysis
 
-You should see a ./Results directory inside each ./fe/pose folder, containing the DD and APR results in the Results.dat file. This folder also contains the results for each of the chosen data blocks, which is useful to check for convergence and fluctuations, and is also used to calculate the uncertainties. This fully automated procedure can be readily applied for any other ligand that binds to the second BRD4 bromodomain, and with minimal adjustments it can be extended to several other proteins.
+You should see a ./Results directory inside each ./fe/pose folder, containing all the components and the final calculated binding free energy, located in the Results.dat file. This folder also contains the results for each of the chosen data blocks, which is useful to check for convergence and fluctuations, and is also used to calculate the uncertainties. This fully automated procedure can be readily applied for any other ligand that binds to the second BRD4 bromodomain, and with minimal adjustments it can be extended to several other proteins.
 
 # Extending it to other systems
 
 ## Additional ligands to BRD4(2)
 
 The sample system shown here uses a particular ligand that binds to the second bromodomain of the BRD4 protein - BRD4(2). The system alignment, parameter generation, assignment of the ligand anchor atoms, and positioning of the dummy atoms is done automatically, so these same calculations can be extended to any other ligand that binds to this receptor. The only thing needed is the files in the ./all-poses folder to be changed, including the docked receptor and poses pdb files, as well as the crystal structure if desired.     
+
+## Using the APR method
+
+Even though the APR method presents limitations, it could stil be useful for ligands that bind to the surface of proteins and have clear access to the solvent. To apply APR in addition to DD, a few parameters have to be changed or added to the BAT.py input file. This procedure is described in the user guide and also on Ref. [9].  
 
 ## Additional receptors
 
