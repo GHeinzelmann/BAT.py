@@ -29,7 +29,7 @@ The simulations and analysis from this example will be performed inside the ./BA
 
 ## Equilibration
 
-The equilibration starts from the docked complex or the crystal structure, gradually releasing restraints applied on the ligand and then performing a final simulation with an unrestrained ligand. The necessary simulation parameters for the ligand are also generated in this stage, using the General Amber Force Field versions 1 and 2 (GAFF or GAFF2) [5], and the AM1-BCC charge model [6,7]. To run this step, inside the program main folder type:
+The equilibration step starts from the docked complex or the crystal structure, gradually releasing restraints applied on the ligand and then performing a final simulation with an unrestrained ligand. The necessary simulation parameters for the ligand are also generated in this stage, using the General Amber Force Field versions 1 and 2 (GAFF or GAFF2) [5], and the AM1-BCC charge model [6,7]. To run this step, inside the program main folder type:
 
 python BAT.py -i input.in -s equil
 
