@@ -65,15 +65,15 @@ python BAT.py -i input.in -s analysis
 
 You should see a ./Results directory inside each ./fe/pose folder, containing all the components and the final calculated binding free energy, located in the Results.dat file. This folder also contains the results for each of the chosen data blocks, which is useful to check for convergence and fluctuations, and is also used to calculate the uncertainties. This fully automated procedure can be readily applied for any other ligand that binds to the second BRD4 bromodomain, and with minimal adjustments it can be extended to several other proteins.
 
+## Using the APR method
+
+Even though the APR method presents limitations, it could stil be useful for ligands that bind to the surface of proteins and have clear access to the solvent. To apply APR in addition to DD, a few parameters have to be changed or added to the BAT.py input file. This procedure is described in the user guide and also on Ref. [9].  
+
 # Extending it to other systems
 
 ## Additional ligands to BRD4(2)
 
 The sample system shown here uses a particular ligand that binds to the second bromodomain of the BRD4 protein - BRD4(2). The system alignment, parameter generation, assignment of the ligand anchor atoms, and positioning of the dummy atoms is done automatically, so these same calculations can be extended to any other ligand that binds to this receptor. The only thing needed is the files in the ./all-poses folder to be changed, including the docked receptor and poses pdb files, as well as the crystal structure if desired.     
-
-## Using the APR method
-
-Even though the APR method presents limitations, it could stil be useful for ligands that bind to the surface of proteins and have clear access to the solvent. To apply APR in addition to DD, a few parameters have to be changed or added to the BAT.py input file. This procedure is described in the user guide and also on Ref. [9].  
 
 ## Additional receptors
 
