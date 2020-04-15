@@ -329,6 +329,7 @@ if pull_ligand == 'no':
 if rec_bb == 'no':
   bb_start =  1
   bb_end   =  0
+  bb_equil = 'no'
 
 # Create poses definitions
 if calc_type == 'dock':

@@ -5,9 +5,9 @@
 #PBS -N Create_system
 
 ### Set Environment
-source /home/gheinzel/APRsetup.csh
+source /home/gheinzel/nielamber.csh
 
 ### Execute
 cd $PBS_O_WORKDIR
-python APRprotein.py -i input.in -s pull
+python BAT.py -i input.in -s equil
 

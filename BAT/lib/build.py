@@ -1048,8 +1048,8 @@ def create_box(hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x,
            print line
            print ('The system is not neutralized properly after solvation')
         if "addIonsRand: Argument #2 is type String must be of type: [unit]" in line:
-	   print('Aborted.The ion types specified in the APR input file could be wrong.')	           
-           print('Please check the tleap_solvate.log file, and the ion types specified in the APR input file.\n')
+	   print('Aborted.The ion types specified in the input file could be wrong.')	           
+           print('Please check the tleap_solvate.log file, and the ion types specified in the input file.\n')
            sys.exit(1)
     f.close()
 

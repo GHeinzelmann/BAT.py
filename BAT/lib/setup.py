@@ -541,7 +541,7 @@ def sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, steps1, st
 	data = myfile.readlines()
 	vac_atoms = data[-3][6:11].strip()
 
-    # Create minimization and NPT equilibration files for big box and small ligand box (APR)
+    # Create minimization and NPT equilibration files for big box and small ligand box 
     if comp != 'c' and comp != 'r':
       with open("../amber_files/mini.in", "rt") as fin:
         with open("./mini.in", "wt") as fout:
@@ -813,7 +813,7 @@ def dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2,
 
 
     if (comp == 'w'):
-      # Create minimization and NPT equilibration files for big box and small ligand box (APR)
+      # Create minimization and NPT equilibration files for big box and small ligand box 
       with open("../amber_files/mini.in", "rt") as fin:
         with open("./mini.in", "wt") as fout:
 	  for line in fin: 
@@ -845,7 +845,7 @@ def dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2,
     	    fout.write(line.replace('STAGE', pose).replace('POSE', '%s%02d' %(comp, int(win))))
 
     if (comp == 'f'):
-      # Create minimization and NPT equilibration files for big box and small ligand box (APR)
+      # Create minimization and NPT equilibration files for big box and small ligand box 
       mk1 = '1'
       mk2 = '2'
       with open("../amber_files/heat-ch.in", "rt") as fin:
