@@ -559,10 +559,6 @@ def sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, steps1, st
         with open("./eqnpt.in", "wt") as fout:
 	  for line in fin:
 	    fout.write(line.replace('_temperature_', str(temperature)))
-      with open("../amber_files/eqnpt.in", "rt") as fin:
-        with open("./eqnpt.in", "wt") as fout:
-	  for line in fin:
-	    fout.write(line.replace('_temperature_', str(temperature)))
     else:
       with open("../amber_files/mini.in", "rt") as fin:
         with open("./mini.in", "wt") as fout:

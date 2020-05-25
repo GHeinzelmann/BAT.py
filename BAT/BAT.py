@@ -436,9 +436,7 @@ elif stage == 'prep':
     print('Creating box...')
     build.create_box(hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt)
     # Apply restraints and prepare simulation files
-    print('Pulling distance interval: %s' %pull_spacing)
-    print('Total pulling distance: %s' %apr_distance)
-    print('Creating pulling steps...')
+    print('Creating preparation steps...')
     for i in range(0, num_sim):
       trans_dist = float(i*pull_spacing)
       setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil)
@@ -457,7 +455,7 @@ elif stage == 'prep':
 elif stage == 'fe':
   # Create systems for all poses after preparation
   num_sim = apr_sim
-  # Create and move to apr directory
+  # Create and move to free energy directory
   if not os.path.exists('fe'):
     os.makedirs('fe')
   os.chdir('fe')

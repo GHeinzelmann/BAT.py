@@ -81,7 +81,7 @@ To include a new receptor system, some additional input data is needed. They inc
 
 # More information
 
-A paper explaining the whole BAT.py theoretical aspects and calculation procedure is currently under review [9]. For more information you can contact the author directly:
+A paper explaining the whole BAT.py theoretical aspects and calculation procedure is currently under review [9], and can be found on the link https://www.biorxiv.org/content/10.1101/2020.04.15.043240v1. For more information you can contact the author directly:
 
 Germano Heinzelmann <br/>
 Departamento de Física, Universidade Federal de Santa Catarina <br/>

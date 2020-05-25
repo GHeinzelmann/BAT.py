@@ -16,15 +16,16 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
     if not os.path.exists('equil'):
       os.makedirs('equil')
     os.chdir('equil')
-    if not os.path.exists('build_files'):
-      try:
-        shutil.copytree('../build_files', './build_files')
-      # Directories are the same
-      except shutil.Error as e:
-        print('Directory not copied. Error: %s' % e)
-      # Any error saying that the directory doesn't exist
-      except OSError as e:
-        print('Directory not copied. Error: %s' % e)
+    if os.path.exists('./build_files'):
+      shutil.rmtree('./build_files')
+    try:
+      shutil.copytree('../build_files', './build_files')
+    # Directories are the same
+    except shutil.Error as e:
+      print('Directory not copied. Error: %s' % e)
+    # Any error saying that the directory doesn't exist
+    except OSError as e:
+      print('Directory not copied. Error: %s' % e)
     os.chdir('build_files')
 
     if calc_type == 'dock':
@@ -86,17 +87,25 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
 #	f.write(data)
 
 
+    # Save parameters in ff folder
+    if not os.path.exists('../ff/'):
+      os.makedirs('../ff/')
+    shutil.copy('./dum.mol2', '../ff/')
+    shutil.copy('./dum.frcmod', '../ff/')
+
     # Get parameters and adjust files
     if calc_type == 'dock':
       sp.call('babel -i pdb '+pose+'.pdb -o pdb '+mol.lower()+'.pdb -d', shell=True)
     sp.call('babel -i pdb '+mol.lower()+'.pdb -o pdb '+mol.lower()+'-h.pdb -h', shell=True)
     if not os.path.exists('../ff/%s.mol2' %mol.lower()):
       sp.call('antechamber -i '+mol.lower()+'-h.pdb -fi pdb -o '+mol.lower()+'.mol2 -fo mol2 -c bcc -s 2 -at '+ligand_ff.lower()+'', shell=True)
+      shutil.copy('./%s.mol2' %(mol.lower()), '../ff/')
     if not os.path.exists('../ff/%s.frcmod' %mol.lower()):
       if ligand_ff == 'gaff':
         sp.call('parmchk2 -i '+mol.lower()+'.mol2 -f mol2 -o '+mol.lower()+'.frcmod -s 1', shell=True)
       elif ligand_ff == 'gaff2':
         sp.call('parmchk2 -i '+mol.lower()+'.mol2 -f mol2 -o '+mol.lower()+'.frcmod -s 2', shell=True)
+      shutil.copy('./%s.frcmod' %(mol.lower()), '../ff/')
     sp.call('antechamber -i '+mol.lower()+'-h.pdb -fi pdb -o '+mol.lower()+'.pdb -fo pdb', shell=True)
 
     # Create raw complex and clean it
@@ -123,14 +132,6 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
 		newfile.write(line)
     sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb', shell=True)
     sp.call('vmd -dispdev text -e prep.tcl', shell=True)
-
-    # Save parameters in ff folder
-    if not os.path.exists('../ff/'):
-      os.makedirs('../ff/')
-    shutil.copy('./%s.mol2' %(mol.lower()), '../ff/')
-    shutil.copy('./%s.frcmod' %(mol.lower()), '../ff/')
-    shutil.copy('./dum.mol2', '../ff/')
-    shutil.copy('./dum.frcmod', '../ff/')
 
     # Check size of anchor file 
     anchor_file = 'anchors.txt'
@@ -274,19 +275,21 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
 
 def build_prep(pose, mol, fwin, l1_x, l1_y, l1_z, l1_zm, l1_range, min_adis, max_adis):
 
-    # Create prepare directory
+
+    # Create preparation directory
     if not os.path.exists('prep'):
       os.makedirs('prep')
     os.chdir('prep')
-    if not os.path.exists('build_files'):
-      try:
-	shutil.copytree('../build_files', './build_files')
-      # Directories are the same
-      except shutil.Error as e:
-	print('Directory not copied. Error: %s' % e)
-      # Any error saying that the directory doesn't exist
-      except OSError as e:
-	print('Directory not copied. Error: %s' % e)
+    if os.path.exists('./build_files'):
+      shutil.rmtree('./build_files')
+    try:
+      shutil.copytree('../build_files', './build_files')
+    # Directories are the same
+    except shutil.Error as e:
+      print('Directory not copied. Error: %s' % e)
+    # Any error saying that the directory doesn't exist
+    except OSError as e:
+      print('Directory not copied. Error: %s' % e)
     os.chdir('build_files')
 
     # Get last state from equilibrium simulations
@@ -932,12 +935,12 @@ def create_box(hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x,
     neu_ani = 0
     f = open('tleap_vac.log', 'r')
     for line in f:
-        if "WARNING: The unperturbed charge of the unit:" in line:
+        if "The unperturbed charge of the unit" in line:
             splitline = line.split()
-            if float(splitline[7]) < 0:
-                neu_cat = round(float(re.sub('[+-]', '', splitline[7])))
-            elif float(splitline[7]) > 0:
-                neu_ani = round(float(re.sub('[+-]', '', splitline[7])))
+            if float(splitline[6].strip('\'\",.:;#()][')) < 0:
+                neu_cat = round(float(re.sub('[+-]', '', splitline[6].strip('\'\"-,.:;#()]['))))
+            elif float(splitline[6].strip('\'\",.:;#()][')) > 0:
+                neu_ani = round(float(re.sub('[+-]', '', splitline[6].strip('\'\"-,.:;#()]['))))
     f.close()
     
     # Define volume density for different water models
