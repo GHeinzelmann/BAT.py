@@ -6,6 +6,7 @@
 
 # Calculation definitions
 
+amber_version = amber18                          # Choose amber version (amber18 or amber20)
 calc_type = dock                                # docked or crystal structure
 celpp_receptor = LMCSS-5uf0_5uez                # Choose CELPP receptor in upper case or pdb code in lower case
 poses_list = [0,1,2,3,4]                        # List of poses for docked calculations, called pose0.pdb, pose1.pdb, pose2.pdb, etc. 
@@ -139,3 +140,4 @@ dt = 0.004                 # simulation time step in ps
 
 receptor_ff = protein.ff14SB   # Force field for receptor atoms
 ligand_ff = gaff               # Force field for ligand atoms (gaff or gaff2 available)
+ligand_ph = 7.0                # Choose pH for ligand protonation
