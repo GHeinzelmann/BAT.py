@@ -9,7 +9,7 @@ import subprocess as sp
 import sys as sys
 import scripts as scripts
 
-def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_zm, l1_range, min_adis, max_adis, ligand_ff):
+def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_zm, l1_range, min_adis, max_adis, ligand_ff, ligand_ph):
 
 
     # Create equilibrium directory
@@ -96,7 +96,8 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
     # Get parameters and adjust files
     if calc_type == 'dock':
       sp.call('babel -i pdb '+pose+'.pdb -o pdb '+mol.lower()+'.pdb -d', shell=True)
-    sp.call('babel -i pdb '+mol.lower()+'.pdb -o pdb '+mol.lower()+'-h.pdb -h', shell=True)
+    sp.call('babel -i pdb '+mol.lower()+'.pdb -o pdb '+mol.lower()+'-h.pdb -p %4.2f' %ligand_ph, shell=True)
+    print('The protonation of the ligand is for pH %4.2f' %ligand_ph)
     if not os.path.exists('../ff/%s.mol2' %mol.lower()):
       sp.call('antechamber -i '+mol.lower()+'-h.pdb -fi pdb -o '+mol.lower()+'.mol2 -fo mol2 -c bcc -s 2 -at '+ligand_ff.lower()+'', shell=True)
       shutil.copy('./%s.mol2' %(mol.lower()), '../ff/')
@@ -128,7 +129,7 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
 	for line in oldfile:
 	    splitdata = line.split()
 	    if len(splitdata) > 4:
-	      if splitdata[4] != 'A':
+	      if line[21] != 'A':
 		newfile.write(line)
     sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb', shell=True)
     sp.call('vmd -dispdev text -e prep.tcl', shell=True)
@@ -332,7 +333,7 @@ def build_prep(pose, mol, fwin, l1_x, l1_y, l1_z, l1_zm, l1_range, min_adis, max
 	for line in oldfile:
 	    splitdata = line.split()
 	    if len(splitdata) > 4:
-	      if splitdata[4] != 'A':
+	      if line[21] != 'A':
 		newfile.write(line)
     sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb', shell=True)
     sp.call('vmd -dispdev text -e prep.tcl', shell=True)
@@ -746,11 +747,15 @@ def build_dec(hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cu
       os.chdir('%s%02d' %(comp, int(win)))
       if int(win) == 0:
 	# Copy a few files
+        shutil.copy('../../../../../prep/'+pose+'/assign-eq.dat', './')
+        shutil.copy('../../../../../prep/'+pose+'/prep-%s.pdb' %mol.lower(), './fe-%s.pdb' %mol.lower())
 	shutil.copy('../../../../../prep/'+pose+'/%s.pdb' %mol.lower(), './')
 	shutil.copy('../../../../../prep/'+pose+'/disang.rest', './')
 	shutil.copy('../../../../../prep/'+pose+'/build.pdb', './build-prep.pdb')
 	shutil.copy('../../../../../prep/'+pose+'/tleap_solvate.in', './')
 	shutil.copy('../../../../../prep/'+pose+'/tleap_vac.in', './')
+        for file in glob.glob('../../../../../prep/'+pose+'/vac_ligand*'):
+	  shutil.copy(file, './')
    
 	for file in glob.glob('../../../ff/%s.*' %mol.lower()):
 	  shutil.copy(file, './')
@@ -815,7 +820,6 @@ def build_dec(hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cu
 	shutil.copy('../../../../../prep/'+pose+'/%s.pdb' %mol.lower(), './%s-orig.pdb' %mol.lower())
 	shutil.copy('../../../../../prep/'+pose+'/build.pdb', './build-prep.pdb')
         shutil.copy('../../../../../prep/'+pose+'/prep-%s.pdb' %mol.lower(), './fe-%s.pdb' %mol.lower())
-	shutil.copy('../../../../../prep/'+pose+'/tleap_vac.in', './')
 	shutil.copy('../../../../../prep/'+pose+'/vac_ligand.prmtop', './')
 	shutil.copy('../../../../../prep/'+pose+'/vac_ligand.pdb', './')
 	for file in glob.glob('../../../ff/%s.*' %mol.lower()):
@@ -860,6 +864,18 @@ def build_dec(hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cu
 	build_file.write('END\n')
         build_file.close()
 	shutil.copy('./build.pdb', './%s.pdb' %mol.lower())
+
+        tleap_vac = open('tleap_vac.in', 'w')
+        tleap_vac.write('source leaprc.'+ligand_ff+'\n\n')        
+        tleap_vac.write('# Load the ligand parameters\n')        
+        tleap_vac.write('loadamberparams %s.frcmod\n'%(mol.lower()))
+        tleap_vac.write('%s = loadmol2 %s.mol2\n\n'%(mol.upper(), mol.lower()))
+        tleap_vac.write('model = loadpdb %s.pdb\n\n' %(mol.lower()))
+        tleap_vac.write('check model\n')
+        tleap_vac.write('savepdb model vac.pdb\n')
+        tleap_vac.write('saveamberparm model vac.prmtop vac.inpcrd\n')
+        tleap_vac.write('quit\n\n')
+
 	p = sp.call('tleap -s -f tleap_vac.in > tleap_vac.log', shell=True)
       else:
         for file in glob.glob('../f00/*'):

@@ -9,7 +9,7 @@ import subprocess as sp
 import sys as sys
 import scripts as scripts
 
-def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil):
+def restraints(amber, pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil):
 
     rst = []
     atm_num = []
@@ -64,6 +64,11 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, com
     # Get a relation between atom number and masks
     atm_num = scripts.num_to_mask(pdb_file)
     ligand_atm_num = scripts.num_to_mask(ligand_pdb_file)
+
+    # Get number of ligand atoms
+    with open('./vac_ligand.pdb') as myfile:
+	data = myfile.readlines()
+	vac_atoms = int(data[-3][6:11].strip())
 
     # Define translational/rotational and anchor atom distance restraints on the protein
 
@@ -247,7 +252,10 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, com
     if (stage == 'fe' and comp != 'c' and comp != 'w' and comp != 'f'):
       if comp != 'r':
         vals[9+nd] = float(vals[9+nd]) + trans_dist
-      shutil.copy('../../../../prep/'+pose+'/assign-eq.dat', './')
+      if comp != 'e':
+        shutil.copy('../../../../prep/'+pose+'/assign-eq.dat', './')
+      else:
+        shutil.copy('../../../../../prep/'+pose+'/assign-eq.dat', './')
       with open('./assign-eq.dat') as fin:
 	lines = (line.rstrip() for line in fin)
 	lines = list(line for line in lines if line) # Non-blank lines in a list   
@@ -268,7 +276,7 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, com
       laf = weight*rest[5]/100
       ldhf = 0    
       ldsf = weight*rest[7]/100
-    elif comp == 's' or comp == 'w' or comp == 'f':
+    elif comp == 's' or comp == 'w' or comp == 'f' or comp == 'e':
       rdf = rest[0]
       raf = rest[1]
       rdhf = rest[2]
@@ -363,18 +371,51 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, com
 	    nums = str(atm_num.index(data[0]))+','+str(atm_num.index(data[1]))+','+str(atm_num.index(data[2]))+','+str(atm_num.index(data[3]))+','  
 	    disang_file.write('%s %-23s '%('&rst iat=', nums))
 	    disang_file.write('r1= %10.4f, r2= %10.4f, r3= %10.4f, r4= %10.4f, rk2= %11.7f, rk3= %11.7f, &end %s \n' % (float(vals[i]) - 180, float(vals[i]), float(vals[i]), float(vals[i]) + 180, laf, laf, lign_tr))      
+          if comp == 'e':
+	    if i == (9+nd):
+	      nums2 = str(atm_num.index(data[0]))+','+str(atm_num.index(data[1])+vac_atoms)+','   
+	      disang_file.write('%s %-23s '%('&rst iat=', nums2))
+	      disang_file.write('r1= %10.4f, r2= %10.4f, r3= %10.4f, r4= %10.4f, rk2= %11.7f, rk3= %11.7f, &end %s \n' % (float(0.0), float(vals[i]), float(vals[i]), float(999.0), ldf, ldf, lign_tr))
+	    if i == (10+nd):
+	      nums2 = str(atm_num.index(data[0]))+','+str(atm_num.index(data[1]))+','+str(atm_num.index(data[2])+vac_atoms)+','  
+	      disang_file.write('%s %-23s '%('&rst iat=', nums2))
+	      disang_file.write('r1= %10.4f, r2= %10.4f, r3= %10.4f, r4= %10.4f, rk2= %11.7f, rk3= %11.7f, &end %s \n' % (float(0.0), float(vals[i]), float(vals[i]), float(180.0), laf, laf, lign_tr))
+	    if i == (11+nd):
+	      nums2 = str(atm_num.index(data[0]))+','+str(atm_num.index(data[1]))+','+str(atm_num.index(data[2]))+','+str(atm_num.index(data[3])+vac_atoms)+','  
+	      disang_file.write('%s %-23s '%('&rst iat=', nums2))
+	      disang_file.write('r1= %10.4f, r2= %10.4f, r3= %10.4f, r4= %10.4f, rk2= %11.7f, rk3= %11.7f, &end %s \n' % (float(vals[i]) - 180, float(vals[i]), float(vals[i]), float(vals[i]) + 180, laf, laf, lign_tr))      
+	    if i == (12+nd):
+	      nums2 = str(atm_num.index(data[0]))+','+str(atm_num.index(data[1])+vac_atoms)+','+str(atm_num.index(data[2])+vac_atoms)+','  
+	      disang_file.write('%s %-23s '%('&rst iat=', nums2))
+	      disang_file.write('r1= %10.4f, r2= %10.4f, r3= %10.4f, r4= %10.4f, rk2= %11.7f, rk3= %11.7f, &end %s \n' % (float(0.0), float(vals[i]), float(vals[i]), float(180.0), laf, laf, lign_tr))
+	    if i == (13+nd):
+	      nums2 = str(atm_num.index(data[0]))+','+str(atm_num.index(data[1]))+','+str(atm_num.index(data[2])+vac_atoms)+','+str(atm_num.index(data[3])+vac_atoms)+','  
+	      disang_file.write('%s %-23s '%('&rst iat=', nums2))
+	      disang_file.write('r1= %10.4f, r2= %10.4f, r3= %10.4f, r4= %10.4f, rk2= %11.7f, rk3= %11.7f, &end %s \n' % (float(vals[i]) - 180, float(vals[i]), float(vals[i]), float(vals[i]) + 180, laf, laf, lign_tr))      
+	    if i == (14+nd):
+	      nums2 = str(atm_num.index(data[0]))+','+str(atm_num.index(data[1])+vac_atoms)+','+str(atm_num.index(data[2])+vac_atoms)+','+str(atm_num.index(data[3])+vac_atoms)+','  
+	      disang_file.write('%s %-23s '%('&rst iat=', nums2))
+	      disang_file.write('r1= %10.4f, r2= %10.4f, r3= %10.4f, r4= %10.4f, rk2= %11.7f, rk3= %11.7f, &end %s \n' % (float(vals[i]) - 180, float(vals[i]), float(vals[i]), float(vals[i]) + 180, laf, laf, lign_tr))      
 	# Ligand conformation (L1-L3 distance restraints)
 	elif i >= 15+nd and i < 18+nd and comp != 'a': 
 	  if len(data) == 2:
 	    nums = str(atm_num.index(data[0]))+','+str(atm_num.index(data[1]))+','   
 	    disang_file.write('%s %-23s '%('&rst iat=', nums))
 	    disang_file.write('r1= %10.4f, r2= %10.4f, r3= %10.4f, r4= %10.4f, rk2= %11.7f, rk3= %11.7f, &end %s \n' % (float(0.0), float(vals[i]), float(vals[i]), float(999.0), ldsf, ldsf, lign_c))
+            if comp == 'e':
+	      nums2 = str(atm_num.index(data[0])+vac_atoms)+','+str(atm_num.index(data[1])+vac_atoms)+','   
+	      disang_file.write('%s %-23s '%('&rst iat=', nums2))
+	      disang_file.write('r1= %10.4f, r2= %10.4f, r3= %10.4f, r4= %10.4f, rk2= %11.7f, rk3= %11.7f, &end %s \n' % (float(0.0), float(vals[i]), float(vals[i]), float(999.0), ldsf, ldsf, lign_c))
 	# Ligand conformation (non-hydrogen dihedrals)
 	elif i >= 18+nd and comp != 'a': 
 	  if len(data) == 4:
 	    nums = str(atm_num.index(data[0]))+','+str(atm_num.index(data[1]))+','+str(atm_num.index(data[2]))+','+str(atm_num.index(data[3]))+','  
 	    disang_file.write('%s %-23s '%('&rst iat=', nums))
 	    disang_file.write('r1= %10.4f, r2= %10.4f, r3= %10.4f, r4= %10.4f, rk2= %11.7f, rk3= %11.7f, &end %s \n' % (float(vals[i]) - 180, float(vals[i]), float(vals[i]), float(vals[i]) + 180, ldhf, ldhf, lign_d))
+            if comp == 'e':
+	      nums2 = str(atm_num.index(data[0])+vac_atoms)+','+str(atm_num.index(data[1])+vac_atoms)+','+str(atm_num.index(data[2])+vac_atoms)+','+str(atm_num.index(data[3])+vac_atoms)+','  
+	      disang_file.write('%s %-23s '%('&rst iat=', nums2))
+	      disang_file.write('r1= %10.4f, r2= %10.4f, r3= %10.4f, r4= %10.4f, rk2= %11.7f, rk3= %11.7f, &end %s \n' % (float(vals[i]) - 180, float(vals[i]), float(vals[i]), float(vals[i]) + 180, ldhf, ldhf, lign_d))
 
       # Analysis of simulations
 
@@ -423,7 +464,32 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, com
 	    restraints_file.write('%s %s %s'%('angle a'+str(i), rst[i], 'out restraints.dat\n'))
 	  if len(arr) == 4:
 	    restraints_file.write('%s %s %s'%('dihedral a'+str(i), rst[i], 'out restraints.dat\n'))
-    elif comp == 'c' or comp == 'w' or comp == 'f':
+    elif comp == 'f':
+      while '' in rst:
+        rst.remove('')
+    # Write restraint file for ligand system 
+      disang_file = open('disang.rest', 'w')
+      disang_file.write('%s  %s  %s  %s  %s  %s  %s  %s  %s \n'%('# Anchor atoms', P1, P2, P3, L1, L2, L3, 'stage = '+stage, 'weight = '+str(weight)))
+      for i in range(0, len(rst)):
+	data = rst[i].split()
+	# Ligand conformational restraints
+	if len(data) == 2:
+	  nums = str(ligand_atm_num.index(data[0]))+','+str(ligand_atm_num.index(data[1]))+','   
+	  nums2 = str(ligand_atm_num.index(data[0])+vac_atoms)+','+str(ligand_atm_num.index(data[1])+vac_atoms)+','   
+	  disang_file.write('%s %-23s '%('&rst iat=', nums))
+	  disang_file.write('r1= %10.4f, r2= %10.4f, r3= %10.4f, r4= %10.4f, rk2= %11.7f, rk3= %11.7f, &end %s \n' % (float(0.0), float(vals[i]), float(vals[i]), float(999.0), ldsf, ldsf, lign_c))
+          if amber == 'amber20':
+	    disang_file.write('%s %-23s '%('&rst iat=', nums2))
+	    disang_file.write('r1= %10.4f, r2= %10.4f, r3= %10.4f, r4= %10.4f, rk2= %11.7f, rk3= %11.7f, &end %s \n' % (float(0.0), float(vals[i]), float(vals[i]), float(999.0), ldsf, ldsf, lign_c))
+	elif len(data) == 4:
+	  nums = str(ligand_atm_num.index(data[0]))+','+str(ligand_atm_num.index(data[1]))+','+str(ligand_atm_num.index(data[2]))+','+str(ligand_atm_num.index(data[3]))+','  
+	  nums2 = str(ligand_atm_num.index(data[0])+vac_atoms)+','+str(ligand_atm_num.index(data[1])+vac_atoms)+','+str(ligand_atm_num.index(data[2])+vac_atoms)+','+str(ligand_atm_num.index(data[3])+vac_atoms)+','  
+	  disang_file.write('%s %-23s '%('&rst iat=', nums))
+	  disang_file.write('r1= %10.4f, r2= %10.4f, r3= %10.4f, r4= %10.4f, rk2= %11.7f, rk3= %11.7f, &end %s \n' % (float(vals[i]) - 180, float(vals[i]), float(vals[i]), float(vals[i]) + 180, ldhf, ldhf, lign_d))
+          if amber == 'amber20':
+	    disang_file.write('%s %-23s '%('&rst iat=', nums2))
+	    disang_file.write('r1= %10.4f, r2= %10.4f, r3= %10.4f, r4= %10.4f, rk2= %11.7f, rk3= %11.7f, &end %s \n' % (float(vals[i]) - 180, float(vals[i]), float(vals[i]), float(vals[i]) + 180, ldhf, ldhf, lign_d))
+    elif comp == 'c' or comp == 'w':
       while '' in rst:
         rst.remove('')
     # Write restraint file for ligand system 
