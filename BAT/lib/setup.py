@@ -553,6 +553,8 @@ def restraints(amber, pose, rest, bb_start, bb_end, weight, stage, mol, trans_di
 	  restraints_file.write('%s %s %s'%('angle a'+str(i), rst[i], 'out restraints.dat\n'))
 	if len(arr) == 4:
 	  restraints_file.write('%s %s %s'%('dihedral a'+str(i), rst[i], 'out restraints.dat\n'))
+ 
+    disang_file.write('\n')
 
 
     if stage != 'fe':
