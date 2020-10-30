@@ -1,6 +1,6 @@
 #!/bin/tcsh
 
-#PBS -l walltime=30:00:00,nodes=1:ppn=2:gpu -q home-gibbs -A mgilson-gibbs
+#PBS -l walltime=30:00:00,nodes=1:ppn=2:gpu -q home-gibbs -A mgilson-gpu
 #PBS -j oe -r n -m n 
 #PBS -N STAGE-POSE
 

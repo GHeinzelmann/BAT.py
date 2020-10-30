@@ -31,6 +31,6 @@ Production runs LJ decoupling
   nmropt = 1,
   pencut = -1,
   icfe = 1, clambda = lbd_val, scalpha = 0.5, scbeta = 12.0,
-  timask1 = ':mk1', timask2 = '',
-  ifsc=1, scmask1=':mk1', scmask2='', crgmask = ':mk1',
+  timask1 = ':mk1', timask2 = ':mk2',
+  ifsc=1, scmask1=':mk1', scmask2=':mk2', crgmask = ':mk1,mk2',
   ifmbar = 1,

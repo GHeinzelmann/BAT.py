@@ -16,9 +16,9 @@ def fe_values(blocks, components, temperature, pose, attach_rest, translate_apr,
 
 
     # Set initial values to zero
-    fe_a = fe_b = fe_bd = fe_u = fe_t = fe_v = fe_e = fe_f = fe_w = fe_c = fe_r = fe_l = 0
-    fb_a = fb_b = fb_bd = fb_u = fb_t = fb_v = fb_e = fb_f = fb_w = fb_c = fb_r = fb_l = 0
-    sd_a = sd_b = sd_bd = sd_u = sd_t = sd_v = sd_e = sd_f = sd_w = sd_c = sd_r = sd_l = 0
+    fe_a = fe_b = fe_bd = fe_u = fe_t = fe_v = fe_e = fe_c = fe_r = fe_l = 0
+    fb_a = fb_b = fb_bd = fb_u = fb_t = fb_v = fb_e = fb_c = fb_r = fb_l = 0
+    sd_a = sd_b = sd_bd = sd_u = sd_t = sd_v = sd_e = sd_c = sd_r = sd_l = 0
 
     # Acquire simulation data
     os.chdir('fe')
@@ -84,14 +84,10 @@ def fe_values(blocks, components, temperature, pose, attach_rest, translate_apr,
 	      fout.write(data[t])
 	    fout.close()
 	  os.chdir('../')
-      elif comp == 'f' or comp == 'w' or comp == 'e' or comp == 'v':
+      elif comp == 'e' or comp == 'v':
         os.chdir('dd')
         if dd_type == 'ti':
           # Get dvdl values from output file
-	  if comp == 'f' or comp == 'w':
-	    os.chdir('bulk')
-	  elif comp == 'v' or comp == 'e':
-	    os.chdir('site')
 	  for j in range(0, len(lambdas)):
 	    data = []
 	    win = j
@@ -119,13 +115,8 @@ def fe_values(blocks, components, temperature, pose, attach_rest, translate_apr,
 		fout.write('%5d   %9.4f\n' % (t+1, float(data[t])))
 	      fout.close()
 	    os.chdir('../')
-	  os.chdir('../')
         elif dd_type == 'mbar':
           # Get potential energy values from output file
-	  if comp == 'f' or comp == 'w':
-	    os.chdir('bulk')
-	  elif comp == 'v' or comp == 'e':
-	    os.chdir('site')
 	  for j in range(0, len(lambdas)):
 	    data = []
 	    win = j
@@ -160,7 +151,6 @@ def fe_values(blocks, components, temperature, pose, attach_rest, translate_apr,
                     fout.write(line)
 	      fout.close()
 	    os.chdir('../')
-	  os.chdir('../')
       os.chdir('../')
 
     os.chdir('../../')
@@ -239,22 +229,8 @@ def fe_values(blocks, components, temperature, pose, attach_rest, translate_apr,
 	  splitdata = data.split()
 	  fe_u = float(splitdata[1])
         os.chdir('../')
-      elif comp == 'w' or comp == 'f':
-        os.chdir('dd')
-        os.chdir('bulk')
-	with open('./data/'+dd_type+'-'+comp+'-all.dat', "r") as f_in:
-	  lines = (line.rstrip() for line in f_in)
-	  lines = list(line for line in lines if line)
-	  data = lines[-1]
-	  splitdata = data.split()
-	  if comp == 'f':
-	    fe_f = -1.00*float(splitdata[1])
-	  elif comp == 'w':
-	    fe_w = -1.00*float(splitdata[1])
-        os.chdir('../../')
       elif comp == 'v' or comp == 'e':
         os.chdir('dd')
-        os.chdir('site')
 	with open('./data/'+dd_type+'-'+comp+'-all.dat', "r") as f_in:
 	  lines = (line.rstrip() for line in f_in)
 	  lines = list(line for line in lines if line)
@@ -264,7 +240,7 @@ def fe_values(blocks, components, temperature, pose, attach_rest, translate_apr,
 	    fe_e = float(splitdata[1])
 	  elif comp == 'v':
 	    fe_v = float(splitdata[1])
-        os.chdir('../../')
+        os.chdir('../')
 
 
     # Get errors
@@ -305,7 +281,6 @@ def fe_values(blocks, components, temperature, pose, attach_rest, translate_apr,
         os.chdir('../')
       elif comp == 'e' or comp == 'v': 
         os.chdir('dd')
-        os.chdir('site')
         if dd_type == 'mbar':
 	  if comp == 'e':
 	    b_data = [] 
@@ -348,53 +323,7 @@ def fe_values(blocks, components, temperature, pose, attach_rest, translate_apr,
 		splitdata = data.split()
 		b_data.append(float(splitdata[1]))
             sd_v = np.std(b_data)
-	os.chdir('../../')
-      elif comp == 'f' or comp == 'w':
-        os.chdir('dd')
-        os.chdir('bulk')
-        if dd_type == 'mbar':
-	  if comp == 'f':
-	    b_data = [] 
-	    for k in range(0, blocks):
-	      with open('./data/mbar-'+comp+'-b%02d.dat' %(k+1), "r") as f_in:
-		lines = (line.rstrip() for line in f_in)
-		lines = list(line for line in lines if line)
-		data = lines[-1]
-		splitdata = data.split()
-		b_data.append(float(splitdata[1]))
-	    sd_f = np.std(b_data)
-	  elif comp == 'w':
-	    b_data = [] 
-	    for k in range(0, blocks):
-	      with open('./data/mbar-'+comp+'-b%02d.dat' %(k+1), "r") as f_in:
-		lines = (line.rstrip() for line in f_in)
-		lines = list(line for line in lines if line)
-		data = lines[-1]
-		splitdata = data.split()
-		b_data.append(float(splitdata[1]))
-	    sd_w = np.std(b_data)
-        elif dd_type == 'ti':
-	  if comp == 'f':
-            b_data = [] 
-	    for k in range(0, blocks):
-	      with open('./data/ti-'+comp+'-b%02d.dat' %(k+1), "r") as f_in:
-		lines = (line.rstrip() for line in f_in)
-		lines = list(line for line in lines if line)
-		data = lines[-1]
-		splitdata = data.split()
-		b_data.append(float(splitdata[1]))
-            sd_f = np.std(b_data)
-	  if comp == 'w':
-            b_data = [] 
-	    for k in range(0, blocks):
-	      with open('./data/ti-'+comp+'-b%02d.dat' %(k+1), "r") as f_in:
-		lines = (line.rstrip() for line in f_in)
-		lines = list(line for line in lines if line)
-		data = lines[-1]
-		splitdata = data.split()
-		b_data.append(float(splitdata[1]))
-            sd_w = np.std(b_data)
-	os.chdir('../../')
+	os.chdir('../')
 
     # Create Results folder
     if not os.path.exists('Results'):
@@ -431,22 +360,8 @@ def fe_values(blocks, components, temperature, pose, attach_rest, translate_apr,
 	    splitdata = data.split()
 	    fb_u = float(splitdata[1])
 	  os.chdir('../')
-	elif comp == 'w' or comp == 'f':
-	  os.chdir('dd')
-	  os.chdir('bulk')
-	  with open('./data/'+dd_type+'-'+comp+'-b%02d.dat' %(k+1), "r") as f_in:
-	    lines = (line.rstrip() for line in f_in)
-	    lines = list(line for line in lines if line)
-	    data = lines[-1]
-	    splitdata = data.split()
-	    if comp == 'f':
-	      fb_f = -1.00*float(splitdata[1])
-	    elif comp == 'w':
-	      fb_w = -1.00*float(splitdata[1])
-	  os.chdir('../../')
 	elif comp == 'v' or comp == 'e':
 	  os.chdir('dd')
-	  os.chdir('site')
 	  with open('./data/'+dd_type+'-'+comp+'-b%02d.dat' %(k+1), "r") as f_in:
 	    lines = (line.rstrip() for line in f_in)
 	    lines = list(line for line in lines if line)
@@ -456,12 +371,12 @@ def fe_values(blocks, components, temperature, pose, attach_rest, translate_apr,
 	      fb_e = float(splitdata[1])
 	    elif comp == 'v':
 	      fb_v = float(splitdata[1])
-	  os.chdir('../../')
+	  os.chdir('../')
 
       fb_b = fe_b
       fb_bd = fe_bd
       blck_apr = fb_a + fb_l + fb_t + fb_u + fb_b + fb_c + fb_r
-      blck_dd = fb_a + fb_l + fb_t + fb_e + fb_v + fb_w + fb_f + fb_bd + fb_c + fb_r
+      blck_dd = fb_a + fb_l + fb_t + fb_e + fb_v + fb_bd + fb_c + fb_r
 
       # Write results for the blocks
       resfile = open('./Results/Res-b%02d.dat' %(k+1), 'w')
@@ -477,17 +392,15 @@ def fe_values(blocks, components, temperature, pose, attach_rest, translate_apr,
 	resfile.write('%-20s %8.2f\n' % ('Release Ligand CF', fb_c))
 	resfile.write('%-20s %8.2f\n\n' % ('Release Protein CF', fb_r))
 	resfile.write('%-20s %8.2f\n' % ('Binding free energy', blck_apr))
-      if os.path.exists('./dd/site/data/') or os.path.exists('./dd/bulk/data/'):
+      if os.path.exists('./dd/data/'):
 	resfile.write('\n----------------------------------------------\n\n')
 	resfile.write('Double decoupling method:\n\n')
 	resfile.write('%-21s %-10s\n\n' % ('Component', 'Free Energy'))
 	resfile.write('%-20s %8.2f\n' % ('Attach protein CF', fb_a))
 	resfile.write('%-20s %8.2f\n' % ('Attach ligand CF', fb_l))
 	resfile.write('%-20s %8.2f\n' % ('Attach ligand TR', fb_t))
-	resfile.write('%-20s %8.2f\n' % ('Site Elect ('+dd_type.upper()+')', fb_e))
-	resfile.write('%-20s %8.2f\n' % ('Site LJ ('+dd_type.upper()+')', fb_v))
-	resfile.write('%-20s %8.2f\n' % ('Bulk LJ ('+dd_type.upper()+')', fb_w))
-	resfile.write('%-20s %8.2f\n' % ('Bulk Elect ('+dd_type.upper()+')', fb_f))
+	resfile.write('%-20s %8.2f\n' % ('Electrostatic ('+dd_type.upper()+')', fb_e))
+	resfile.write('%-20s %8.2f\n' % ('Lennard-Jones ('+dd_type.upper()+')', fb_v))
 	resfile.write('%-20s %8.2f\n' % ('Release Ligand TR',fb_bd))
 	resfile.write('%-20s %8.2f\n' % ('Release Ligand CF', fb_c))
 	resfile.write('%-20s %8.2f\n\n' % ('Release Protein CF', fb_r))
@@ -498,9 +411,9 @@ def fe_values(blocks, components, temperature, pose, attach_rest, translate_apr,
 
     # Write final results
     total_apr = fe_a + fe_l + fe_t + fe_u + fe_b + fe_c + fe_r
-    total_dd = fe_a + fe_l + fe_t + fe_e + fe_v + fe_w + fe_f + fe_bd + fe_c + fe_r
+    total_dd = fe_a + fe_l + fe_t + fe_e + fe_v + fe_bd + fe_c + fe_r
     sd_apr = math.sqrt(sd_a**2 + sd_l**2 + sd_t**2 + sd_u**2 + sd_b**2 + sd_c**2 + sd_r**2)
-    sd_dd = math.sqrt(sd_a**2 + sd_l**2 + sd_t**2 + sd_e**2 + sd_v**2 + sd_w**2 + sd_f**2 + sd_b**2 + sd_c**2 + sd_r**2)
+    sd_dd = math.sqrt(sd_a**2 + sd_l**2 + sd_t**2 + sd_e**2 + sd_v**2 + sd_b**2 + sd_c**2 + sd_r**2)
 
     resfile = open('./Results/Results.dat', 'w')
     if os.path.exists('./pmf/data/'):
@@ -515,17 +428,15 @@ def fe_values(blocks, components, temperature, pose, attach_rest, translate_apr,
       resfile.write('%-20s %8.2f (%3.2f)\n' % ('Release Ligand CF', fe_c, sd_c))
       resfile.write('%-20s %8.2f (%3.2f)\n\n' % ('Release Protein CF', fe_r, sd_r))
       resfile.write('%-20s %8.2f (%3.2f)\n' % ('Binding free energy', total_apr, sd_apr))
-    if os.path.exists('./dd/site/data/') or os.path.exists('./dd/bulk/data/'):
+    if os.path.exists('./dd/data/'):
       resfile.write('\n----------------------------------------------\n\n')
       resfile.write('Double decoupling method:\n\n')
       resfile.write('%-21s %-10s %-4s\n\n' % ('Component', 'Free Energy', '(Error)'))
       resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach protein CF', fe_a, sd_a))
       resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach ligand CF', fe_l, sd_l))
       resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach ligand TR', fe_t, sd_t))
-      resfile.write('%-20s %8.2f (%3.2f)\n' % ('Site Elect ('+dd_type.upper()+')', fe_e, sd_e))
-      resfile.write('%-20s %8.2f (%3.2f)\n' % ('Site LJ ('+dd_type.upper()+')', fe_v, sd_v))
-      resfile.write('%-20s %8.2f (%3.2f)\n' % ('Bulk LJ ('+dd_type.upper()+')', fe_w, sd_w))
-      resfile.write('%-20s %8.2f (%3.2f)\n' % ('Bulk Elect ('+dd_type.upper()+')', fe_f, sd_f))
+      resfile.write('%-20s %8.2f (%3.2f)\n' % ('Electrostatic ('+dd_type.upper()+')', fe_e, sd_e))
+      resfile.write('%-20s %8.2f (%3.2f)\n' % ('Lennard-Jones ('+dd_type.upper()+')', fe_v, sd_v))
       resfile.write('%-20s %8.2f \n' % ('Release Ligand TR',fe_bd))
       resfile.write('%-20s %8.2f (%3.2f)\n' % ('Release Ligand CF', fe_c, sd_c))
       resfile.write('%-20s %8.2f (%3.2f)\n\n' % ('Release Protein CF', fe_r, sd_r))
@@ -845,10 +756,6 @@ def fe_dd(comp, pose, mode, lambdas, weights, dd_type, rest_file, temperature):
     os.chdir('fe')
     os.chdir(pose)
     os.chdir('dd')
-    if comp == 'f' or comp == 'w':
-      os.chdir('bulk')
-    elif comp == 'v' or comp == 'e':
-      os.chdir('site')
     if not os.path.exists('data'):
       os.makedirs('data')
 
@@ -994,6 +901,6 @@ def fe_dd(comp, pose, mode, lambdas, weights, dd_type, rest_file, temperature):
 	print "%10.5f %10.5f %10.5f" % ( lambdas[k], Deltaf[0,k]/beta, dDeltaf[0,k]/beta)
       print "\n\n"
 
-    os.chdir('../../../../')
+    os.chdir('../../../')
 
 

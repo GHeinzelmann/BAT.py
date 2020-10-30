@@ -35,6 +35,8 @@ lambdas = [ 0.00922 0.04794 0.11505 0.20634 0.31608 0.43738 0.56262 0.68392 0.79
 
 pull_ligand = no        # perform pulling of the ligand from the binding site during preparation, for pmf calculation only
 
+dd_dist = 16.00         # z distance between site and bulk molecules on DD
+
 # Additional variables for analysis 
 
 weights = [ 0.02359 0.05347 0.08004 0.10158 0.11675 0.12457 0.12457 0.11675 0.10158 0.08004 0.05347 0.02359 ] # Weights for Gaussian quadrature, make sure it matches the lambda values
