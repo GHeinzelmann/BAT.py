@@ -25,7 +25,7 @@ P3 = :450@CA
 
 fe_type = dd-rest  # Type of free energy calculations (all, rest, dd, pmf, dd-rest, pmf-rest, custom)
 
-components = [ e v w f t r l a c ] # Used with custom option for fe_type
+components = [ e v t r l a c ] # Used with custom option for fe_type
 
 release_eq = [ 5.00 2.50 1.00 0.50 0.20 0.10 0.05 0.02 0.00 ]   # Equilibrium gradual release weights
 
@@ -103,12 +103,6 @@ e_steps2	= 400000    # Number of steps for window component e (production)
 
 v_steps1	= 2000000   # Number of steps per window for component v (equilibrium) 
 v_steps2	= 4000000   # Number of steps for window component v (production)     
-
-w_steps1	= 1000000   # Number of steps per window for component w (equilibrium) 
-w_steps2	= 2000000   # Number of steps for window component w (production)     
-
-f_steps1	= 200000    # Number of steps per window for component f (equilibrium) 
-f_steps2	= 400000    # Number of steps for window component f (production)     
 
 # Conformational restraints on the protein backbone
 
