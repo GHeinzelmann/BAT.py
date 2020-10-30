@@ -1,3 +1,5 @@
+*Coming soon: GHDD.py, a fully automated tool for guest-host ABFE calculations using DD with pmemd.cuda*
+
 # BAT.py
 
 The Binding Affinity Tool (BAT.py) is a python tool for fully automated absolute binding free energy calculations. Its workflow encompasses the creation of the bound complex, generation of parameters using Antechamber, preparation of the simulation files, and post-processing to retrieve the binding free energy. By using the _pmemd.cuda_ software from AMBER, it is able to perform several calculations at a reduced computational cost using graphics processing units (GPUs).
