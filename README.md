@@ -1,4 +1,4 @@
-*Coming soon: GHDD.py, a fully automated tool for guest-host ABFE calculations using pmemd.cuda*
+*Coming soon: GHDD.py, a fully automated tool for guest-host ABFE calculations using DD with pmemd.cuda*
 
 
 # BAT.py
