@@ -9,7 +9,7 @@ import subprocess as sp
 import sys as sys
 import scripts as scripts
 
-def restraints(amber, pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil):
+def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil):
 
     rst = []
     atm_num = []
@@ -478,17 +478,15 @@ def restraints(amber, pose, rest, bb_start, bb_end, weight, stage, mol, trans_di
 	  nums2 = str(ligand_atm_num.index(data[0])+vac_atoms)+','+str(ligand_atm_num.index(data[1])+vac_atoms)+','   
 	  disang_file.write('%s %-23s '%('&rst iat=', nums))
 	  disang_file.write('r1= %10.4f, r2= %10.4f, r3= %10.4f, r4= %10.4f, rk2= %11.7f, rk3= %11.7f, &end %s \n' % (float(0.0), float(vals[i]), float(vals[i]), float(999.0), ldsf, ldsf, lign_c))
-          if amber == 'amber20':
-	    disang_file.write('%s %-23s '%('&rst iat=', nums2))
-	    disang_file.write('r1= %10.4f, r2= %10.4f, r3= %10.4f, r4= %10.4f, rk2= %11.7f, rk3= %11.7f, &end %s \n' % (float(0.0), float(vals[i]), float(vals[i]), float(999.0), ldsf, ldsf, lign_c))
+	  disang_file.write('%s %-23s '%('&rst iat=', nums2))
+	  disang_file.write('r1= %10.4f, r2= %10.4f, r3= %10.4f, r4= %10.4f, rk2= %11.7f, rk3= %11.7f, &end %s \n' % (float(0.0), float(vals[i]), float(vals[i]), float(999.0), ldsf, ldsf, lign_c))
 	elif len(data) == 4:
 	  nums = str(ligand_atm_num.index(data[0]))+','+str(ligand_atm_num.index(data[1]))+','+str(ligand_atm_num.index(data[2]))+','+str(ligand_atm_num.index(data[3]))+','  
 	  nums2 = str(ligand_atm_num.index(data[0])+vac_atoms)+','+str(ligand_atm_num.index(data[1])+vac_atoms)+','+str(ligand_atm_num.index(data[2])+vac_atoms)+','+str(ligand_atm_num.index(data[3])+vac_atoms)+','  
 	  disang_file.write('%s %-23s '%('&rst iat=', nums))
 	  disang_file.write('r1= %10.4f, r2= %10.4f, r3= %10.4f, r4= %10.4f, rk2= %11.7f, rk3= %11.7f, &end %s \n' % (float(vals[i]) - 180, float(vals[i]), float(vals[i]), float(vals[i]) + 180, ldhf, ldhf, lign_d))
-          if amber == 'amber20':
-	    disang_file.write('%s %-23s '%('&rst iat=', nums2))
-	    disang_file.write('r1= %10.4f, r2= %10.4f, r3= %10.4f, r4= %10.4f, rk2= %11.7f, rk3= %11.7f, &end %s \n' % (float(vals[i]) - 180, float(vals[i]), float(vals[i]), float(vals[i]) + 180, ldhf, ldhf, lign_d))
+	  disang_file.write('%s %-23s '%('&rst iat=', nums2))
+	  disang_file.write('r1= %10.4f, r2= %10.4f, r3= %10.4f, r4= %10.4f, rk2= %11.7f, rk3= %11.7f, &end %s \n' % (float(vals[i]) - 180, float(vals[i]), float(vals[i]), float(vals[i]) + 180, ldhf, ldhf, lign_d))
     elif comp == 'c' or comp == 'w':
       while '' in rst:
         rst.remove('')

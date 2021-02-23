@@ -130,14 +130,6 @@ for i in range(0, len(lines)):
 	    H3 = lines[i][1]
 	elif lines[i][0] == 'ligand_name':
 	    mol = lines[i][1]
-        elif lines[i][0] == 'amber_version':
-	    if lines[i][1].lower() == 'amber18':
-                amber = lines[i][1].lower()
-	    elif lines[i][1].lower() == 'amber20':
-                amber = lines[i][1].lower()
-	    else:
-		print('Amber version not recognized, please choose amber18 or amber20 for the amber_version parameter')
-		sys.exit(1)
         elif lines[i][0] == 'fe_type':
 	    if lines[i][1].lower() == 'rest':
                 fe_type = lines[i][1].lower()
@@ -404,7 +396,7 @@ if stage == 'equil':
     for i in range(0, len(release_eq)):
       weight = release_eq[i]
       print('%s' %str(weight))
-      setup.restraints(amber, pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil)
+      setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil)
       shutil.copy('./'+pose+'/disang.rest', './'+pose+'/disang%02d.rest' %int(i))
     shutil.copy('./'+pose+'/disang%02d.rest' %int(0), './'+pose+'/disang.rest')
     setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, eq_steps1, eq_steps2, rng)
@@ -449,7 +441,7 @@ elif stage == 'prep':
     print('Creating preparation steps...')
     for i in range(0, num_sim):
       trans_dist = float(i*pull_spacing)
-      setup.restraints(amber, pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil)
+      setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil)
       shutil.copy('./'+pose+'/disang.rest', './'+pose+'/disang%03d.rest' %int(i))
     shutil.copy('./'+pose+'/disang%03d.rest' %int(0), './'+pose+'/disang.rest')
     setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, prep_steps1, prep_steps2, rng)
@@ -508,12 +500,12 @@ elif stage == 'fe':
 	    build.build_apr(hmr, mol, pose, comp, win, trans_dist, pull_spacing, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt)
             print('Creating box for ligand only...')
 	    build.ligand_box(mol, lig_buffer, water_model, neut, ion_lig, comp, ligand_ff)
-	    setup.restraints(amber, pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil)
+	    setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil)
 	    setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, c_steps1, c_steps2, rng)
           else:
             print('window: %s%02d weight: %s' %(comp, int(win), str(weight)))
 	    build.build_apr(hmr, mol, pose, comp, win, trans_dist, pull_spacing, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt)
-	    setup.restraints(amber, pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil)
+	    setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil)
 	    setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, c_steps1, c_steps2, rng)
         os.chdir('../')  
       # Receptor conformational release in a separate box
@@ -530,12 +522,12 @@ elif stage == 'fe':
 	    build.build_apr(hmr, mol, pose, comp, win, trans_dist, pull_spacing, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt)
             print('Creating box for apo protein...')
             build.create_box(hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt)
-	    setup.restraints(amber, pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil)
+	    setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil)
 	    setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, r_steps1, r_steps2, rng)
           else:
             print('window: %s%02d weight: %s' %(comp, int(win), str(weight)))
 	    build.build_apr(hmr, mol, pose, comp, win, trans_dist, pull_spacing, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt)
-	    setup.restraints(amber, pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil)
+	    setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil)
 	    setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, r_steps1, r_steps2, rng)
         os.chdir('../')  
       # Van der Waals decoupling
@@ -572,7 +564,7 @@ elif stage == 'fe':
 	    build.build_apr(hmr, mol, pose, comp, win, trans_dist, pull_spacing, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt)
             print('Creating box for ligand only...')
 	    build.ligand_box(mol, lig_buffer, water_model, neut, ion_lig, comp, ligand_ff)
-	    setup.restraints(amber, pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil)
+	    setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil)
 	    setup.dec_files(temperature, mol, num_sim, pose, comp, win, stage, w_steps1, w_steps2, weight, lambdas)
           else:
             print('window: %s%02d lambda: %s' %(comp, int(win), str(weight)))
@@ -595,8 +587,7 @@ elif stage == 'fe':
           if int(win) == 0:
             print('window: %s%02d lambda: %s' %(comp, int(win), str(weight)))
 	    build.build_dec(hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt)
-            if amber == 'amber20':
-	      setup.restraints(amber, pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil)
+	    setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil)
 	    setup.dec_files(temperature, mol, num_sim, pose, comp, win, stage, e_steps1, e_steps2, weight, lambdas)
           else:
             print('window: %s%02d lambda: %s' %(comp, int(win), str(weight)))
@@ -620,7 +611,7 @@ elif stage == 'fe':
 	    build.build_dec(hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt)
             print('Creating box for ligand decharging in bulk...')
 	    build.ligand_box(mol, lig_buffer, water_model, neut, ion_lig, comp, ligand_ff)
-	    setup.restraints(amber, pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil)
+	    setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil)
 	    setup.dec_files(temperature, mol, num_sim, pose, comp, win, stage, f_steps1, f_steps2, weight, lambdas)
           else:
             print('window: %s%02d lambda: %s' %(comp, int(win), str(weight)))
@@ -638,7 +629,7 @@ elif stage == 'fe':
 	  win = k
           print('window: %s%02d weight: %s' %(comp, int(win), str(weight)))
 	  build.build_apr(hmr, mol, pose, comp, win, trans_dist, pull_spacing, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt)
-	  setup.restraints(amber, pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil)
+	  setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, trans_dist, comp, bb_equil)
           steps1 = dic_steps1[comp]
           steps2 = dic_steps2[comp]
 	  setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2, rng)

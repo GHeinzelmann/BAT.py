@@ -131,7 +131,7 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
 	    if len(splitdata) > 4:
 	      if line[21] != 'A':
 		newfile.write(line)
-    sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb', shell=True)
+    sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y', shell=True)
     sp.call('vmd -dispdev text -e prep.tcl', shell=True)
 
     # Check size of anchor file 
@@ -335,7 +335,7 @@ def build_prep(pose, mol, fwin, l1_x, l1_y, l1_z, l1_zm, l1_range, min_adis, max
 	    if len(splitdata) > 4:
 	      if line[21] != 'A':
 		newfile.write(line)
-    sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb', shell=True)
+    sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y', shell=True)
     sp.call('vmd -dispdev text -e prep.tcl', shell=True)
 
     # Check size of anchor file 
