@@ -14,7 +14,7 @@ To use BAT.py, download the files from this repository, which already contain an
 
 VMD (Visual Molecular Dynamics) [1] - https://www.ks.uiuc.edu/Development/Download/download.cgi?PackageName=VMD
 
-Openbabel 2.4.1 [2] - https://github.com/openbabel/openbabel/releases/tag/openbabel-2-4-1\*
+Openbabel 2.4.1 [2] - https://github.com/openbabel/openbabel/releases/tag/openbabel-2-4-1 *
 
 MUSTANG v3.2.3 (MUltiple (protein) STructural AligNment alGorithm) [3] - http://lcb.infotech.monash.edu.au/mustang/
 
