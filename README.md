@@ -3,7 +3,7 @@
 
 # BAT.py
 
-The Binding Affinity Tool (BAT.py) is a python tool for fully automated absolute binding free energy calculations. Its workflow encompasses the creation of the bound complex, generation of parameters using Antechamber, preparation of the simulation files, and post-processing to retrieve the binding free energy. By using the _pmemd.cuda_ software from AMBER, it is able to perform several calculations at a reduced computational cost using graphics processing units (GPUs).
+The Binding Affinity Tool (BAT.py) is a python tool for fully automated absolute binding free energy calculations. Its workflow encompasses the creation of the bound complex, generation of parameters using Antechamber, preparation of the simulation files, and post-processing to retrieve the binding free energy. By using the _pmemd.cuda_ software from AMBER20, it is able to perform several calculations at a reduced computational cost using graphics processing units (GPUs).
 
 
 BAT.py can perform binding free energy calculations by two alchemical routes in the presence of restraints, either with double decoupling (DD) procedure or with the simultaneous decoupling recoupling (SDR) method. It can also apply a physical route, through the APR method, suitable for ligands that have free access to the solvent. The program is compatible with the simulation package AMBER20, also requiring a few installed programs to work properly, which are listed in the next section. 
@@ -38,11 +38,11 @@ The equilibration step starts from the docked complex or the crystal structure, 
 
 python BAT.py -i input.in -s equil
 
-BAT.py is compatible with python 2.7 versions. If you have another version, or you find that this command gives an error, you can use the python version included in the Ambertools distribution:
+BAT.py is compatible with python 3.8 versions. If you have another version, or you find that this command gives an error, you can use the python version included in the Ambertools20 distribution:
 
 $AMBERHOME/miniconda/bin/python BAT.py -i input.in -s equil
 
-This command will create an ./equil folder, with one folder inside for each of the docked poses (pose0, pose1, etc.). In order to run the simulations for each pose, you can use the run-local.bash script (to run them locally), or the PBS-run script, which is designed to run in a queue system such as TORQUE. Both of these files might have to be adjusted, depending on your computer or server configuration. The number of simulations and the applied restraints will depend on the _release_ _eq_ array defined in the input file. 
+This command will create an ./equil folder, with one folder inside for each of the docked poses (pose0, pose1, etc.). In order to run the simulations for each pose, you can use the run-local.bash script (to run them locally), or the PBS-run script, which is designed to run in a queue system such as TORQUE. Both of these files might have to be adjusted, depending on your computer or server configuration. The number of simulations and the applied restraints will depend on the _release_eq_ array defined in the input file. 
 
 ## Preparation
 
@@ -70,9 +70,9 @@ python BAT.py -i input.in -s analysis
 
 You should see a ./Results directory inside each ./fe/pose folder, containing all the components and the final calculated binding free energy, located in the Results.dat file. This folder also contains the results for each of the chosen data blocks, which is useful to check for convergence and fluctuations, and is also used to calculate the uncertainties. This fully automated procedure can be readily applied for any other ligand that binds to the second BRD4 bromodomain, and with minimal adjustments it can be extended to several other proteins.
 
-## Using the SDR and APR method
+## Using the SDR and APR methods
 
-The SDR method is suitable for ligands with net charge, since it keeps the net charge of the system constant during the transformations. The APR method presents limitations, but it could stil be useful for ligands that bind to the surface of proteins and have clear access to the solvent. To apply SDR/APR in addition to DD, a few parameters have to be changed or added to the BAT.py input file. This procedure is described in the user guide and also on Ref. [9].  
+The SDR method is suitable for ligands with net charge, since it keeps the full system neutral during the transformations. The APR method presents limitations, but it could stil be useful for ligands that bind to the surface of proteins and have clear access to the solvent. To apply SDR/APR in addition to DD, a few parameters have to be changed or added to the BAT.py input file. This procedure is described in the user guide and also on Ref. [9].  
 
 # Extending it to other systems
 
