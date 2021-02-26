@@ -324,18 +324,25 @@ apr_sim = 2
 # Define free energy components
 if fe_type == 'rest':
   components = ['c', 'a', 'l', 't', 'r'] 
+  dec_method == 'dd'
 elif fe_type == 'sdr':
   components = ['e', 'v'] 
+  dec_method == 'sdr'
 elif fe_type == 'dd':
   components = ['e', 'v', 'f', 'w'] 
+  dec_method == 'dd'
 elif fe_type == 'pmf':
   components = ['u'] 
+  dec_method == 'dd'
 elif fe_type == 'pmf-rest':
   components = ['c', 'a', 'l', 't', 'r', 'u'] 
+  dec_method == 'dd'
 elif fe_type == 'sdr-rest':
   components = ['c', 'a', 'l', 't', 'r', 'e', 'v'] 
+  dec_method == 'sdr'
 elif fe_type == 'dd-rest':
   components = ['c', 'a', 'l', 't', 'r', 'e', 'v', 'f', 'w'] 
+  dec_method == 'dd'
 
 # Pull ligand out or not
 if pull_ligand == 'no':
