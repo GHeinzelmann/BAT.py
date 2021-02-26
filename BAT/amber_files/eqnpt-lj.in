@@ -30,6 +30,8 @@ Equilibrate, NPT.
   icfe = 1, clambda = lbd_val, scalpha = 0.5, scbeta = 12.0,
   timask1 = ':mk1', timask2 = ':mk2',
   ifsc=1, scmask1=':mk1', scmask2=':mk2', crgmask = ':mk1,mk2',
+  gti_chg_keep = 0
+  gti_add_sc = 3
  /
  &wt type = 'END', /
 DISANG=disang.rest

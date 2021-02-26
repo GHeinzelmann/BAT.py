@@ -1,7 +1,7 @@
 *******************************************************
 *****************************       mdin
 *******************************************************
-Production runs LJ decoupling
+Production runs charge annihilation
  &cntrl
   imin = 0,
   ntx = 5,
@@ -30,9 +30,8 @@ Production runs LJ decoupling
   restraintmask = ':1-3',
   nmropt = 1,
   pencut = -1,
-  icfe = 1, clambda = lbd_val, scalpha = 0.5, scbeta = 12.0,
+  icfe = 1, clambda = lbd_val,
   timask1 = ':mk1', timask2 = ':mk2',
-  ifsc=1, scmask1=':mk1', scmask2=':mk2', crgmask = ':mk1,mk2',
+  ifsc=0, crgmask = ':mk2',
   gti_chg_keep = 0
-  gti_add_sc = 3
   ifmbar = 1,

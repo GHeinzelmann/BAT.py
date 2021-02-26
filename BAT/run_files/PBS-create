@@ -1,13 +1,13 @@
 #!/bin/tcsh
 
-#PBS -l walltime=1:00:00,nodes=1:ppn=4 -q home-gibbs -A mgilson-gpu
+#PBS -l walltime=2:00:00,nodes=1:ppn=4 -q home-gibbs -A mgilson-gpu
 #PBS -j oe -r n -m n 
 #PBS -N Create_system
 
 ### Set Environment
-source /home/ibenshal/Amber_Jan2019/amber/amber.csh
+source /home/gheinzel/amber20/amber-new.csh
 
 ### Execute
 cd $PBS_O_WORKDIR
-/home/ibenshal/Amber_Jan2019/amber/miniconda/bin/python BAT.py -i input.in -s equil
+/home/gheinzel/amber20/miniconda/bin/python BAT.py -i input.in -s analysis
 

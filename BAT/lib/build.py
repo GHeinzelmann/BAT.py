@@ -9,7 +9,7 @@ import subprocess as sp
 import sys as sys
 import scripts as scripts
 
-def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_zm, l1_range, min_adis, max_adis, ligand_ff, ligand_ph):
+def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_zm, l1_range, min_adis, max_adis, ligand_ff, ligand_ph, ligand_charge):
 
 
     # Create equilibrium directory
@@ -99,7 +99,7 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
     sp.call('babel -i pdb '+mol.lower()+'.pdb -o pdb '+mol.lower()+'-h.pdb -p %4.2f' %ligand_ph, shell=True)
     print('The protonation of the ligand is for pH %4.2f' %ligand_ph)
     if not os.path.exists('../ff/%s.mol2' %mol.lower()):
-      sp.call('antechamber -i '+mol.lower()+'-h.pdb -fi pdb -o '+mol.lower()+'.mol2 -fo mol2 -c bcc -s 2 -at '+ligand_ff.lower()+'', shell=True)
+      sp.call('antechamber -i '+mol.lower()+'-h.pdb -fi pdb -o '+mol.lower()+'.mol2 -fo mol2 -c bcc -s 2 -at '+ligand_ff.lower()+' -nc %02d' % ligand_charge, shell=True)
       shutil.copy('./%s.mol2' %(mol.lower()), '../ff/')
     if not os.path.exists('../ff/%s.frcmod' %mol.lower()):
       if ligand_ff == 'gaff':
@@ -131,7 +131,7 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
 	    if len(splitdata) > 4:
 	      if line[21] != 'A':
 		newfile.write(line)
-    sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb', shell=True)
+    sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y', shell=True)
     sp.call('vmd -dispdev text -e prep.tcl', shell=True)
 
     # Check size of anchor file 
@@ -335,7 +335,7 @@ def build_prep(pose, mol, fwin, l1_x, l1_y, l1_z, l1_zm, l1_range, min_adis, max
 	    if len(splitdata) > 4:
 	      if line[21] != 'A':
 		newfile.write(line)
-    sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb', shell=True)
+    sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y', shell=True)
     sp.call('vmd -dispdev text -e prep.tcl', shell=True)
 
     # Check size of anchor file 
@@ -627,7 +627,7 @@ def build_apr(hmr, mol, pose, comp, win, trans_dist, pull_spacing, ntpr, ntwr, n
         for file in glob.glob('../r00/*'):
 	  shutil.copy(file, './')
 
-def build_dec(hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, dd_dist):
+def build_dec(hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method):
 
     if not os.path.exists('../ff'):
       os.makedirs('../ff')
@@ -692,84 +692,150 @@ def build_dec(hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cu
       os.makedirs('%s%02d' %(comp, int(win)))
     os.chdir('%s%02d' %(comp, int(win)))
     if int(win) == 0:
-      # Copy a few files
-      shutil.copy('../../../../prep/'+pose+'/assign-eq.dat', './')
-      shutil.copy('../../../../prep/'+pose+'/prep-%s.pdb' %mol.lower(), './fe-%s.pdb' %mol.lower())
-      shutil.copy('../../../../prep/'+pose+'/%s.pdb' %mol.lower(), './')
-      shutil.copy('../../../../prep/'+pose+'/build.pdb', './build-prep.pdb')
-      for file in glob.glob('../../../../prep/'+pose+'/vac_ligand*'):
-	shutil.copy(file, './')
+      if (comp == 'e' or comp == 'v'):
+	# Copy a few files
+	shutil.copy('../../../../prep/'+pose+'/assign-eq.dat', './')
+	shutil.copy('../../../../prep/'+pose+'/prep-%s.pdb' %mol.lower(), './fe-%s.pdb' %mol.lower())
+	shutil.copy('../../../../prep/'+pose+'/%s.pdb' %mol.lower(), './')
+	shutil.copy('../../../../prep/'+pose+'/build.pdb', './build-prep.pdb')
+	for file in glob.glob('../../../../prep/'+pose+'/vac_ligand*'):
+	  shutil.copy(file, './')
  
-      for file in glob.glob('../../ff/%s.*' %mol.lower()):
-	shutil.copy(file, './')
-      for file in glob.glob('../../ff/dum.*'):
-	shutil.copy(file, './')
+	for file in glob.glob('../../ff/%s.*' %mol.lower()):
+	  shutil.copy(file, './')
+	for file in glob.glob('../../ff/dum.*'):
+	  shutil.copy(file, './')
 
-      lig_coords = []
-      lig_atom = 0
-      lig_atomlist = []
-      resid_lig = 0
-      resname_lig = mol
-      resname_list = []
-      resid_list = []
-      lig_atom = 0
-      lines_ligand = []
-      lig_resid = 0
+	lig_coords = []
+	lig_atom = 0
+	lig_atomlist = []
+	resid_lig = 0
+	resname_lig = mol
+	resname_list = []
+	resid_list = []
+	lig_atom = 0
+	lines_ligand = []
+	lig_resid = 0
 
-      # Read coordinates from aligned system
-      with open('build-prep.pdb') as f_in:
-	lines = (line.rstrip() for line in f_in)
-	lines = list(line for line in lines if line) # Non-blank lines in a list   
-	for i in range(0, len(lines)):
-	  if lines[i][17:20].strip() == mol:
-	      lig_coords.append((float(lines[i][30:38].strip()), float(lines[i][38:46].strip()), float(lines[i][46:54].strip())))
-	      lig_atomlist.append(lines[i][12:16].strip())
-	      resname_list.append(lines[i][17:20].strip())
-	      lig_resid = float(lines[i][22:26].strip())
-	      lig_atom += 1
-      # Write anchors and last protein residue to original pdb file
-      with open('build-prep.pdb', 'r') as fin:
-	  data = fin.read().splitlines(True)
-      with open('build.pdb', 'w') as fout:
-	  fout.writelines(data[0:-1])
+	# Read coordinates from aligned system
+	with open('build-prep.pdb') as f_in:
+	  lines = (line.rstrip() for line in f_in)
+	  lines = list(line for line in lines if line) # Non-blank lines in a list   
+	  for i in range(0, len(lines)):
+	    if lines[i][17:20].strip() == mol:
+		lig_coords.append((float(lines[i][30:38].strip()), float(lines[i][38:46].strip()), float(lines[i][46:54].strip())))
+		lig_atomlist.append(lines[i][12:16].strip())
+		resname_list.append(lines[i][17:20].strip())
+		lig_resid = float(lines[i][22:26].strip())
+		lig_atom += 1
+	# Write anchors and last protein residue to original pdb file
+	with open('build-prep.pdb', 'r') as fin:
+	    data = fin.read().splitlines(True)
+	with open('build.pdb', 'w') as fout:
+	    fout.writelines(data[0:-1])
 
-      # Positions of the ligand atoms
-      build_file = open('build.pdb', 'a')
-      if (comp == 'e'):
-	for i in range(0, lig_atom):
-	    build_file.write('%-4s  %5s %-4s %3s  %4.0f    '%('ATOM', i+1, lig_atomlist[i],mol, float(lig_resid + 1)))
-	    build_file.write('%8.3f%8.3f%8.3f'%(float(lig_coords[i][0]), float(lig_coords[i][1]),float(lig_coords[i][2])))
+	# Positions of the ligand atoms
+	build_file = open('build.pdb', 'a')
+	if (comp == 'e'):
+	  for i in range(0, lig_atom):
+	      build_file.write('%-4s  %5s %-4s %3s  %4.0f    '%('ATOM', i+1, lig_atomlist[i],mol, float(lig_resid + 1)))
+	      build_file.write('%8.3f%8.3f%8.3f'%(float(lig_coords[i][0]), float(lig_coords[i][1]),float(lig_coords[i][2])))
 
-	    build_file.write('%6.2f%6.2f\n'%(0, 0))
+	      build_file.write('%6.2f%6.2f\n'%(0, 0))
+	  build_file.write('TER\n')
+	  if (dec_method == 'sdr'):
+	    for i in range(0, lig_atom):
+		build_file.write('%-4s  %5s %-4s %3s  %4.0f    '%('ATOM', i+1, lig_atomlist[i],mol, float(lig_resid + 2)))
+		build_file.write('%8.3f%8.3f%8.3f'%(float(lig_coords[i][0]), float(lig_coords[i][1]),float(lig_coords[i][2]+sdr_dist)))
+
+		build_file.write('%6.2f%6.2f\n'%(0, 0))
+	    build_file.write('TER\n')
+	    for i in range(0, lig_atom):
+		build_file.write('%-4s  %5s %-4s %3s  %4.0f    '%('ATOM', i+1, lig_atomlist[i],mol, float(lig_resid + 3)))
+		build_file.write('%8.3f%8.3f%8.3f'%(float(lig_coords[i][0]), float(lig_coords[i][1]),float(lig_coords[i][2]+sdr_dist)))
+
+		build_file.write('%6.2f%6.2f\n'%(0, 0))
+	  print('Creating new system for decharging...')
+	elif comp == 'v':
+	  if (dec_method == 'sdr'):
+	    for i in range(0, lig_atom):
+		build_file.write('%-4s  %5s %-4s %3s  %4.0f    '%('ATOM', i+1, lig_atomlist[i],mol, float(lig_resid + 1)))
+		build_file.write('%8.3f%8.3f%8.3f'%(float(lig_coords[i][0]), float(lig_coords[i][1]),float(lig_coords[i][2]+sdr_dist)))
+
+		build_file.write('%6.2f%6.2f\n'%(0, 0))
+	  print('Creating new system for vdw decoupling...')
 	build_file.write('TER\n')
-	for i in range(0, lig_atom):
-	    build_file.write('%-4s  %5s %-4s %3s  %4.0f    '%('ATOM', i+1, lig_atomlist[i],mol, float(lig_resid + 2)))
-	    build_file.write('%8.3f%8.3f%8.3f'%(float(lig_coords[i][0]), float(lig_coords[i][1]),float(lig_coords[i][2]+dd_dist)))
+	build_file.write('END\n')
+	build_file.close()
+      elif (comp == 'f' or comp == 'w'):
+        # Copy a few files 
+        shutil.copy('../../../../prep/'+pose+'/%s.pdb' %mol.lower(), './%s-orig.pdb' %mol.lower())
+        shutil.copy('../../../../prep/'+pose+'/build.pdb', './build-prep.pdb')
+        shutil.copy('../../../../prep/'+pose+'/prep-%s.pdb' %mol.lower(), './fe-%s.pdb' %mol.lower())
+        shutil.copy('../../../../prep/'+pose+'/vac_ligand.prmtop', './')
+        shutil.copy('../../../../prep/'+pose+'/vac_ligand.pdb', './')
+        for file in glob.glob('../../../ff/%s.*' %mol.lower()):
+          shutil.copy(file, './')
 
-	    build_file.write('%6.2f%6.2f\n'%(0, 0))
-	build_file.write('TER\n')
-	for i in range(0, lig_atom):
-	    build_file.write('%-4s  %5s %-4s %3s  %4.0f    '%('ATOM', i+1, lig_atomlist[i],mol, float(lig_resid + 3)))
-	    build_file.write('%8.3f%8.3f%8.3f'%(float(lig_coords[i][0]), float(lig_coords[i][1]),float(lig_coords[i][2]+dd_dist)))
+        lig_coords = []
+        lig_atom = 0
+        lig_atomlist = []
+        resid_lig = 0
+        resname_lig = mol
+        resname_list = []
+        resid_list = []
+        lig_atom = 0
+        lines_ligand = []
+        lig_resid = 1
 
-	    build_file.write('%6.2f%6.2f\n'%(0, 0))
-	print('Creating new system for decharging...')
-      else:
-	for i in range(0, lig_atom):
-	    build_file.write('%-4s  %5s %-4s %3s  %4.0f    '%('ATOM', i+1, lig_atomlist[i],mol, float(lig_resid + 1)))
-	    build_file.write('%8.3f%8.3f%8.3f'%(float(lig_coords[i][0]), float(lig_coords[i][1]),float(lig_coords[i][2]+dd_dist)))
+        # Read coordinates from aligned system
+        with open('build-prep.pdb') as f_in:
+          lines = (line.rstrip() for line in f_in)
+          lines = list(line for line in lines if line) # Non-blank lines in a list   
+          for i in range(0, len(lines)):
+            if lines[i][17:20].strip() == mol:
+                lig_coords.append((float(lines[i][30:38].strip()), float(lines[i][38:46].strip()), float(lines[i][46:54].strip())))
+                lig_atomlist.append(lines[i][12:16].strip())
+                resname_list.append(lines[i][17:20].strip())
+                lig_atom += 1
 
-	    build_file.write('%6.2f%6.2f\n'%(0, 0))
-	print('Creating new system for vdw decoupling...')
-      build_file.write('TER\n')
-      build_file.write('END\n')
-      build_file.close()
+        # Positions of the ligand atoms
+        build_file = open('build.pdb', 'w')
+        for i in range(0, lig_atom):
+            build_file.write('%-4s  %5s %-4s %3s  %4.0f    '%('ATOM', i+1, lig_atomlist[i],mol, float(lig_resid )))
+            build_file.write('%8.3f%8.3f%8.3f'%(float(lig_coords[i][0]), float(lig_coords[i][1]),float(lig_coords[i][2])))
+
+            build_file.write('%6.2f%6.2f\n'%(0, 0))
+        build_file.write('TER\n')
+	if comp == 'f':
+	  for i in range(0, lig_atom):
+	      build_file.write('%-4s  %5s %-4s %3s  %4.0f    '%('ATOM', i+1, lig_atomlist[i],mol, float(lig_resid + 1)))
+	      build_file.write('%8.3f%8.3f%8.3f'%(float(lig_coords[i][0]), float(lig_coords[i][1]),float(lig_coords[i][2])))
+
+	      build_file.write('%6.2f%6.2f\n'%(0, 0))
+	  build_file.write('TER\n')
+        build_file.write('END\n')
+        build_file.close()
+        shutil.copy('./build.pdb', './%s.pdb' %mol.lower())
+        tleap_vac = open('tleap_vac.in', 'w')
+        tleap_vac.write('source leaprc.'+ligand_ff+'\n\n')
+        tleap_vac.write('# Load the ligand parameters\n')
+        tleap_vac.write('loadamberparams %s.frcmod\n'%(mol.lower()))
+        tleap_vac.write('%s = loadmol2 %s.mol2\n\n'%(mol.upper(), mol.lower()))
+        tleap_vac.write('model = loadpdb %s.pdb\n\n' %(mol.lower()))
+        tleap_vac.write('check model\n')
+        tleap_vac.write('savepdb model vac.pdb\n')
+        tleap_vac.write('saveamberparm model vac.prmtop vac.inpcrd\n')
+        tleap_vac.write('quit\n\n')
+        tleap_vac.close()
+
+        p = sp.call('tleap -s -f tleap_vac.in > tleap_vac.log', shell=True)
     else:
       for file in glob.glob('../'+comp+'00/*'):
 	shutil.copy(file, './')
     
 
-def create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt):
+def create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, dec_method):
     
     # Copy and replace simulation files
     if stage != 'fe':
@@ -860,7 +926,7 @@ def create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buf
     f.close()
      
     # Adjust ions for LJ and electrostatic Calculations (avoid neutralizing plasma)
-    if comp == 'v':
+    if comp == 'v' and dec_method == 'sdr':
       charge_neut = neu_cat - neu_ani - 2*lig_cat + 2*lig_ani
       neu_cat = 0
       neu_ani = 0
@@ -868,7 +934,7 @@ def create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buf
         neu_cat = abs(charge_neut)
       if charge_neut < 0:
         neu_ani = abs(charge_neut)
-    if comp == 'e':
+    if comp == 'e' and dec_method == 'sdr':
       charge_neut = neu_cat - neu_ani - 3*lig_cat + 3*lig_ani
       neu_cat = 0
       neu_ani = 0
@@ -1058,6 +1124,6 @@ def ligand_box(mol, lig_buffer, water_model, neut, ion_lig, comp, ligand_ff):
     sp.call('parmed -O -n -i parmed-hmr.in > parmed-hmr.log', shell=True)
 
     # Copy a few files for consistency
-    shutil.copy('./vac.pdb','./vac_ligand.pdb')
-    shutil.copy('./vac.prmtop','./vac_ligand.prmtop')
-
+    if (comp != 'f' and comp != 'w'):
+      shutil.copy('./vac.pdb','./vac_ligand.pdb')
+      shutil.copy('./vac.prmtop','./vac_ligand.prmtop')
