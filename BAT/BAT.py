@@ -311,8 +311,6 @@ for i in range(0, len(lines)):
 		sys.exit(1)
 	elif lines[i][0] == 'ligand_ph':
 	    ligand_ph = scripts.check_input('float', lines[i][1], input_file, lines[i][0]) 
-	elif lines[i][0] == 'ligand_charge':
-	    ligand_charge = scripts.check_input('int', lines[i][1], input_file, lines[i][0]) 
 	elif lines[i][0] == 'dt':
 	    dt = lines[i][1]
 
@@ -410,7 +408,7 @@ if stage == 'equil':
     # Get number of simulations
     num_sim = len(release_eq)
     # Create aligned initial complex
-    anch = build.build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_zm, l1_range, min_adis, max_adis, ligand_ff, ligand_ph, ligand_charge)
+    anch = build.build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_zm, l1_range, min_adis, max_adis, ligand_ff, ligand_ph)
     if anch == 'anch1':
       aa1_poses.append(pose)
       os.chdir('../')
