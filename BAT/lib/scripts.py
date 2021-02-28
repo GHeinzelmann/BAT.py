@@ -42,7 +42,7 @@ def check_tleap():
             num_added = int(num_added[0])
     f.close()
     if num_added is None:
-  	print('Problem solvating system, check your input file and the tleap log file\n')
+        print('Problem solvating system, check your input file and the tleap log file\n')
         sys.exit(1)
     return num_added
 
@@ -63,7 +63,7 @@ def cross_sectional_area():
 
 def check_input(param_type, param_value, filename, param_name):
     if not param_value:
-    # If the parameter value was not defined	
+    # If the parameter value was not defined    
          if param_type == 'string':
              return 'None'
          elif param_type == 'list':
@@ -109,9 +109,9 @@ def num_to_mask(pdb_file):
       lines = (line.rstrip() for line in f_in)
       lines = list(line for line in lines if line)
       for i in range(0, len(lines)):
-	if (lines[i][0:6].strip() == 'ATOM') or (lines[i][0:6].strip() == 'HETATM'):
-	  atomname = lines[i][12:16].strip() 
-	  resid = lines[i][22:26].strip() 
-	  number = lines[i][6:11].strip()  
-	  atm_num.append(':'+resid+'@'+atomname)
+        if (lines[i][0:6].strip() == 'ATOM') or (lines[i][0:6].strip() == 'HETATM'):
+          atomname = lines[i][12:16].strip() 
+          resid = lines[i][22:26].strip() 
+          number = lines[i][6:11].strip()  
+          atm_num.append(':'+resid+'@'+atomname)
     return atm_num
