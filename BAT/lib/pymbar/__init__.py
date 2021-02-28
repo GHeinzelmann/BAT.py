@@ -28,7 +28,7 @@ __license__ = "MIT"
 __maintainer__ = "Levi N. Naden, Michael R. Shirts and John D. Chodera"
 __email__ = "levi.naden@choderalab.org,michael.shirts@colorado.edu,john.chodera@choderalab.org"
 
-from lib.pymbar import timeseries, testsystems, confidenceintervals
+from lib.pymbar import timeseries, confidenceintervals
 from lib.pymbar.mbar import MBAR
 from lib.pymbar.bar import BAR, BARzero
 from lib.pymbar.exp import EXP, EXPGauss
