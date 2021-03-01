@@ -11,7 +11,7 @@ Equilibrate, NPT.
   ntwx = 500,
   ioutfm = 1,
   iwrap = 1,
-  ntf = 2,
+  ntf = 1,
   ntc = 2,
   cut = _cutoff_,
   ntt = 3,
@@ -28,8 +28,9 @@ Equilibrate, NPT.
   nmropt = 1,
   pencut = -1,
   icfe = 1, clambda = lbd_val,
-  timask1 = ':mk1', timask2 = ':mk2',
-  ifsc=0, crgmask = ':mk2',
+  timask1 = ':mk1,mk4', timask2 = ':mk2,mk3',
+  ifsc=0, crgmask = ':mk2,mk4',
+  gti_chg_keep = 0
  /
  &wt type = 'END', /
 DISANG=disang.rest

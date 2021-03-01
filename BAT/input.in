@@ -6,10 +6,9 @@
 
 # Calculation definitions
 
-amber_version = amber18                          # Choose amber version (amber18 or amber20)
 calc_type = dock                                # docked or crystal structure
 celpp_receptor = LMCSS-5uf0_5uez                # Choose CELPP receptor in upper case or pdb code in lower case
-poses_list = [0,1,2,3,4]                        # List of poses for docked calculations, called pose0.pdb, pose1.pdb, pose2.pdb, etc. 
+poses_list = [1,3]                        # List of poses for docked calculations, called pose0.pdb, pose1.pdb, pose2.pdb, etc. 
 
 # Ligand residue name
 
@@ -23,23 +22,31 @@ P3 = :450@CA
 
 # Variables for setting up equilibrium and free energy calculations, also used on analysis       
 
-fe_type = dd-rest  # Type of free energy calculations (all, rest, dd, pmf, dd-rest, pmf-rest, custom)
+fe_type = custom  # Type of free energy calculations (rest, dd, sdr, pmf, dd-rest, sdr-rest, pmf-rest, custom)
 
-components = [ e v w f t r l a c ] # Used with custom option for fe_type
+components = [ a l t r c e v u f w ] # Used with custom option for fe_type
 
 release_eq = [ 5.00 2.50 1.00 0.50 0.20 0.10 0.05 0.02 0.00 ]   # Equilibrium gradual release weights
+
+translate_apr  = [ 0.00 0.40 0.80 1.20 1.60 2.00 2.40 2.80 3.20 3.60 4.00 4.40 4.80 5.20 5.60 6.00 6.40 6.80 7.20 7.60 8.00 8.40 8.80 9.20 9.60 10.00 10.40 10.80 11.20 11.60 12.00 12.40 12.80 13.20 13.60 14.00 14.40 14.80 15.20 15.60 16.00 ]   # Umbrella windows  
 
 attach_rest = [ 0.00 0.20 0.40 0.80 1.60 2.40 4.00 5.50 8.65 11.80 18.10 24.40 37.00 49.60 74.80 100.00 ]   # Restraints attach/release weights
 
 lambdas = [ 0.00922 0.04794 0.11505 0.20634 0.31608 0.43738 0.56262 0.68392 0.79366 0.88495 0.95206 0.99078 ] # Lambdas for decoupling
 
-pull_ligand = no        # perform pulling of the ligand from the binding site during preparation, for pmf calculation only
+pull_ligand = yes        # Perform pulling of the ligand from the binding site during preparation, for pmf calculation only (yes or no)
+
+pull_spacing = 0.1        # Pulling spacing, in ansgtroms
+
+dec_method = dd         # Method for decoupling - double decoupling (dd) or simultaneous decoupling (sdr) - used with custom option and e/v components
+
+sdr_dist = 16.00         # z distance between site and bulk molecules on DD, in angstroms
 
 # Additional variables for analysis 
 
 weights = [ 0.02359 0.05347 0.08004 0.10158 0.11675 0.12457 0.12457 0.11675 0.10158 0.08004 0.05347 0.02359 ] # Weights for Gaussian quadrature, make sure it matches the lambda values
 
-dd_type = TI # Integration method for double decoupling (MBAR or TI with Gaussian quadrature)
+dec_int = TI # Integration method for double decoupling (MBAR or TI with Gaussian quadrature)
 
 blocks = 5 # Number of blocks for block data analysis
 
@@ -76,37 +83,42 @@ hmr             = yes       # Use hydrogen mass repartitioning (yes or no)
 
 Temperature	= 298.15    # Temperature of simulation and analysis 
 
-eq_steps1	= 500000    # Number of steps for equilibration gradual release 
-eq_steps2	= 15000000  # Number of steps for equilibration after release
+eq_steps1	= 40000    # Number of steps for equilibration gradual release 
+eq_steps2	= 300000  # Number of steps for equilibration after release
 
-prep_steps1	= 1000000   # Number of steps for initial preparation
+prep_steps1	= 200000   # Number of steps for initial preparation
+prep_steps2	=  50000   # Number of steps for initial preparation
 
-a_steps1	= 500000    # Number of steps per window for component a (equilibrium)
-a_steps2	= 1000000   # Number of steps for window component a (production) 
+a_steps1        = 300000    # Number of steps per window for component a (equilibrium)
+a_steps2        = 600000   # Number of steps for window component a (production) 
 
-l_steps1	= 500000    # Number of steps per window for component l (equilibrium)  
-l_steps2	= 1000000   # Number of steps for window component l (production)             
+l_steps1        = 300000    # Number of steps per window for component l (equilibrium)  
+l_steps2        = 600000   # Number of steps for window component l (production)             
 
-t_steps1	= 500000    # Number of steps per window for component t (equilibrium)
-t_steps2	= 1000000   # Number of steps for window component t (production)     
+t_steps1        = 200000    # Number of steps per window for component t (equilibrium)
+t_steps2        = 400000   # Number of steps for window component t (production)     
 
-c_steps1	= 1000000   # Number of steps per window for component c (equilibrium)
-c_steps2	= 2000000   # Number of steps for window component c (production)     
+c_steps1        = 300000   # Number of steps per window for component c (equilibrium)
+c_steps2        = 600000   # Number of steps for window component c (production)     
 
-r_steps1	= 1000000   # Number of steps per window for component r (equilibrium) 
-r_steps2	= 2000000   # Number of steps for window component r (production)     
+r_steps1        = 300000   # Number of steps per window for component r (equilibrium) 
+r_steps2        = 600000   # Number of steps for window component r (production)     
 
-e_steps1	= 200000    # Number of steps per window for component e (equilibrium) 
-e_steps2	= 400000    # Number of steps for window component e (production)     
+e_steps1        = 200000    # Number of steps per window for component e (equilibrium) 
+e_steps2        = 400000    # Number of steps for window component e (production)     
 
-v_steps1	= 2000000   # Number of steps per window for component v (equilibrium) 
-v_steps2	= 4000000   # Number of steps for window component v (production)     
+v_steps1        = 300000   # Number of steps per window for component v (equilibrium) 
+v_steps2        = 600000   # Number of steps for window component v (production)     
 
-w_steps1	= 1000000   # Number of steps per window for component w (equilibrium) 
-w_steps2	= 2000000   # Number of steps for window component w (production)     
+w_steps1        = 300000   # Number of steps per window for component w (equilibrium) 
+w_steps2        = 600000   # Number of steps for window component w (production)     
 
-f_steps1	= 200000    # Number of steps per window for component f (equilibrium) 
-f_steps2	= 400000    # Number of steps for window component f (production)     
+f_steps1        = 200000    # Number of steps per window for component f (equilibrium) 
+f_steps2        = 400000    # Number of steps for window component f (production)     
+
+u_steps1        = 500000    # Number of steps per window for component f (equilibrium) 
+u_steps2        = 1000000    # Number of steps for window component f (production)     
+
 
 # Conformational restraints on the protein backbone
 
@@ -128,7 +140,7 @@ max_adis        = 8.00     # maximum distance between anchors
 # Amber options for production simulations
 
 ntpr = 1000                # print energy every ntpr steps to output file (controls DD output)
-ntwr = 1000                # write the restart file every ntwr steps
+ntwr = 10000                # write the restart file every ntwr steps
 ntwe = 0                   # write energies and temperatures to mden file every ntwe steps (0 = not write to this file)
 ntwx = 2500                # write coordinates to trajectory file every ntwx steps (controls PMF and restraints output)
 cut = 9.0                  # cutoff for nonbonded interactions 
@@ -141,3 +153,4 @@ dt = 0.004                 # simulation time step in ps
 receptor_ff = protein.ff14SB   # Force field for receptor atoms
 ligand_ff = gaff               # Force field for ligand atoms (gaff or gaff2 available)
 ligand_ph = 7.0                # Choose pH for ligand protonation
+ligand_charge = 0              # Ligand net charge

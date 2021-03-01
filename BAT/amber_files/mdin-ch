@@ -31,6 +31,7 @@ Production runs charge annihilation
   nmropt = 1,
   pencut = -1,
   icfe = 1, clambda = lbd_val,
-  timask1 = ':mk1', timask2 = ':mk2',
-  ifsc=0, crgmask = ':mk2',
+  timask1 = ':mk1,mk4', timask2 = ':mk2,mk3',
+  ifsc=0, crgmask = ':mk2,mk4',
+  gti_chg_keep = 0
   ifmbar = 1,

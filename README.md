@@ -1,12 +1,12 @@
-*Just released: GHOAT.py, a fully automated tool for guest-host ABFE calculations using DD with pmemd.cuda: GHeinzelmann/GHOAT.py. 
-Will soon add a tutorial a detailed user guide, right after addressing  the current BAT.py issues.*
+*Just released: GHOAT.py, a fully automated tool for guest-host ABFE calculations using DD with pmemd.cuda: GHeinzelmann/GHOAT.py. Will soon add a tutorial a detailed user guide, right after addressing the current BAT.py issues.*
+
 
 # BAT.py
 
-The Binding Affinity Tool (BAT.py) is a python tool for fully automated absolute binding free energy calculations. Its workflow encompasses the creation of the bound complex, generation of parameters using Antechamber, preparation of the simulation files, and post-processing to retrieve the binding free energy. By using the _pmemd.cuda_ software from AMBER, it is able to perform several calculations at a reduced computational cost using graphics processing units (GPUs).
+The Binding Affinity Tool (BAT.py) is a python tool for fully automated absolute binding free energy calculations. Its workflow encompasses the creation of the bound complex, generation of parameters using Antechamber, preparation of the simulation files, and post-processing to retrieve the binding free energy. By using the _pmemd.cuda_ software from AMBER20, it is able to perform several calculations at a reduced computational cost using graphics processing units (GPUs).
 
 
-BAT.py can perform binding free energy calculations by an alchemical route, using a double decoupling (DD) procedure in the presence of restraints, or using a physical route through the APR method. The program is compatible with AMBER18, also requiring a few installed programs to work properly, which are listed in the next section. 
+BAT.py can perform binding free energy calculations by two alchemical routes in the presence of restraints, either with double decoupling (DD) procedure or with the simultaneous decoupling recoupling (SDR) method. It can also apply a physical route, through the APR method, suitable for ligands that have free access to the solvent. The program is compatible with the simulation package AMBER20, also requiring a few installed programs to work properly, which are listed in the next section. 
 
 # Getting started
 
@@ -14,13 +14,15 @@ To use BAT.py, download the files from this repository, which already contain an
 
 VMD (Visual Molecular Dynamics) [1] - https://www.ks.uiuc.edu/Development/Download/download.cgi?PackageName=VMD
 
-Openbabel [2] - http://openbabel.org/wiki/Category:Installation
+Openbabel 2.4.1 [2] - https://github.com/openbabel/openbabel/releases/tag/openbabel-2-4-1 *
 
 MUSTANG v3.2.3 (MUltiple (protein) STructural AligNment alGorithm) [3] - http://lcb.infotech.monash.edu.au/mustang/
 
-AmberTools18 or later [4] - http://ambermd.org/AmberTools.php
+AmberTools20 or later [4] - http://ambermd.org/AmberTools.php
 
-_pmemd.cuda_ software from AMBER18 [4] - http://ambermd.org/GetAmber.php 
+_pmemd.cuda_ software from AMBER20 [4] - http://ambermd.org/GetAmber.php
+
+\* Had problems with wrong protonation using Openbabel 3, so keeping the 2.4.1 version for now, might change in the future. 
 
 The folder ./BAT/all-poses contains an example of system input files, with a docked receptor from the 5uez crystal structure (LMCSS-5uf0_5uez_docked.pdb), as well as 9 docked poses for the ligand with the 5uf0 crystal structure (pose0.pdb to pose8.pdb). The docking files were generated and converted to .pdb using Autodock Vina and AutodockTools, following a protocol adapted from the CELPP challenge tutorial (https://docs.google.com/document/d/1iJcPUktbdrRftAA8cuVa32Ri1TPr2XvZVqTccDja2OM). Inside the ./all-poses folder there is also the original crystal structure file for 5uf0. Below we show an example of using these files to calculate the standard binding free energies of the top 5 docked poses and the crystal structure, with all the necessary steps in the calculation. 
 
@@ -36,7 +38,7 @@ The equilibration step starts from the docked complex or the crystal structure, 
 
 python BAT.py -i input.in -s equil
 
-BAT.py is compatible with python 2.7 versions. If you have another version, or you find that this command gives an error, you can use the python version included in the Ambertools distribution:
+BAT.py is compatible with python 3.8 versions. If you have another version, or you find that this command gives an error, you can use the python version included in the Ambertools20 distribution:
 
 $AMBERHOME/miniconda/bin/python BAT.py -i input.in -s equil
 
@@ -54,7 +56,7 @@ python BAT.py -i input.in -s prep
 
 ### Simulations
 
-Starting from the states created in the prep stage, we can now perform the binding free energy calculations, which will be located inside the ./fe folder. In this example we will use the double decoupling method with retraints to obtain the binding free energies, which is more suitable for this type of calculation. Again in the program main folder, type:
+Starting from the states created in the prep stage, we can now perform the binding free energy calculations, which will be located inside the ./fe folder. In this example we will use the double decoupling method (DD) with retraints to obtain the binding free energies. For charged ligands, one should use the simultaneous decoupling recoupling (SDR) method instead, as explained in the user guide. Again in the program main folder, type:
 
 python BAT.py -i input.in -s fe
 
@@ -68,9 +70,9 @@ python BAT.py -i input.in -s analysis
 
 You should see a ./Results directory inside each ./fe/pose folder, containing all the components and the final calculated binding free energy, located in the Results.dat file. This folder also contains the results for each of the chosen data blocks, which is useful to check for convergence and fluctuations, and is also used to calculate the uncertainties. This fully automated procedure can be readily applied for any other ligand that binds to the second BRD4 bromodomain, and with minimal adjustments it can be extended to several other proteins.
 
-## Using the APR method
+## Using the SDR and APR methods
 
-Even though the APR method presents limitations, it could stil be useful for ligands that bind to the surface of proteins and have clear access to the solvent. To apply APR in addition to DD, a few parameters have to be changed or added to the BAT.py input file. This procedure is described in the user guide and also on Ref. [9].  
+The SDR method is suitable for ligands with net charge, since it keeps the full system neutral during the transformations. The APR method presents limitations, but it could stil be useful for ligands that bind to the surface of proteins and have clear access to the solvent. To apply SDR/APR in addition to DD, a few parameters have to be changed or added to the BAT.py input file. This procedure is described in the user guide and also on Ref. [9].  
 
 # Extending it to other systems
 
@@ -84,7 +86,7 @@ To include a new receptor system, some additional input data is needed. They inc
 
 # More information
 
-A paper explaining the whole BAT.py theoretical aspects and calculation procedure is currently under review [9], and can be found on the link https://www.biorxiv.org/content/10.1101/2020.04.15.043240v1. For more information you can contact the author directly:
+A paper explaining the whole BAT.py theoretical aspects and calculation procedure is available in Ref [9]. For more information you can contact the author directly:
 
 Germano Heinzelmann <br/>
 Departamento de Física, Universidade Federal de Santa Catarina <br/>
@@ -103,7 +105,7 @@ Germano Heinzelmann thanks FAPESC and CNPq for the research grants.
 
 3. A. S. Konagurthu, J. Whisstock, P. J. Stuckey, and A. M. Lesk. (2006) “MUSTANG: A multiple structural alignment algorithm”. Proteins, 64, 559-574.
 
-4. D.A. Case, I.Y. Ben-Shalom, S.R. Brozell, D.S. Cerutti, T.E. Cheatham, III, V.W.D. Cruzeiro, T.A. Darden, R.E. Duke, D. Ghoreishi, M.K. Gilson, H. Gohlke, A.W. Goetz, D. Greene, R Harris, N. Homeyer, S. Izadi, A. Kovalenko, T. Kurtzman, T.S. Lee, S. LeGrand, P. Li, C. Lin, J. Liu, T. Luchko, R. Luo, D.J. Mermelstein, K.M. Merz, Y. Miao, G. Monard, C. Nguyen, H. Nguyen, I. Omelyan, A. Onufriev, F. Pan, R. Qi, D.R. Roe, A. Roitberg, C. Sagui, S. Schott-Verdugo, J. Shen, C.L. Simmerling, J. Smith, R. Salomon-Ferrer, J. Swails, R.C. Walker, J. Wang, H. Wei, R.M. Wolf, X. Wu, L. Xiao, D.M. York and P.A. Kollman (2018), AMBER 2018, University of California, San Francisco.
+4. D.A. Case, K. Belfon, I.Y. Ben-Shalom, S.R. Brozell, D.S. Cerutti, T.E. Cheatham, III, V.W.D. Cruzeiro, T.A. Darden, R.E. Duke, G. Giambasu, M.K. Gilson, H. Gohlke, A.W. Goetz, R. Harris, S. Izadi, S.A. Izmailov, K. Kasavajhala, A. Kovalenko, R. Krasny, T. Kurtzman, T.S. Lee, S. LeGrand, P. Li, C. Lin, J. Liu, T. Luchko, R. Luo, V. Man, K.M. Merz, Y. Miao, O. Mikhailovskii, G. Monard, H. Nguyen, A. Onufriev, F.Pan, S. Pantano, R. Qi, D.R. Roe, A. Roitberg, C. Sagui, S. Schott-Verdugo, J. Shen, C. Simmerling, N.R.Skrynnikov, J. Smith, J. Swails, R.C. Walker, J. Wang, L. Wilson, R.M. Wolf, X. Wu, Y. Xiong, Y. Xue, D.M. York and P.A. Kollman (2020), AMBER 2020, University of California, San Francisco.
 
 5. J. Wang, R.M. Wolf, J.W. Caldwell, and P. A. Kollman, D. A. Case (2004) "Development and testing of a general AMBER force field". Journal of Computational Chemistry, 25, 1157-1174.
 
@@ -113,7 +115,7 @@ Germano Heinzelmann thanks FAPESC and CNPq for the research grants.
 
 8. M. R. Shirts and J. Chodera (2008) “Statistically optimal analysis of samples from multiple equilibrium states.” Journal of  Chemical Physics, 129, 129105.
 
-9. G. Heinzelmann and M. K. Gilson (2020). “Automated docking refinement and virtual compound screening with absolute binding free energy calculations”.
+9. G. Heinzelmann and M. K. Gilson (2021). “Automation of absolute protein-ligand binding free energy calculations for docking refinement and compound evaluation”. Scientific Reports, 11, 1116.
 
 
 

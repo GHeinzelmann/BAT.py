@@ -1,17 +1,14 @@
 *******************************************************
-*****************************       mdin
+*****************************       eqnpt.in
 *******************************************************
-Production runs LJ decoupling
+Equilibrate, NPT.
  &cntrl
   imin = 0,
   ntx = 5,
   irest = 1,
-  ntpr = _ntpr_,
-  ntwr = _ntwr_,
-  ntwe = _ntwe_,
-  ntxo = 1,
-  ntwx = _ntwx_,
-  ntwprt = _num-atoms_,
+  ntpr = 500,
+  ntwr = 500,
+  ntwx = 500,
   ioutfm = 1,
   iwrap = 1,
   ntf = 1,
@@ -23,7 +20,7 @@ Production runs LJ decoupling
   ig = -1,
   ntp = 1,
   barostat = _barostat_,
-  nstlim = _num-steps_,
+  nstlim = 3500,
   dt = _step_,
   ntr = 1,
   restraint_wt = 50.0,
@@ -35,4 +32,8 @@ Production runs LJ decoupling
   ifsc=1, scmask1=':mk1', scmask2=':mk2', crgmask = ':mk1,mk2',
   gti_chg_keep = 0
   gti_add_sc = 3
-  ifmbar = 1,
+ /
+ &wt type = 'END', /
+DISANG=disang.rest
+LISTOUT=POUT
+
