@@ -1,4 +1,4 @@
-*Just released: GHOAT.py, a fully automated tool for guest-host ABFE calculations using DD with pmemd.cuda: GHeinzelmann/GHOAT.py. Will soon add tutorial a detailed user guide.*
+*Just released: GHOAT.py, a fully automated tool for guest-host ABFE calculations using DD with pmemd.cuda: GHeinzelmann/GHOAT.py. Will soon add tutorial and a detailed user guide.*
 
 
 # BAT.py
