@@ -542,7 +542,7 @@ elif stage == 'fe':
         if not os.path.exists('rest'):
           os.makedirs('rest')
         os.chdir('rest')
-        trans_dist = translate_apr[-1]
+        trans_dist = 0
         for k in range(0, len(attach_rest)):
           weight = attach_rest[k]
           win = k
