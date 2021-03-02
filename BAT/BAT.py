@@ -23,6 +23,30 @@ components = []
 aa1_poses = []  
 aa2_poses = []  
 
+# Predefine some variables to avoid errors
+
+a_steps1 = 0
+a_steps2 = 0
+l_steps1 = 0
+l_steps2 = 0
+t_steps1 = 0
+t_steps2 = 0
+c_steps1 = 0
+c_steps2 = 0
+r_steps1 = 0
+r_steps2 = 0
+e_steps1 = 0
+e_steps2 = 0
+v_steps1 = 0
+v_steps2 = 0
+f_steps1 = 0
+f_steps2 = 0
+w_steps1 = 0
+w_steps2 = 0
+u_steps1 = 0
+u_steps2 = 0
+sdr_dist = 0
+
 # Read arguments that define input file and stage
 if len(sys.argv) < 5:
   scripts.help_message()
