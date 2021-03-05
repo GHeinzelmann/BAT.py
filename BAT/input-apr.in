@@ -22,7 +22,7 @@ P3 = :450@CA
 
 # Variables for setting up equilibrium and free energy calculations, also used on analysis       
 
-fe_type = pmf-rest  # Type of free energy calculations (all, rest, dd, pmf, dd-rest, pmf-rest, custom)
+fe_type = pmf-rest  # Type of free energy calculations (rest, dd, pmf, sdr, dd-rest, pmf-rest, sdr-rest, custom)
 
 components = [ u t r l a c ] # Used with custom option for fe_type
 
