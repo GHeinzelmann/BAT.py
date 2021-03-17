@@ -2,7 +2,7 @@
 
 https://github.com/GHeinzelmann/GHOAT.py 
 
-*A tutorial is already available, and also detailed user guide.*
+*A tutorial is already available, and also a detailed user guide.*
 
 
 # BAT.py
