@@ -18,15 +18,17 @@ To use BAT.py, download the files from this repository, which already contain an
 
 VMD (Visual Molecular Dynamics) [1] - https://www.ks.uiuc.edu/Development/Download/download.cgi?PackageName=VMD
 
-Openbabel 2.4.1 [2] - https://github.com/openbabel/openbabel/releases/tag/openbabel-2-4-1 *
+Openbabel 2.4.1 [2] - https://github.com/openbabel/openbabel/releases/tag/openbabel-2-4-1 &dagger
 
 MUSTANG v3.2.3 (MUltiple (protein) STructural AligNment alGorithm) [3] - http://lcb.infotech.monash.edu.au/mustang/
 
-AmberTools20 or later [4] - http://ambermd.org/AmberTools.php
+AmberTools20 or later [4] - http://ambermd.org/AmberTools.php &Dagger
 
 _pmemd.cuda_ software from AMBER20 [4] - http://ambermd.org/GetAmber.php
 
-\* Had problems with wrong protonation using Openbabel 3, so keeping the 2.4.1 version for now, might change in the future. 
+&dagger Had problems with wrong protonation using Openbabel 3, so keeping the 2.4.1 version for now, might change in the future. 
+
+&Dagger If pdb4amber from Ambertools does not work, add the following line to your amber.sh file: export PYTHONPATH=$PYTHONPATH:$AMBERHOME/lib/python3.8/site-packages/pdb4amber-1.7.dev0-py3.8.egg/
 
 The folder ./BAT/all-poses contains an example of system input files, with a docked receptor from the 5uez crystal structure (LMCSS-5uf0_5uez_docked.pdb), as well as 9 docked poses for the ligand with the 5uf0 crystal structure (pose0.pdb to pose8.pdb). The docking files were generated and converted to .pdb using Autodock Vina and AutodockTools, following a protocol adapted from the CELPP challenge tutorial (https://docs.google.com/document/d/1iJcPUktbdrRftAA8cuVa32Ri1TPr2XvZVqTccDja2OM). Inside the ./all-poses folder there is also the original crystal structure file for 5uf0. Below we show an example of using these files to calculate the standard binding free energies of the top 5 docked poses and the crystal structure, with all the necessary steps in the calculation. 
 
