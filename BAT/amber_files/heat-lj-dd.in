@@ -9,19 +9,21 @@ heating
    pencut = -1
    ntr = 1,
    restraint_wt = 50.0,
-   restraintmask = ':1-3',
+   restraintmask = ':1',
    ntwe = 1000, ntwx = 1000, ntpr = 1000, ntwr = 5000,
    logdvdl = 0,
    icfe = 1, clambda = lbd_val, scalpha = 0.5, scbeta = 12.0,
    timask1 = ':mk1', timask2 = '',
    ifsc=1, scmask1=':mk1', scmask2='', crgmask = ':mk1',
-   gti_chg_keep = 0
-   gti_add_sc = 3
+   gti_chg_keep = 0,
+   gti_add_sc = 3,
+   infe = 1,
  /
-
- &ewald
+ &pmd
+ output_file = 'cmass.txt'
+ output_freq = 1000
+ cv_file = 'cv.in'
  /
-
  &wt
    type='TEMP0',
    istep1 = 0, istep2 = 30000,

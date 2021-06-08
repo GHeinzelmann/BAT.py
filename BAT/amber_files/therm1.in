@@ -22,11 +22,17 @@ Thermalizing, NVT.
   ntp = 0,
   nstlim = 500,
   dt = _step_,
-  ntr = 1,
-  restraint_wt = 50.0,
-  restraintmask = ':1-3 | _L1_ | _L2_ | _L3_',
   nmropt = 1,
   pencut = -1,
+  ntr = 1,
+  restraint_wt = 50.0,
+  restraintmask = ':1',
+  infe = 1,
+ /
+ &pmd
+ output_file = 'cmass.txt'
+ output_freq = 1000
+ cv_file = 'cv.in'
  /
  &wt type = 'END', /
 DISANG=disang.rest

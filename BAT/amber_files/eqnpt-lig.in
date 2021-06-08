@@ -11,7 +11,7 @@ Equilibrate, NPT.
   ntwx = 500,
   ioutfm = 1,
   iwrap = 1,
-  ntf = 2,
+  ntf = 1,
   ntc = 2,
   cut = _cutoff_,
   ntt = 3,

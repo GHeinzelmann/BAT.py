@@ -15,15 +15,6 @@ Minimizing.
   cut = _cutoff_,
   nmropt = 1,
   pencut = -1,
-  ntr = 1,
-  restraint_wt = 50.0,
-  restraintmask = ':1',
-  infe = 1,
- /
- &pmd
- output_file = 'cmass.txt'
- output_freq = 1000
- cv_file = 'cv.in'
  /
  &wt type = 'END', /
 DISANG=disang.rest

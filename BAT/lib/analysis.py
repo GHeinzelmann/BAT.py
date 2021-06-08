@@ -11,13 +11,13 @@ import numpy as np
 from lib.pymbar import MBAR # multistate Bennett acceptance ratio
 from lib.pymbar import timeseries # timeseries analysis
 
-def fe_values(blocks, components, temperature, pose, attach_rest, translate_apr, lambdas, weights, dec_int, dec_method, rest):
+def fe_values(blocks, components, temperature, pose, attach_rest, lambdas, weights, dec_int, dec_method, rest):
 
 
     # Set initial values to zero
-    fe_a = fe_b = fe_bd = fe_u = fe_t = fe_v = fe_e = fe_c = fe_r = fe_l = fe_f = fe_w = fe_vs = fe_es = 0
-    fb_a = fb_b = fb_bd = fb_u = fb_t = fb_v = fb_e = fb_c = fb_r = fb_l = fb_f = fb_w = fb_es = fb_vs = 0
-    sd_a = sd_b = sd_bd = sd_u = sd_t = sd_v = sd_e = sd_c = sd_r = sd_l = sd_f = sd_w = sd_vs = sd_es = 0
+    fe_a = fe_bd = fe_t = fe_v = fe_e = fe_c = fe_r = fe_l = fe_f = fe_w = fe_vs = fe_es = 0
+    fb_a = fb_bd = fb_t = fb_v = fb_e = fb_c = fb_r = fb_l = fb_f = fb_w = fb_es = fb_vs = 0
+    sd_a = sd_bd = sd_t = sd_v = sd_e = sd_c = sd_r = sd_l = sd_f = sd_w = sd_vs = sd_es = 0
 
     # Acquire simulation data
     os.chdir('fe')
@@ -31,14 +31,12 @@ def fe_values(blocks, components, temperature, pose, attach_rest, translate_apr,
           win = j
           os.chdir('%s%02d' %(comp, int(win)))
           if comp == 't' and win == 0:
-            # Calculate analytical release for pmf, dd and sdr
+            # Calculate analytical release for dd and sdr
             with open('disang.rest', "r") as f_in:
               lines = (line.rstrip() for line in f_in)
               lines = list(line for line in lines if '#Lig_TR' in line)
-              apr_dist = translate_apr[-1]
               splitdata = lines[0].split()
               r0 = float(splitdata[6].strip(','))
-              r1_0 = apr_dist + r0 
               splitdata = lines[1].split()
               a1_0  = float(splitdata[6].strip(','))
               splitdata = lines[2].split()
@@ -49,30 +47,12 @@ def fe_values(blocks, components, temperature, pose, attach_rest, translate_apr,
               t2_0  = float(splitdata[6].strip(','))
               splitdata = lines[5].split()
               t3_0  = float(splitdata[6].strip(','))
-              k_r = rest[4]
-              k_a = rest[5]
-              fe_b = fe_int(r1_0, a1_0, t1_0, a2_0, t2_0, t3_0, k_r, k_a, temperature)
+              k_r = rest[2]
+              k_a = rest[3]
               fe_bd = fe_int(r0, a1_0, t1_0, a2_0, t2_0, t3_0, k_r, k_a, temperature)
           # Get restraint trajectory file
           sp.call('cpptraj -i restraints.in >& restraints.log', shell=True)
           # Separate in blocks
-          with open("restraints.dat", "r") as fin:
-            for line in fin:
-              if not '#' in line:
-                data.append(line)
-          for k in range(0, blocks):
-            fout = open('rest%02d.dat' % (k+1), "w")
-            for t in range(k*int(round(len(data)//blocks)), (k+1)*int(round(len(data)//blocks))):
-              fout.write(data[t])
-            fout.close()
-          os.chdir('../')
-      elif comp == 'u':
-        os.chdir('pmf')
-        for j in range(0, len(translate_apr)):
-          data = []
-          win = j
-          os.chdir('%s%02d' %(comp, int(win)))
-          sp.call('cpptraj -i restraints.in >& restraints.log', shell=True)
           with open("restraints.dat", "r") as fin:
             for line in fin:
               if not '#' in line:
@@ -157,7 +137,7 @@ def fe_values(blocks, components, temperature, pose, attach_rest, translate_apr,
     # Get free energies for the whole run    
     for i in range(0, len(components)):
       comp = components[i]
-      if comp == 'a' or comp == 'l' or comp == 't' or comp == 'c' or comp == 'r' or comp == 'u':
+      if comp == 'a' or comp == 'l' or comp == 't' or comp == 'c' or comp == 'r':
         rest_file = 'restraints.dat'
         mode = 'all'
         fe_mbar(comp, pose, mode, rest_file, temperature)
@@ -179,7 +159,7 @@ def fe_values(blocks, components, temperature, pose, attach_rest, translate_apr,
     for i in range(0, len(components)):
       for k in range(0, blocks):
         comp = components[i]
-        if comp == 'a' or comp == 'l' or comp == 't' or comp == 'c' or comp == 'r' or comp == 'u':
+        if comp == 'a' or comp == 'l' or comp == 't' or comp == 'c' or comp == 'r':
           rest_file = 'rest%02d.dat' % (k+1)
           mode = 'b%02d' % (k+1)
           fe_mbar(comp, pose, mode, rest_file, temperature)
@@ -218,15 +198,6 @@ def fe_values(blocks, components, temperature, pose, attach_rest, translate_apr,
             fe_l = float(splitdata[1])
           elif comp == 'r':
             fe_r = -1.00*float(splitdata[1])
-        os.chdir('../')
-      elif comp == 'u':
-        os.chdir('pmf')
-        with open('./data/mbar-'+comp+'-all.dat', "r") as f_in:
-          lines = (line.rstrip() for line in f_in)
-          lines = list(line for line in lines if line)
-          data = lines[-1]
-          splitdata = data.split()
-          fe_u = float(splitdata[1])
         os.chdir('../')
       elif comp == 'v' or comp == 'e' or comp == 'f' or comp == 'w':
         os.chdir(dec_method)
@@ -273,18 +244,6 @@ def fe_values(blocks, components, temperature, pose, attach_rest, translate_apr,
             sd_l = np.std(b_data)
           elif comp == 'r':
             sd_r = np.std(b_data)
-        os.chdir('../')
-      elif comp == 'u':
-        os.chdir('pmf')
-        b_data = [] 
-        for k in range(0, blocks):
-          with open('./data/mbar-'+comp+'-b%02d.dat' %(k+1), "r") as f_in:
-            lines = (line.rstrip() for line in f_in)
-            lines = list(line for line in lines if line)
-            data = lines[-1]
-            splitdata = data.split()
-            b_data.append(float(splitdata[1]))
-            sd_u = np.std(b_data)
         os.chdir('../')
       elif comp == 'e' or comp == 'v' or comp == 'f' or comp == 'w': 
         os.chdir(dec_method)
@@ -438,15 +397,6 @@ def fe_values(blocks, components, temperature, pose, attach_rest, translate_apr,
             elif comp == 'r':
               fb_r = -1.00*float(splitdata[1])
           os.chdir('../')
-        elif comp == 'u':
-          os.chdir('pmf')
-          with open('./data/mbar-'+comp+'-b%02d.dat' %(k+1), "r") as f_in:
-            lines = (line.rstrip() for line in f_in)
-            lines = list(line for line in lines if line)
-            data = lines[-1]
-            splitdata = data.split()
-            fb_u = float(splitdata[1])
-          os.chdir('../')
         elif comp == 'v' or comp == 'e' or comp == 'f' or comp == 'w':
           os.chdir(dec_method)
           with open('./data/'+dec_int+'-'+comp+'-b%02d.dat' %(k+1), "r") as f_in:
@@ -468,27 +418,13 @@ def fe_values(blocks, components, temperature, pose, attach_rest, translate_apr,
               fb_w = -1.00*float(splitdata[1])
           os.chdir('../')
 
-      fb_b = fe_b
       fb_bd = fe_bd
-      blck_apr = fb_a + fb_l + fb_t + fb_u + fb_b + fb_c + fb_r
       blck_sdr = fb_a + fb_l + fb_t + fb_es + fb_vs + fb_bd + fb_c + fb_r
       blck_dd = fb_a + fb_l + fb_t + fb_e + fb_v + fb_w + fb_f + fb_bd + fb_c + fb_r
 
 
       # Write results for the blocks
       resfile = open('./Results/Res-b%02d.dat' %(k+1), 'w')
-      if os.path.exists('./pmf/data/'):
-        resfile.write('\n----------------------------------------------\n\n')
-        resfile.write('PMF method:\n\n')
-        resfile.write('%-21s %-10s\n\n' % ('Component', 'Free Energy'))
-        resfile.write('%-20s %8.2f\n' % ('Attach protein CF', fb_a))
-        resfile.write('%-20s %8.2f\n' % ('Attach ligand CF', fb_l))
-        resfile.write('%-20s %8.2f\n' % ('Attach ligand TR', fb_t))
-        resfile.write('%-20s %8.2f\n' % ('Ligand pulling', fb_u))
-        resfile.write('%-20s %8.2f\n' % ('Release ligand TR',fb_b))
-        resfile.write('%-20s %8.2f\n' % ('Release ligand CF', fb_c))
-        resfile.write('%-20s %8.2f\n\n' % ('Release protein CF', fb_r))
-        resfile.write('%-20s %8.2f\n' % ('Binding free energy', blck_apr))
       if dec_method == 'dd' and os.path.exists('./dd/data/'):
         resfile.write('\n----------------------------------------------\n\n')
         resfile.write('Double decoupling method:\n\n')
@@ -522,26 +458,12 @@ def fe_values(blocks, components, temperature, pose, attach_rest, translate_apr,
       resfile.close()
 
     # Write final results
-    total_apr = fe_a + fe_l + fe_t + fe_u + fe_b + fe_c + fe_r
     total_dd = fe_a + fe_l + fe_t + fe_e + fe_v + fe_w + fe_f + fe_bd + fe_c + fe_r
     total_sdr = fe_a + fe_l + fe_t + fe_es + fe_vs + fe_bd + fe_c + fe_r
-    sd_apr = math.sqrt(sd_a**2 + sd_l**2 + sd_t**2 + sd_u**2 + sd_b**2 + sd_c**2 + sd_r**2)
-    sd_dd = math.sqrt(sd_a**2 + sd_l**2 + sd_t**2 + sd_e**2 + sd_v**2 + sd_w**2 + sd_f**2 + sd_b**2 + sd_c**2 + sd_r**2)
-    sd_sdr = math.sqrt(sd_a**2 + sd_l**2 + sd_t**2 + sd_es**2 + sd_vs**2 + sd_b**2 + sd_c**2 + sd_r**2)
+    sd_dd = math.sqrt(sd_a**2 + sd_l**2 + sd_t**2 + sd_e**2 + sd_v**2 + sd_w**2 + sd_f**2 + sd_bd**2 + sd_c**2 + sd_r**2)
+    sd_sdr = math.sqrt(sd_a**2 + sd_l**2 + sd_t**2 + sd_es**2 + sd_vs**2 + sd_bd**2 + sd_c**2 + sd_r**2)
 
     resfile = open('./Results/Results.dat', 'w')
-    if os.path.exists('./pmf/data/'):
-      resfile.write('\n----------------------------------------------\n\n')
-      resfile.write('PMF method:\n\n')
-      resfile.write('%-21s %-10s %-4s\n\n' % ('Component', 'Free Energy', '(Error)'))
-      resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach protein CF', fe_a, sd_a))
-      resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach ligand CF', fe_l, sd_l))
-      resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach ligand TR', fe_t, sd_t))
-      resfile.write('%-20s %8.2f (%3.2f)\n' % ('PMF free energy', fe_u, sd_u))
-      resfile.write('%-20s %8.2f \n' % ('Release ligand TR',fe_b))
-      resfile.write('%-20s %8.2f (%3.2f)\n' % ('Release ligand CF', fe_c, sd_c))
-      resfile.write('%-20s %8.2f (%3.2f)\n\n' % ('Release protein CF', fe_r, sd_r))
-      resfile.write('%-20s %8.2f (%3.2f)\n' % ('Binding free energy', total_apr, sd_apr))
     if dec_method == 'dd' and os.path.exists('./dd/data/'):
       resfile.write('\n----------------------------------------------\n\n')
       resfile.write('DD method:\n\n')
@@ -585,10 +507,7 @@ def fe_mbar(comp, pose, mode, rest_file, temperature):
     ### Change to pose directory
     os.chdir('fe')
     os.chdir(pose)
-    if comp != 'u':
-      os.chdir('rest')
-    else:
-      os.chdir('pmf')
+    os.chdir('rest')
     if not os.path.exists('data'):
       os.makedirs('data')
 
@@ -607,7 +526,7 @@ def fe_mbar(comp, pose, mode, rest_file, temperature):
     disang = infile.readlines()
     infile.close()
     R = 0
-    if (comp == 't' or comp == 'u'):
+    if (comp == 't'):
       for line in disang:
         cols = line.split()
         if len(cols) != 0 and (cols[-1] == "#Lig_TR"):
@@ -682,7 +601,7 @@ def fe_mbar(comp, pose, mode, rest_file, temperature):
       r = 0
       for line in disang:
         cols = line.split()
-        if (comp == 't' or comp == 'u'):
+        if (comp == 't'):
           if len(cols) != 0 and (cols[-1] == "#Lig_TR"):
             natms = len(cols[2].split(','))-1
             req[k,r] = float(cols[6].replace(",", ""))

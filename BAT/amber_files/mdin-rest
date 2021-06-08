@@ -1,17 +1,20 @@
 *******************************************************
-*****************************       eqnpt.in
+*****************************       mdin
 *******************************************************
-Equilibrate, NPT.
+Production runs 
  &cntrl
   imin = 0,
   ntx = 5,
   irest = 1,
-  ntpr = 500,
-  ntwr = 500,
-  ntwx = 500,
+  ntpr = _ntpr_,
+  ntwr = _ntwr_,
+  ntwe = _ntwe_,
+  ntxo = 1,
+  ntwx = _ntwx_,
+  ntwprt = _num-atoms_,
   ioutfm = 1,
   iwrap = 1,
-  ntf = 1,
+  ntf = 2,
   ntc = 2,
   cut = _cutoff_,
   ntt = 3,
@@ -20,7 +23,7 @@ Equilibrate, NPT.
   ig = -1,
   ntp = 1,
   barostat = _barostat_,
-  nstlim = 3500,
+  nstlim = _num-steps_,
   dt = _step_,
   nmropt = 1,
   pencut = -1,
@@ -31,10 +34,10 @@ Equilibrate, NPT.
  /
  &pmd
  output_file = 'cmass.txt'
- output_freq = 1000
+ output_freq = _ntwx_
  cv_file = 'cv.in'
  /
  &wt type = 'END', /
-DISANG=disang.rest
+DISANG=disang_file.rest
 LISTOUT=POUT
 

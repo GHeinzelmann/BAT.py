@@ -25,11 +25,17 @@ Runs equilibrium stage
   barostat = _barostat_,
   nstlim = _num-steps_,
   dt = _step_,
-  ntr = 1,
-  restraint_wt = 50.0,
-  restraintmask = ':1-3',
   nmropt = 1,
   pencut = -1,
+  ntr = 1,
+  restraint_wt = 50.0,
+  restraintmask = ':1',
+  infe = 1,
+ /
+ &pmd
+ output_file = 'cmass.txt'
+ output_freq = _ntwx_
+ cv_file = 'cv.in'
  /
  &wt type = 'END', /
 DISANG=disang_file.rest
