@@ -85,10 +85,6 @@ for i in range(0, len(lines)):
             eq_steps1 = scripts.check_input('int', lines[i][1], input_file, lines[i][0]) 
         elif lines[i][0] == 'eq_steps2':
             eq_steps2 = scripts.check_input('int', lines[i][1], input_file, lines[i][0]) 
-        elif lines[i][0] == 'prep_steps1':
-            prep_steps1 = scripts.check_input('int', lines[i][1], input_file, lines[i][0]) 
-        elif lines[i][0] == 'prep_steps2':
-            prep_steps2 = scripts.check_input('int', lines[i][1], input_file, lines[i][0]) 
         elif lines[i][0] == 'a_steps1':
             a_steps1 = scripts.check_input('int', lines[i][1], input_file, lines[i][0]) 
         elif lines[i][0] == 'a_steps2':
