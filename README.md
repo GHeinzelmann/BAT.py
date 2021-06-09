@@ -38,7 +38,7 @@ The folder ./BAT/all-poses contains an example of system input files, with a doc
 
 The simulations and analysis from this example will be performed inside the ./BAT folder. The simulations are divided in two steps, equilibration (folder ./equil) and free energy calculation (folder ./fe). The input file with all the needed BAT.py parameters for double decoupling is called input-dd.in, with the meaning of each explained in more detail in the user guide, located inside the ./doc folder. For our sample calculation, we will use the values already provided in the input files included in this distribution. Briefly, the poses\_list parameter sets up the calculation for the first 5 poses from Autodock Vina, all in the ./all-poses folder. The input files can be modified to perform the calculations in the 5uf0 crystal structure, by changing the calc\_type option to "crystal", the celpp\_receptor option to "5uf0", and the ligand\_name option to "89J", which is the ligand residue name in the 5uf0 pdb structure. 
 
-![](doc/workflow.jpg)
+![](doc/workflow.png)
 
 ## Equilibration
 
