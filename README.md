@@ -14,6 +14,8 @@ The Binding Affinity Tool (BAT.py) is a python tool for fully automated absolute
 
 The 2.0 version of BAT.py can perform binding free energy calculations by two alchemical routes in the presence of restraints, either with double decoupling (DD) procedure or with the simultaneous decoupling recoupling (SDR) method. For the use of the APR method in addition to DD and SDR, download the 1.0 version of the code at the BATv1.0 branch. BAT.py is compatible with the simulation package AMBER20, also requiring a few installed programs to work properly, which are listed in the next section. 
 
+![](doc/figure.png)
+
 # Getting started
 
 To use BAT.py, download the files from this repository, which already contain an example for ligand binding to the second bromodomain of the BRD4 protein - BRD4(2). In order to perform all the steps from BAT.py, the following programs must be installed and in your path:
