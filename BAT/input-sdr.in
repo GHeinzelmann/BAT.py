@@ -62,7 +62,7 @@ water_model     = TIP3P   # Water model (SPCE, TIP4PEW or TIP3P)
 num_waters      = 13000   # Number of waters in the system
 buffer_x        = 15      # Box solvation buffer in the x axis
 buffer_y        = 15      # Box solvation buffer in the y axis 
-#buffer_z        = 12      # Box solvation buffer in the y axis 
+#buffer_z        = 12      # Box solvation buffer in the z axis 
 lig_buffer      = 15      # Buffer size for the three axes of the ligand-only box
 
 # Counterions 

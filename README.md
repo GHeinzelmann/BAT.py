@@ -13,6 +13,8 @@
 
 *- Possible choice between a fixed number of waters, or fixed solvation buffers in the three cartesian axes.*
 
+*- Automatic determination of the number of ions based on the chosen ion concentration.*
+
 *- Much simpler procedure to add new protein systems, when compared to the 1.0 version.*
 
 -------------------------------------------------------
