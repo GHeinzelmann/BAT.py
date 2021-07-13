@@ -24,7 +24,7 @@ P3 = :363@CA
 
 fe_type = dd-rest  # Type of free energy calculations (rest, dd, sdr, dd-rest, sdr-rest, custom)
 
-components = [ e v ] # Used with custom option for fe_type
+components = [ f w c ] # Used with custom option for fe_type
 
 release_eq = [ 5.00 2.50 1.00 0.50 0.20 0.10 0.05 0.02 0.00 ]   # Equilibrium gradual release weights
 
@@ -33,6 +33,8 @@ attach_rest = [ 0.00 0.20 0.40 0.80 1.60 2.40 4.00 5.50 8.65 11.80 18.10 24.40 3
 #lambdas = [ 0.0001 0.02 0.04 0.06 0.08 0.10  0.15  0.20  0.25  0.30  0.40  0.50  0.60  0.70 0.75 0.80 0.85 0.90 0.92 0.94 0.96 0.98 0.9999 ] # MBAR
 
 lambdas = [ 0.00922 0.04794 0.11505 0.20634 0.31608 0.43738 0.56262 0.68392 0.79366 0.88495 0.95206 0.99078 ] # Lambdas for decoupling
+
+#sdr_dist = 32.00
 
 #dec_method = dd
 
@@ -60,7 +62,7 @@ water_model     = TIP3P   # Water model (SPCE, TIP4PEW or TIP3P)
 num_waters      = 13000   # Number of waters in the system
 buffer_x        = 15      # Box solvation buffer in the x axis
 buffer_y        = 15      # Box solvation buffer in the y axis 
-#buffer_z        = 12      # Box solvation buffer in the z axis 
+#buffer_z        = 18      # Box solvation buffer in the z axis 
 lig_buffer      = 15      # Buffer size for the three axes of the ligand-only box
 
 # Counterions 
@@ -68,8 +70,7 @@ lig_buffer      = 15      # Buffer size for the three axes of the ligand-only bo
 neutralize_only = no     # neutralize only or also ionize (yes or no)
 cation = Na+             # cation for neutralization/ionization                
 anion = Cl-              # anion  for neutralization/ionization   
-num_cations = 32         # number of extra cations after neutralization
-num_cat_ligbox = 8       # number of extra cations after neutralization for ligand box
+ion_conc = 0.15          # salt concentration for all boxes
 
 # Simulation parameters
 

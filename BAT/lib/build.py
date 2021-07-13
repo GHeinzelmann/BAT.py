@@ -968,10 +968,6 @@ def create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buf
         neu_cat = abs(charge_neut)
       if charge_neut < 0:
         neu_ani = abs(charge_neut)
- 
-    # Number of cations and anions   
-    num_cat = ion_def[2]
-    num_ani = ion_def[2] - neu_cat + neu_ani
     
     # Define volume density for different water models
     if water_model == 'TIP3P':
@@ -987,19 +983,35 @@ def create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buf
     # Fixed number of water molecules
     if num_waters != 0:
 
-      # Update target number of residues according to the ion definitions 
-      if (neut == 'no'):
-        target_num = int(num_waters - neu_cat + neu_ani + 2*int(ion_def[2])) 
-      elif (neut == 'yes'):
-        target_num = int(num_waters + neu_cat + neu_ani)
-    
       # Create the first box guess to get the initial number of waters and cross sectional area
       buff = 50.0  
       scripts.write_tleap(mol, water_model, water_box, buff, buffer_x, buffer_y)
       num_added = scripts.check_tleap()
       cross_area = scripts.cross_sectional_area()
 
+      # First iteration to estimate box volume and number of ions
+      res_diff = num_added - num_waters 
+      buff_diff = res_diff/(ratio*cross_area)
+      buff -= buff_diff 
+      print(buff)
+      if buff < 0:
+        print ('Not enough water molecules to fill the system in the z direction, please increase the number of water molecules')
+        sys.exit(1)
+      # Get box volume and number of added ions
+      scripts.write_tleap(mol, water_model, water_box, buff, buffer_x, buffer_y)
+      box_volume = scripts.box_volume()
+      print(box_volume)
+      num_cations = round(0.85*ion_def[2]*6.02e23*box_volume*1e-27) # 0.85 factor to account for some shrinking of the box during equilibration
+      print(num_cations)
+
+      # Update target number of residues according to the ion definitions 
+      if (neut == 'no'):
+        target_num = int(num_waters - neu_cat + neu_ani + 2*int(num_cations)) 
+      elif (neut == 'yes'):
+        target_num = int(num_waters + neu_cat + neu_ani)
+    
       # Define a few parameters for solvation iteration
+      buff = 50.0  
       count = 0
       max_count = 10
       rem_limit = 16
@@ -1043,7 +1055,17 @@ def create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buf
     elif buffer_z != 0:
       buff = buffer_z
       tleap_remove = None
+      # Get box volume and number of added ions
+      scripts.write_tleap(mol, water_model, water_box, buff, buffer_x, buffer_y)
+      box_volume = scripts.box_volume()
+      print(box_volume)
+      num_cations = round(0.85*ion_def[2]*6.02e23*box_volume*1e-27) # 0.85 factor to account for some shrinking of the box during equilibration
+      print(num_cations)
  
+    # Number of cations and anions   
+    num_cat = num_cations
+    num_ani = num_cations - neu_cat + neu_ani
+    
     # Write the final tleap file with the correct system size and removed water molecules
     shutil.copy('tleap.in', 'tleap_solvate.in')
     tleap_solvate = open('tleap_solvate.in', 'a')
@@ -1104,7 +1126,7 @@ def create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buf
     if stage != 'fe':
       os.chdir('../')
    
-def ligand_box(mol, lig_buffer, water_model, neut, ion_lig, comp, ligand_ff):
+def ligand_box(mol, lig_buffer, water_model, neut, ion_def, comp, ligand_ff):
     # Define volume density for different water models
     if water_model == 'TIP3P':
        water_box = water_model.upper()+'BOX'
@@ -1117,7 +1139,32 @@ def ligand_box(mol, lig_buffer, water_model, neut, ion_lig, comp, ligand_ff):
     for file in glob.glob('../../ff/%s.*' %mol.lower()):
         shutil.copy(file, './')
 
-    # Write and run tleap file
+    # Write and run preliminary tleap file
+    tleap_solvate = open('tmp_tleap.in', 'w')
+    tleap_solvate.write('source leaprc.'+ligand_ff+'\n\n')        
+    tleap_solvate.write('# Load the ligand parameters\n')        
+    tleap_solvate.write('loadamberparams %s.frcmod\n'%(mol.lower()))
+    tleap_solvate.write('%s = loadmol2 %s.mol2\n\n'%(mol.upper(), mol.lower()))
+    tleap_solvate.write('model = loadpdb %s.pdb\n\n' %(mol.lower()))
+    tleap_solvate.write('# Load the water and jc ion parameters\n')        
+    tleap_solvate.write('source leaprc.water.%s\n'%(water_model.lower()))
+    tleap_solvate.write('loadamberparams frcmod.ionsjc_%s\n\n'%(water_model.lower()))
+    tleap_solvate.write('check model\n')
+    tleap_solvate.write('savepdb model vac.pdb\n')
+    tleap_solvate.write('saveamberparm model vac.prmtop vac.inpcrd\n\n')
+    tleap_solvate.write('# Create water box with chosen model\n')
+    tleap_solvate.write('solvatebox model ' + water_box + ' '+str(lig_buffer)+'\n\n')
+    tleap_solvate.write('quit\n')
+    tleap_solvate.close()
+
+    # Get box volume and number of added ions
+    box_volume = scripts.box_volume()
+    print(box_volume)
+    num_cations = round(0.85*ion_def[2]*6.02e23*box_volume*1e-27) # 0.85 factor to account for some shrinking of the box during equilibration
+    print(num_cations)
+
+
+     # Write and run tleap file
     tleap_solvate = open('tleap_solvate.in', 'a')
     tleap_solvate.write('source leaprc.'+ligand_ff+'\n\n')        
     tleap_solvate.write('# Load the ligand parameters\n')        
@@ -1134,12 +1181,12 @@ def ligand_box(mol, lig_buffer, water_model, neut, ion_lig, comp, ligand_ff):
     tleap_solvate.write('solvatebox model ' + water_box + ' '+str(lig_buffer)+'\n\n')
     if (neut == 'no'):
         tleap_solvate.write('# Add ions for neutralization/ionization\n')
-        tleap_solvate.write('addionsrand model %s %d\n' % (ion_lig[0], ion_lig[2]))
-        tleap_solvate.write('addionsrand model %s 0\n' % (ion_lig[1]))
+        tleap_solvate.write('addionsrand model %s %d\n' % (ion_def[0], num_cations))
+        tleap_solvate.write('addionsrand model %s 0\n' % (ion_def[1]))
     elif (neut == 'yes'):
         tleap_solvate.write('# Add ions for neutralization/ionization\n')
-        tleap_solvate.write('addionsrand model %s 0\n' % (ion_lig[0]))
-        tleap_solvate.write('addionsrand model %s 0\n' % (ion_lig[1]))
+        tleap_solvate.write('addionsrand model %s 0\n' % (ion_def[0]))
+        tleap_solvate.write('addionsrand model %s 0\n' % (ion_def[1]))
     tleap_solvate.write('\n')
     tleap_solvate.write('desc model\n')
     tleap_solvate.write('savepdb model full.pdb\n')

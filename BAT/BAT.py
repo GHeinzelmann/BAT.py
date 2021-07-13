@@ -204,10 +204,8 @@ for i in range(0, len(lines)):
             cation = lines[i][1]
         elif lines[i][0] == 'anion':
             anion = lines[i][1]
-        elif lines[i][0] == 'num_cations':
-            num_cations = scripts.check_input('int', lines[i][1], input_file, lines[i][0])
-        elif lines[i][0] == 'num_cat_ligbox':
-            num_cat_ligbox = scripts.check_input('int', lines[i][1], input_file, lines[i][0])
+        elif lines[i][0] == 'ion_conc':
+            ion_conc = scripts.check_input('float', lines[i][1], input_file, lines[i][0])
         elif lines[i][0] == 'buffer_x':
             buffer_x = scripts.check_input('float', lines[i][1], input_file, lines[i][0]) 
         elif lines[i][0] == 'buffer_y':
@@ -370,8 +368,7 @@ elif calc_type == 'crystal':
 rest = [rec_dihcf_force, rec_discf_force, lig_distance_force, lig_angle_force, lig_dihcf_force, rec_com_force, lig_com_force]
 
 # Create ion definitions
-ion_def = [cation, anion, num_cations]
-ion_lig = [cation, anion, num_cat_ligbox]
+ion_def = [cation, anion, ion_conc]
 
 # Define number of steps for all stages
 dic_steps1 = {}
@@ -471,7 +468,7 @@ elif stage == 'fe':
             print('window: %s%02d weight: %s' %(comp, int(win), str(weight)))
             build.build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist)
             print('Creating box for ligand only...')
-            build.ligand_box(mol, lig_buffer, water_model, neut, ion_lig, comp, ligand_ff)
+            build.ligand_box(mol, lig_buffer, water_model, neut, ion_def, comp, ligand_ff)
             setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method)
             setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, c_steps1, c_steps2, rng)
           else:
@@ -534,8 +531,8 @@ elif stage == 'fe':
           if int(win) == 0:
             print('window: %s%02d lambda: %s' %(comp, int(win), str(weight)))
             build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis)
-            print('Creating box for ligand decharging in bulk...')
-            build.ligand_box(mol, lig_buffer, water_model, neut, ion_lig, comp, ligand_ff)
+            print('Creating box for ligand decoupling in bulk...')
+            build.ligand_box(mol, lig_buffer, water_model, neut, ion_def, comp, ligand_ff)
             setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method)
             setup.dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2, weight, lambdas, dec_method, ntwx)
           else:

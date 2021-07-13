@@ -61,6 +61,21 @@ def cross_sectional_area():
     cross_area=float(x_axis * y_axis)
     return cross_area
 
+def box_volume():
+    p = sp.call('tleap -s -f tmp_tleap.in > tmp.log', shell=True)
+    # Get the total box size in the three axes and the xy cross sectional area
+    num_added = None
+    f = open('tmp.log', 'r')
+    for line in f:
+        if "Total vdw box size" in line:
+            splitdata = line.split()
+            x_axis = float(splitdata[4])
+            y_axis = float(splitdata[5])
+            z_axis = float(splitdata[6])
+    f.close()
+    box_volume=float(x_axis * y_axis * z_axis)
+    return box_volume
+
 def check_input(param_type, param_value, filename, param_name):
     if not param_value:
     # If the parameter value was not defined    
