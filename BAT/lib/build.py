@@ -487,7 +487,7 @@ def build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln,
         os.makedirs('%s%02d' %(comp, int(win)))
       os.chdir('%s%02d' %(comp, int(win)))
       if int(win) == 0:
-        shutil.copy('../../build_files/md%02d.rst7' %fwin, './fe-apo.rst7')
+        shutil.copy('../../build_files/fe-%s.pdb' %mol.lower(), './build-ini.pdb')
         shutil.copy('../../build_files/fe-%s.pdb' %mol.lower(), './')
         shutil.copy('../../build_files/%s.pdb' %mol.lower(), './')
         shutil.copy('../../build_files/full.prmtop', './')
@@ -495,20 +495,19 @@ def build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln,
         shutil.copy('../../ff/%s.frcmod' %(mol.lower()), './')
         shutil.copy('../../ff/dum.mol2', './')
         shutil.copy('../../ff/dum.frcmod', './')
-        # Get receptor last residue
-        with open('fe-%s.pdb' % mol.lower(), 'r') as f:
-          data = f.readline().split()    
-          recep_last = data[9].strip()   
-        # Get apo protein from prepared system
-        cpp_file = open('strip-lig.in', 'a')
-        cpp_file.write('parm full.prmtop\n')
-        cpp_file.write('trajin fe-apo.rst7\n')
-        rec_res = str(int(recep_last) + 1)
-        cpp_file.write('strip !:2-%s\n' %rec_res)
-        cpp_file.write('trajout build.pdb\n')
-        cpp_file.write('run')
-        cpp_file.close() 
-        sp.call('cpptraj -i strip-lig.in >& strip-lig.log', shell=True)
+
+        # Read coordinates from aligned system
+        with open('build-ini.pdb') as f_in:
+          lines = (line.rstrip() for line in f_in)
+          lines = list(line for line in lines if line) # Non-blank lines in a list   
+
+        # Leave only receptor atoms
+        build_file = open('build.pdb', 'w')
+        for i in range(0, len(lines)):
+          if (lines[i][0:6].strip() == 'ATOM') or (lines[i][0:6].strip() == 'HETATM'):
+            if (lines[i][17:20].strip() != mol) and (lines[i][17:20].strip() != 'DUM'):
+              build_file.write(lines[i]+'\n')
+        build_file.close()
       else:
         for file in glob.glob('../r00/*'):
           shutil.copy(file, './')
@@ -518,7 +517,9 @@ def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, nt
 
     # Get files or finding new anchors and building some systems
 
-    if not os.path.exists('../build_files'):
+    if (not os.path.exists('../build_files')) or (dec_method == 'sdr' and win == 0):
+      if dec_method == 'sdr':
+        shutil.rmtree('../build_files')    
       try:
         shutil.copytree('../../../build_files', '../build_files')
       # Directories are the same

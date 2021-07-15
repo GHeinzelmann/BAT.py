@@ -47,7 +47,7 @@ rng = 0
 rec_dihcf_force = 0
 buffer_z = 0
 num_waters = 0
-
+ion_conc = 0.0
 
 # Read arguments that define input file and stage
 if len(sys.argv) < 5:

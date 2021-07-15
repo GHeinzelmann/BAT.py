@@ -5,17 +5,17 @@
 *New features on BAT 2.0:*
 
  
-*- Relative restraints between the receptor and the ligand (figure below), without the need for three fixed dummy atoms as in the 1.0 version.*
+*- Relative restraints between the receptor and the ligand (figure below), without the need for three fixed dummy atoms.*
 
-*- Center of mass restraints on the receptor and the bulk ligand (when the SDR method is applied), so internal degrees of freedom are not affected.*
+*- Center of mass restraints on the receptor, and the bulk ligand when the SDR method is applied, so their internal degrees of freedom are not affected.*
 
 *- Only two stages, equilibrium and free energy simulations. The preparation stage is no longer required, since the APR method is not available in the 2.0 version.*
 
 *- Possible choice between a fixed number of waters, or fixed solvation buffers in the three cartesian axes.*
 
-*- Automatic determination of the number of ions based on the chosen ion concentration.*
+*- Automatic determination of the number of ions based on the chosen salt concentration.*
 
-*- Much simpler procedure to add new protein systems, when compared to the 1.0 version.*
+*- Simpler procedure to add new receptors.*
 
 -------------------------------------------------------
 
