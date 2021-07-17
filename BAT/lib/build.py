@@ -518,7 +518,7 @@ def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, nt
     # Get files or finding new anchors and building some systems
 
     if (not os.path.exists('../build_files')) or (dec_method == 'sdr' and win == 0):
-      if dec_method == 'sdr':
+      if dec_method == 'sdr' and os.path.exists('../build_files'):
         shutil.rmtree('../build_files')    
       try:
         shutil.copytree('../../../build_files', '../build_files')

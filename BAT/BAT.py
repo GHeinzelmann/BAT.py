@@ -466,7 +466,13 @@ elif stage == 'fe':
           win = k
           if int(win) == 0:
             print('window: %s%02d weight: %s' %(comp, int(win), str(weight)))
-            build.build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist)
+            anch = build.build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist)
+            if anch == 'anch1':
+              aa1_poses.append(pose)
+              break
+            if anch == 'anch2':
+              aa2_poses.append(pose)
+              break
             print('Creating box for ligand only...')
             build.ligand_box(mol, lig_buffer, water_model, neut, ion_def, comp, ligand_ff)
             setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method)
@@ -476,6 +482,10 @@ elif stage == 'fe':
             build.build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist)
             setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method)
             setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, c_steps1, c_steps2, rng)
+        if len(aa1_poses) != 0:
+          break
+        if len(aa2_poses) != 0:
+          break
         os.chdir('../')  
       # Receptor conformational release in a separate box
       elif (comp == 'r'):          
@@ -487,7 +497,13 @@ elif stage == 'fe':
           win = k
           if int(win) == 0:
             print('window: %s%02d weight: %s' %(comp, int(win), str(weight)))
-            build.build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist)
+            anch = build.build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist)
+            if anch == 'anch1':
+              aa1_poses.append(pose)
+              break
+            if anch == 'anch2':
+              aa2_poses.append(pose)
+              break
             print('Creating box for apo protein...')
             build.create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, buffer_z, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, dec_method)
             setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method)
@@ -497,6 +513,10 @@ elif stage == 'fe':
             build.build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist)
             setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method)
             setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, r_steps1, r_steps2, rng)
+        if len(aa1_poses) != 0:
+          break
+        if len(aa2_poses) != 0:
+          break
         os.chdir('../')  
       # Simultaneous/double decoupling
       elif (comp == 'v' or comp == 'e'):          
@@ -510,13 +530,23 @@ elif stage == 'fe':
           win = k
           print('window: %s%02d lambda: %s' %(comp, int(win), str(weight)))
           if int(win) == 0:
-            build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis)
+            anch = build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis)
+            if anch == 'anch1':
+              aa1_poses.append(pose)
+              break
+            if anch == 'anch2':
+              aa2_poses.append(pose)
+              break
             build.create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, buffer_z, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, dec_method)
             setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method)
             setup.dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2, weight, lambdas, dec_method, ntwx)
           else:
             build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis)
             setup.dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2, weight, lambdas, dec_method, ntwx)
+        if len(aa1_poses) != 0:
+          break
+        if len(aa2_poses) != 0:
+          break
         os.chdir('../')  
       # Bulk systems for dd
       elif (comp == 'f' or comp == 'w'):
@@ -530,7 +560,13 @@ elif stage == 'fe':
           win = k
           if int(win) == 0:
             print('window: %s%02d lambda: %s' %(comp, int(win), str(weight)))
-            build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis)
+            anch = build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis)
+            if anch == 'anch1':
+              aa1_poses.append(pose)
+              break
+            if anch == 'anch2':
+              aa2_poses.append(pose)
+              break
             print('Creating box for ligand decoupling in bulk...')
             build.ligand_box(mol, lig_buffer, water_model, neut, ion_def, comp, ligand_ff)
             setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method)
@@ -539,6 +575,10 @@ elif stage == 'fe':
             print('window: %s%02d lambda: %s' %(comp, int(win), str(weight)))
             build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis)
             setup.dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2, weight, lambdas, dec_method, ntwx)
+        if len(aa1_poses) != 0:
+          break
+        if len(aa2_poses) != 0:
+          break
         os.chdir('../')
       # Attachments in the bound system
       else:          
@@ -549,13 +589,31 @@ elif stage == 'fe':
           weight = attach_rest[k]
           win = k
           print('window: %s%02d weight: %s' %(comp, int(win), str(weight)))
-          build.build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist)
+          anch = build.build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist)
+          if anch == 'anch1':
+            aa1_poses.append(pose)
+            break
+          if anch == 'anch2':
+            aa2_poses.append(pose)
+            break
           setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method)
           steps1 = dic_steps1[comp]
           steps2 = dic_steps2[comp]
           setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2, rng)
+        if len(aa1_poses) != 0:
+          break
+        if len(aa2_poses) != 0:
+          break
         os.chdir('../')  
     os.chdir('../')
+  if len(aa1_poses) != 0:
+    print('\n')
+    print ('WARNING: Could not find the ligand first anchor L1 for', aa1_poses)
+    print ('The ligand most likely left the binding site during equilibration of these systems.')
+  if len(aa2_poses) != 0:
+    print('\n')
+    print ('WARNING: Could not find the ligand L2 or L3 anchors for', aa2_poses)
+    print ('Try reducing the min_adis parameter in the input file.')
 elif stage == 'analysis':
   # Free energies MBAR/TI and analytical calculations
   for i in range(0, len(poses_def)):
