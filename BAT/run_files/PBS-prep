@@ -11,7 +11,7 @@ module load scipy/2.7
 setenv PATH "/home/henrikse/gnu44-bin:/opt/mvapich2/gnu/ib/bin:$PATH"
 setenv CUDA_HOME "/opt/cuda/7.5.18"
 setenv LD_LIBRARY_PATH "${CUDA_HOME}/lib64:/opt/mvapich2/gnu/ib/lib:$LD_LIBRARY_PATH"
-source /home/gheinzel/ido-amber20.csh
+source /home/gheinzel/amber20.csh
 
 ### Copy input files to scratch folder
 cd $PBS_O_WORKDIR
