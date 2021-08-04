@@ -7,3 +7,11 @@ P1 = :1936@CA
 P2 = :1958@CA
 P3 = :1879@CA
 
+# Conformational restraints on the protein backbone
+
+rec_bb          = yes       # Use protein backbone dihedrals conformational restraints
+bb_start        = 1892       # First residue of the restrained range (original protein numbering)
+bb_end          = 1901       # Last residue of the restrained range
+bb_equil        = yes       # Keep this backbone section rigid during equilibration 
+
+
