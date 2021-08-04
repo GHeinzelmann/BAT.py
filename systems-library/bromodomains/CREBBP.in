@@ -1,18 +1,9 @@
 # Input variables for the CREBBP bromodomain 
 
 
-# Ligand anchor search definitions
-
-l1_x            = 2.00     # x distance from P1 to center of L1 strike zone
-l1_y            = -6.00    # y distance from P1 to center of L1 strike zone             
-l1_z            = 8.50     # minimum z distance between P1 and L1
-l1_range        = 3.00     # Initial search range (strike zone) of the first ligand anchor L1 
-min_adis        = 4.00     # minimum distance between anchors
-max_adis        = 8.00     # maximum distance between anchors
-
 # Protein anchors, using original sequence 
 
-P1 = :1138@CA
-P2 = :1159@CA
-P3 = :1185@CA
+P1 = :1160@CA
+P2 = :1182@CA
+P3 = :1100@CA
 
