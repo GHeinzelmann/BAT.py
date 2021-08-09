@@ -1,4 +1,4 @@
-*Note: The master branch is currently developing the 2.0 version of BAT. For the version associated with Ref. [1], which includes the APR method, download the package from the BATv1.0 branch.* 
+*Note: The master branch is for the 2.0 version of BAT. For the version associated with Ref. [1], which includes the APR method, download the package from the BATv1.0 branch.* 
 
 --------------------------------------------------------
 
