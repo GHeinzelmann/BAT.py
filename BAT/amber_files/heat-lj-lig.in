@@ -13,7 +13,7 @@ heating
    timask1 = ':mk1', timask2 = '',
    ifsc=1, scmask1=':mk1', scmask2='', crgmask = ':mk1',
    gti_chg_keep = 0,
-   gti_add_sc = 3,
+   gti_add_sc = 1,
  /
  &wt
    type='TEMP0',

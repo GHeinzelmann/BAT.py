@@ -34,5 +34,5 @@ Production runs LJ decoupling
   timask1 = ':mk1', timask2 = ':mk2',
   ifsc=1, scmask1=':mk1', scmask2=':mk2', crgmask = ':mk1,mk2',
   gti_chg_keep = 0,
-  gti_add_sc = 3,
+  gti_add_sc = 1,
   ifmbar = 1,
