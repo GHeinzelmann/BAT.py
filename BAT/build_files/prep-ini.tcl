@@ -34,7 +34,7 @@ set tot [$a get name]
 
 foreach i $tot {
 set t [atomselect 1 "resname MMM and name $i"]
-set p [atomselect 1 "resid P1A and name NN"]
+set p [atomselect 1 "(not resname MMM) and (resid P1A and name NN)"]
 set d1 [measure center $t weight mass]
 set d2 [measure center $p weight mass]
 foreach {x2 y2 z2} $d2 {break}
@@ -57,7 +57,7 @@ puts $mat
 
 foreach i $mat {
 set t [atomselect 1 "resname MMM and name $i"]
-set p [atomselect 1 "resid P1A and name NN"]
+set p [atomselect 1 "(not resname MMM) and (resid P1A and name NN)"]
 set d1 [measure center $t weight mass]
 set d2 [measure center $p weight mass]
 foreach {x2 y2 z2} $d2 {break}
@@ -100,7 +100,7 @@ set angle3 {}
 set angle {}
 set t [atomselect 1 "resname MMM and name $i"]
 set p [atomselect 1 "resname MMM and name $aa1"]
-set d [atomselect 1 "resid P1A and name NN"]
+set d [atomselect 1 "(not resname MMM) and (resid P1A and name NN)"]
 if {$i ne $aa1} { set a1 [$d get index]
 set d1 [measure center $t weight mass]
 set d2 [measure center $p weight mass]
@@ -138,7 +138,7 @@ set angle3 {}
 set angle {}
 set t [atomselect 1 "resname MMM and name $i"]
 set p [atomselect 1 "resname MMM and name $aa1"]
-set d [atomselect 1 "resid P1A and name NN"]
+set d [atomselect 1 "(not resname MMM) and (resid P1A and name NN)"]
 set d1 [measure center $t weight mass]
 set d2 [measure center $p weight mass]
 set a1 [$d get index]

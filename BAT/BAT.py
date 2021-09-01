@@ -482,9 +482,7 @@ elif stage == 'fe':
             build.build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist)
             setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method)
             setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, c_steps1, c_steps2, rng)
-        if len(aa1_poses) != 0:
-          break
-        if len(aa2_poses) != 0:
+        if anch != 'all':  
           break
         os.chdir('../')  
       # Receptor conformational release in a separate box
@@ -513,9 +511,7 @@ elif stage == 'fe':
             build.build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist)
             setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method)
             setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, r_steps1, r_steps2, rng)
-        if len(aa1_poses) != 0:
-          break
-        if len(aa2_poses) != 0:
+        if anch != 'all':  
           break
         os.chdir('../')  
       # Simultaneous/double decoupling
@@ -543,9 +539,7 @@ elif stage == 'fe':
           else:
             build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis)
             setup.dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2, weight, lambdas, dec_method, ntwx)
-        if len(aa1_poses) != 0:
-          break
-        if len(aa2_poses) != 0:
+        if anch != 'all':  
           break
         os.chdir('../')  
       # Bulk systems for dd
@@ -575,9 +569,7 @@ elif stage == 'fe':
             print('window: %s%02d lambda: %s' %(comp, int(win), str(weight)))
             build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis)
             setup.dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2, weight, lambdas, dec_method, ntwx)
-        if len(aa1_poses) != 0:
-          break
-        if len(aa2_poses) != 0:
+        if anch != 'all':  
           break
         os.chdir('../')
       # Attachments in the bound system
@@ -600,9 +592,7 @@ elif stage == 'fe':
           steps1 = dic_steps1[comp]
           steps2 = dic_steps2[comp]
           setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2, rng)
-        if len(aa1_poses) != 0:
-          break
-        if len(aa2_poses) != 0:
+        if anch != 'all':
           break
         os.chdir('../')  
     os.chdir('../')

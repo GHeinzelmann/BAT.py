@@ -131,7 +131,7 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
                     outfile.write(line)
     with open('complex-merge.pdb') as oldfile, open('complex.pdb', 'w') as newfile:
         for line in oldfile:
-            if not 'TER' in line and not 'CONECT' in line:
+            if not 'TER' in line and not 'CONECT' in line and not 'END' in line:
                 newfile.write(line)
 
     # Align to reference structure using mustang
@@ -512,6 +512,8 @@ def build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln,
         for file in glob.glob('../r00/*'):
           shutil.copy(file, './')
 
+    return 'all'
+
 def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis):
 
 
@@ -861,6 +863,7 @@ def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, nt
       for file in glob.glob('../'+comp+'00/*'):
         shutil.copy(file, './')
     
+    return 'all'
 
 def create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, buffer_z, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, dec_method):
     
