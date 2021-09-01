@@ -462,6 +462,8 @@ def build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln,
         shutil.copy('../../build_files/fe-%s.pdb' %mol.lower(), './')
         shutil.copy('../../build_files/md%02d.rst7' %fwin, './md00.rst7')
         shutil.copy('../../build_files/anchors-'+pose+'.txt', './')
+        shutil.copy('../../ff/%s.mol2' %(mol.lower()), './')
+        shutil.copy('../../ff/%s.frcmod' %(mol.lower()), './')
         sp.call('cpptraj -p full.prmtop -y md00.rst7 -x full.rst7 > cpptraj1.log', shell=True)
         shutil.copy('./full.rst7', './full.inpcrd')
         sp.call('cpptraj -p full.prmtop -y md00.rst7 -x full.pdb > cpptraj2.log', shell=True)
@@ -1008,6 +1010,15 @@ def create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buf
       num_cations = round(0.85*ion_def[2]*6.02e23*box_volume*1e-27) # 0.85 factor to account for some shrinking of the box during equilibration
       print(num_cations)
 
+      # Number of cations and anions   
+      num_cat = num_cations
+      num_ani = num_cations - neu_cat + neu_ani
+      # If there are not enough chosen cations to neutralize the system
+      if num_ani < 0:
+        num_cat = neu_cat
+        num_cations = neu_cat
+        num_ani = 0
+
       # Update target number of residues according to the ion definitions 
       if (neut == 'no'):
         target_num = int(num_waters - neu_cat + neu_ani + 2*int(num_cations)) 
@@ -1064,12 +1075,16 @@ def create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buf
       box_volume = scripts.box_volume()
       print(box_volume)
       num_cations = round(0.85*ion_def[2]*6.02e23*box_volume*1e-27) # 0.85 factor to account for some shrinking of the box during equilibration
+      # Number of cations and anions   
+      num_cat = num_cations
+      num_ani = num_cations - neu_cat + neu_ani
+      # If there are not enough chosen cations to neutralize the system
+      if num_ani < 0:
+        num_cat = neu_cat
+        num_cations = neu_cat
+        num_ani = 0
       print(num_cations)
  
-    # Number of cations and anions   
-    num_cat = num_cations
-    num_ani = num_cations - neu_cat + neu_ani
-    
     # Write the final tleap file with the correct system size and removed water molecules
     shutil.copy('tleap.in', 'tleap_solvate.in')
     tleap_solvate = open('tleap_solvate.in', 'a')
