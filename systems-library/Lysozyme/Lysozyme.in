@@ -1,0 +1,22 @@
+# Input variables for T4 lysozyme
+
+
+# Protein anchors, using original sequence 
+
+P1 = :103@CA
+P2 = :145@CA
+P3 = :130@CA
+
+# Conformational restraints on the protein backbone
+
+rec_bb          =  no       # Don't use protein backbone dihedrals conformational restraints
+
+# Ligand anchor search definitions
+
+l1_x            =  0.17     # X distance between P1 and center of L1 search range
+l1_y            = -1.18     # Y distance between P1 and center of L1 search range  
+l1_z            =  7.62     # Z distance between P1 and center of L1 search range  
+l1_range        =  2.50     # search radius for the first ligand anchor L1 
+min_adis        =  1.50     # minimum distance between anchors
+max_adis        =  4.00     # maximum distance between anchors
+
