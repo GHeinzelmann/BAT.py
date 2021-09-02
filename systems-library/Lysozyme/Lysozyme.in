@@ -20,3 +20,7 @@ l1_range        =  2.50     # search radius for the first ligand anchor L1
 min_adis        =  1.50     # minimum distance between anchors
 max_adis        =  4.00     # maximum distance between anchors
 
+# If using SDR 
+
+sdr_dist = 40.0
+
