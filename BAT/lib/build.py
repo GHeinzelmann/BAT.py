@@ -1007,7 +1007,7 @@ def create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buf
       scripts.write_tleap(mol, water_model, water_box, buff, buffer_x, buffer_y)
       box_volume = scripts.box_volume()
       print(box_volume)
-      num_cations = round(0.85*ion_def[2]*6.02e23*box_volume*1e-27) # 0.85 factor to account for some shrinking of the box during equilibration
+      num_cations = round(ion_def[2]*6.02e23*box_volume*1e-27) # box volume already takes into account system shrinking during equilibration
       print(num_cations)
 
       # Number of cations and anions   
@@ -1074,7 +1074,7 @@ def create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buf
       scripts.write_tleap(mol, water_model, water_box, buff, buffer_x, buffer_y)
       box_volume = scripts.box_volume()
       print(box_volume)
-      num_cations = round(0.85*ion_def[2]*6.02e23*box_volume*1e-27) # 0.85 factor to account for some shrinking of the box during equilibration
+      num_cations = round(ion_def[2]*6.02e23*box_volume*1e-27) # # box volume already takes into account system shrinking during equilibration
       # Number of cations and anions   
       num_cat = num_cations
       num_ani = num_cations - neu_cat + neu_ani
@@ -1179,7 +1179,7 @@ def ligand_box(mol, lig_buffer, water_model, neut, ion_def, comp, ligand_ff):
     # Get box volume and number of added ions
     box_volume = scripts.box_volume()
     print(box_volume)
-    num_cations = round(0.85*ion_def[2]*6.02e23*box_volume*1e-27) # 0.85 factor to account for some shrinking of the box during equilibration
+    num_cations = round(ion_def[2]*6.02e23*box_volume*1e-27)  # box volume already takes into account system shrinking during equilibration
     print(num_cations)
 
 

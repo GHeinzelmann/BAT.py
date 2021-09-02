@@ -49,7 +49,7 @@ def check_tleap():
 
 def cross_sectional_area():
     p = sp.call('tleap -s -f tmp_tleap.in > tmp.log', shell=True)
-    # Get the total box size in the three axes and the xy cross sectional area
+    # Get the total box size in the x and y axes and the xy cross sectional area
     num_added = None
     f = open('tmp.log', 'r')
     for line in f:
@@ -63,8 +63,9 @@ def cross_sectional_area():
 
 def box_volume():
     p = sp.call('tleap -s -f tmp_tleap.in > tmp.log', shell=True)
-    # Get the total box size in the three axes and the xy cross sectional area
+    # Get box volume and adjust it to system density after equilibration
     num_added = None
+    dens = 1.00    # Final estimated density of the equilibrated system (close to 1)
     f = open('tmp.log', 'r')
     for line in f:
         if "Total vdw box size" in line:
@@ -72,8 +73,11 @@ def box_volume():
             x_axis = float(splitdata[4])
             y_axis = float(splitdata[5])
             z_axis = float(splitdata[6])
+        if "Density" in line:
+            splitdata = line.split()
+            ratio = float(float(splitdata[5])/dens)
     f.close()
-    box_volume=float(x_axis * y_axis * z_axis)
+    box_volume=float(ratio * x_axis * y_axis * z_axis)
     return box_volume
 
 def check_input(param_type, param_value, filename, param_name):
