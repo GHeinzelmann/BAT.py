@@ -109,10 +109,18 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
               ligand_charge += 1
             elif '2+' in line:
               ligand_charge += 2
+            elif '3+' in line:
+              ligand_charge += 3
+            elif '4+' in line:
+              ligand_charge += 4
             elif '1-' in line:
               ligand_charge += -1
             elif '2-' in line:
               ligand_charge += -2
+            elif '3-' in line:
+              ligand_charge += -3
+            elif '4-' in line:
+              ligand_charge += -4
         print('The net charge of the ligand is %d' %ligand_charge)
         if not os.path.exists('../ff/%s.mol2' %mol.lower()):
           print('Antechamber parameters command: antechamber -i '+pose+'.pdb -fi pdb -o '+mol.lower()+'.mol2 -fo mol2 -c bcc -s 2 -at '+ligand_ff.lower()+' -nc %d' % ligand_charge)
@@ -128,29 +136,29 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
 
       else:
         sp.call('babel -i pdb '+pose+'.pdb -o pdb '+mol.lower()+'.pdb -d', shell=True)
-    sp.call('babel -i pdb '+mol.lower()+'.pdb -o pdb '+mol.lower()+'-h.pdb -p %4.2f' %ligand_ph, shell=True)
-    sp.call('babel -i pdb '+mol.lower()+'.pdb -o mol2 '+mol.lower()+'-crg.mol2 -p %4.2f' %ligand_ph, shell=True)
-    # Get ligand net charge from babel
-    lig_crg = 0
-    with open('%s-crg.mol2' %mol.lower()) as f_in:
-      for line in f_in:
-        splitdata = line.split()
-        if len(splitdata) > 8:
-          lig_crg = lig_crg + float(splitdata[8].strip())
-    ligand_charge = round(lig_crg)
-    print('The protonation of the ligand is for pH %4.2f' %ligand_ph)
-    print('The net charge of the ligand is %d' %ligand_charge)
-    if not os.path.exists('../ff/%s.mol2' %mol.lower()):
-      print('Antechamber parameters command: antechamber -i '+mol.lower()+'-h.pdb -fi pdb -o '+mol.lower()+'.mol2 -fo mol2 -c bcc -s 2 -at '+ligand_ff.lower()+' -nc %d' % ligand_charge)
-      sp.call('antechamber -i '+mol.lower()+'-h.pdb -fi pdb -o '+mol.lower()+'.mol2 -fo mol2 -c bcc -s 2 -at '+ligand_ff.lower()+' -nc %d' % ligand_charge, shell=True)
-      shutil.copy('./%s.mol2' %(mol.lower()), '../ff/')
-    if not os.path.exists('../ff/%s.frcmod' %mol.lower()):
-      if ligand_ff == 'gaff':
-        sp.call('parmchk2 -i '+mol.lower()+'.mol2 -f mol2 -o '+mol.lower()+'.frcmod -s 1', shell=True)
-      elif ligand_ff == 'gaff2':
-        sp.call('parmchk2 -i '+mol.lower()+'.mol2 -f mol2 -o '+mol.lower()+'.frcmod -s 2', shell=True)
-      shutil.copy('./%s.frcmod' %(mol.lower()), '../ff/')
-    sp.call('antechamber -i '+mol.lower()+'-h.pdb -fi pdb -o '+mol.lower()+'.pdb -fo pdb', shell=True)
+        sp.call('babel -i pdb '+mol.lower()+'.pdb -o pdb '+mol.lower()+'-h.pdb -p %4.2f' %ligand_ph, shell=True)
+        sp.call('babel -i pdb '+mol.lower()+'.pdb -o mol2 '+mol.lower()+'-crg.mol2 -p %4.2f' %ligand_ph, shell=True)
+        # Get ligand net charge from babel
+        lig_crg = 0
+        with open('%s-crg.mol2' %mol.lower()) as f_in:
+          for line in f_in:
+            splitdata = line.split()
+            if len(splitdata) > 8:
+              lig_crg = lig_crg + float(splitdata[8].strip())
+        ligand_charge = round(lig_crg)
+        print('The protonation of the ligand is for pH %4.2f' %ligand_ph)
+        print('The net charge of the ligand is %d' %ligand_charge)
+        if not os.path.exists('../ff/%s.mol2' %mol.lower()):
+          print('Antechamber parameters command: antechamber -i '+mol.lower()+'-h.pdb -fi pdb -o '+mol.lower()+'.mol2 -fo mol2 -c bcc -s 2 -at '+ligand_ff.lower()+' -nc %d' % ligand_charge)
+          sp.call('antechamber -i '+mol.lower()+'-h.pdb -fi pdb -o '+mol.lower()+'.mol2 -fo mol2 -c bcc -s 2 -at '+ligand_ff.lower()+' -nc %d' % ligand_charge, shell=True)
+          shutil.copy('./%s.mol2' %(mol.lower()), '../ff/')
+        if not os.path.exists('../ff/%s.frcmod' %mol.lower()):
+          if ligand_ff == 'gaff':
+            sp.call('parmchk2 -i '+mol.lower()+'.mol2 -f mol2 -o '+mol.lower()+'.frcmod -s 1', shell=True)
+          elif ligand_ff == 'gaff2':
+            sp.call('parmchk2 -i '+mol.lower()+'.mol2 -f mol2 -o '+mol.lower()+'.frcmod -s 2', shell=True)
+          shutil.copy('./%s.frcmod' %(mol.lower()), '../ff/')
+        sp.call('antechamber -i '+mol.lower()+'-h.pdb -fi pdb -o '+mol.lower()+'.pdb -fo pdb', shell=True)
 
     # Create raw complex and clean it
     filenames = ['protein.pdb', '%s.pdb' %mol.lower()]
