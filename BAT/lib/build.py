@@ -288,7 +288,7 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
     return 'all'
 
 
-def build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist):
+def build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist, ion_def):
 
       
     # Get files or finding new anchors and building some systems
@@ -314,7 +314,7 @@ def build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln,
       # Clean output file
       with open('fe-ini.pdb') as oldfile, open('complex.pdb', 'w') as newfile:
           for line in oldfile:
-              if not 'TER' in line and not 'WAT' in line:
+              if not 'TER' in line and not 'WAT' in line and not str(ion_def[0]) in line and not str(ion_def[1]) in line:
                 newfile.write(line)
 
 
@@ -516,7 +516,7 @@ def build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln,
 
     return 'all'
 
-def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis):
+def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ion_def):
 
 
     # Get files or finding new anchors and building some systems
@@ -544,7 +544,7 @@ def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, nt
       # Clean output file
       with open('fe-ini.pdb') as oldfile, open('complex.pdb', 'w') as newfile:
           for line in oldfile:
-              if not 'TER' in line and not 'WAT' in line:
+              if not 'TER' in line and not 'WAT' in line and not str(ion_def[0]) in line and not str(ion_def[1]) in line:
                 newfile.write(line)
 
 

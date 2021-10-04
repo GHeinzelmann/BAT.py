@@ -466,7 +466,7 @@ elif stage == 'fe':
           win = k
           if int(win) == 0:
             print('window: %s%02d weight: %s' %(comp, int(win), str(weight)))
-            anch = build.build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist)
+            anch = build.build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist, ion_def)
             if anch == 'anch1':
               aa1_poses.append(pose)
               break
@@ -479,7 +479,7 @@ elif stage == 'fe':
             setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, c_steps1, c_steps2, rng)
           else:
             print('window: %s%02d weight: %s' %(comp, int(win), str(weight)))
-            build.build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist)
+            build.build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist, ion_def)
             setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method)
             setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, c_steps1, c_steps2, rng)
         if anch != 'all':  
@@ -495,7 +495,7 @@ elif stage == 'fe':
           win = k
           if int(win) == 0:
             print('window: %s%02d weight: %s' %(comp, int(win), str(weight)))
-            anch = build.build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist)
+            anch = build.build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist, ion_def)
             if anch == 'anch1':
               aa1_poses.append(pose)
               break
@@ -508,7 +508,7 @@ elif stage == 'fe':
             setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, r_steps1, r_steps2, rng)
           else:
             print('window: %s%02d weight: %s' %(comp, int(win), str(weight)))
-            build.build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist)
+            build.build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist, ion_def)
             setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method)
             setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, r_steps1, r_steps2, rng)
         if anch != 'all':  
@@ -526,7 +526,7 @@ elif stage == 'fe':
           win = k
           print('window: %s%02d lambda: %s' %(comp, int(win), str(weight)))
           if int(win) == 0:
-            anch = build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis)
+            anch = build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ion_def)
             if anch == 'anch1':
               aa1_poses.append(pose)
               break
@@ -537,7 +537,7 @@ elif stage == 'fe':
             setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method)
             setup.dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2, weight, lambdas, dec_method, ntwx)
           else:
-            build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis)
+            build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ion_def)
             setup.dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2, weight, lambdas, dec_method, ntwx)
         if anch != 'all':  
           break
@@ -554,7 +554,7 @@ elif stage == 'fe':
           win = k
           if int(win) == 0:
             print('window: %s%02d lambda: %s' %(comp, int(win), str(weight)))
-            anch = build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis)
+            anch = build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ion_def)
             if anch == 'anch1':
               aa1_poses.append(pose)
               break
@@ -567,7 +567,7 @@ elif stage == 'fe':
             setup.dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2, weight, lambdas, dec_method, ntwx)
           else:
             print('window: %s%02d lambda: %s' %(comp, int(win), str(weight)))
-            build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis)
+            build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ion_def)
             setup.dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2, weight, lambdas, dec_method, ntwx)
         if anch != 'all':  
           break
@@ -581,7 +581,7 @@ elif stage == 'fe':
           weight = attach_rest[k]
           win = k
           print('window: %s%02d weight: %s' %(comp, int(win), str(weight)))
-          anch = build.build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist)
+          anch = build.build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist, ion_def)
           if anch == 'anch1':
             aa1_poses.append(pose)
             break
