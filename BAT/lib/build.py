@@ -195,7 +195,6 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
         sys.exit(1)
       
       # Call pdb4amber twice, because pdb4amber can only correct residue names of histidines before removing H (-y option).
-      # Maybe we should call pdb4amber twice like this, when align_method == 'mustang' too.
       sp.call('pdb4amber -i complex.pdb -o temp.pdb', shell=True)
       sp.call('pdb4amber -i temp.pdb -o aligned_amber.pdb -y', shell=True)
 
@@ -370,20 +369,11 @@ def build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln,
       sp.call('cpptraj -p full.prmtop -y md%02d.rst7 -x fe-ini.pdb' %fwin, shell=True)
 
       # Clean output file
-      if align_method == 'mustang':
-        with open('fe-ini.pdb') as oldfile, open('complex.pdb', 'w') as newfile:
-            for line in oldfile:
-                if not 'TER' in line and not 'WAT' in line and not str(ion_def[0]) in line and not str(ion_def[1]) in line::
-                  newfile.write(line)
-      
-      elif align_method == 'vmd':
-        with open('fe-ini.pdb') as oldfile, open('complex.pdb', 'w') as newfile:
-            for line in oldfile:
-                if not 'TER' in line and not 'WAT' in line and not str(ion_def[0]) in line and not str(ion_def[1]) in line::
-                # TER lines must be retained here, so that a multi-chain receptor has its chains being separated by TER.
-                # Here I have to rely on TER to differentiate chains because cpptraj doesn't write out chain information to fe-ini.pdb
-                #if not 'WAT' in line: 
-                  newfile.write(line)
+      with open('fe-ini.pdb') as oldfile, open('complex.pdb', 'w') as newfile:
+          for line in oldfile:
+              if not 'TER' in line and not 'WAT' in line and not str(ion_def[0]) in line and not str(ion_def[1]) in line:
+                newfile.write(line)
+    
 
       # Read protein anchors and size from equilibrium
       with open('../../../equil/'+pose+'/equil-%s.pdb' % mol.lower(), 'r') as f:
@@ -426,18 +416,6 @@ def build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln,
         print('Because equil simulations moved the structure, alignment is needed at the start of the step -s fe')
 
         sp.call('vmd -dispdev text -e align.tcl', shell=True)
-
-        # Put back TER lines removed by vmd alignment
-        # with open('aligned.pdb', 'r') as oldfile, open('aligned-clean.pdb', 'w') as newfile:
-        #     for line in oldfile:
-        #         splitdata = line.split()
-        #         if len(splitdata) > 4:
-        #           if line[21] != 'A':
-        #             newfile.write(line)
-
-        #     if resname_list[i] == 'NME' and atom_namelist[i] == 'CH3':
-        #       build_file.write('TER\n')
-
         sp.call('pdb4amber -i aligned.pdb -o aligned_amber.pdb -y', shell=True)
 
       else:
