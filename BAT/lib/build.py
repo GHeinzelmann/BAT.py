@@ -8,8 +8,9 @@ import signal as signal
 import subprocess as sp
 import sys as sys
 from lib import scripts as scripts
+import filecmp
 
-def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ligand_ff, ligand_ph, retain_ligand_protonation):
+def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ligand_ff, ligand_ph, retain_ligand_protonation, align_method):
 
     # Not apply SDR distance when equilibrating
     sdr_dist = 0
@@ -172,17 +173,36 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
             if not 'TER' in line and not 'CONECT' in line and not 'END' in line:
                 newfile.write(line)
 
-    # Align to reference structure using mustang
-    sp.call('mustang-3.2.3 -p ./ -i reference.pdb complex.pdb -o aligned -r ON', shell=True)
+    if align_method == 'mustang':
+      # Align to reference structure using mustang
+      sp.call('mustang-3.2.3 -p ./ -i reference.pdb complex.pdb -o aligned -r ON', shell=True)
 
-    # Put in AMBER format and find ligand anchor atoms
-    with open('aligned.pdb', 'r') as oldfile, open('aligned-clean.pdb', 'w') as newfile:
-        for line in oldfile:
-            splitdata = line.split()
-            if len(splitdata) > 4:
-              if line[21] != 'A':
-                newfile.write(line)
-    sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y', shell=True)
+      # Put in AMBER format and find ligand anchor atoms
+      with open('aligned.pdb', 'r') as oldfile, open('aligned-clean.pdb', 'w') as newfile:
+          for line in oldfile:
+              splitdata = line.split()
+              if len(splitdata) > 4:
+                if line[21] != 'A':
+                  newfile.write(line)
+      sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y', shell=True)
+
+    elif align_method == 'vmd' and calc_type == 'dock': # I only have experience with calc_type == 'dock' so calc_type is checked here - Mudong
+      print('align_method chosen as vmd, so vmd instead of mustang is used for structure alignment.')
+      print('This align method only works when the strucrture being aligned has the exact same atoms as the reference.')
+      print('So all-poses/*_docked.pdb should be the exact same file as build_files/reference.pdb, and therefore no alignment is needed at the step -s equil')
+      if not filecmp.cmp('protein.pdb', 'reference.pdb'):
+        print ('Error! They are not really the exact same file')
+        sys.exit(1)
+      
+      # Call pdb4amber twice, because pdb4amber can only correct residue names of histidines before removing H (-y option).
+      # Maybe we should call pdb4amber twice like this, when align_method == 'mustang' too.
+      sp.call('pdb4amber -i complex.pdb -o temp.pdb', shell=True)
+      sp.call('pdb4amber -i temp.pdb -o aligned_amber.pdb -y', shell=True)
+
+    else:
+      print ('Error. Keywords align_method and calc_type are not set correctly')
+      sys.exit(1)
+    
     sp.call('vmd -dispdev text -e prep.tcl', shell=True)
 
     # Check size of anchor file 
@@ -326,7 +346,7 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
     return 'all'
 
 
-def build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist, ion_def):
+def build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist, ion_def, align_method):
 
       
     # Get files or finding new anchors and building some systems
@@ -350,11 +370,20 @@ def build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln,
       sp.call('cpptraj -p full.prmtop -y md%02d.rst7 -x fe-ini.pdb' %fwin, shell=True)
 
       # Clean output file
-      with open('fe-ini.pdb') as oldfile, open('complex.pdb', 'w') as newfile:
-          for line in oldfile:
-              if not 'TER' in line and not 'WAT' in line and not str(ion_def[0]) in line and not str(ion_def[1]) in line:
-                newfile.write(line)
-
+      if align_method == 'mustang':
+        with open('fe-ini.pdb') as oldfile, open('complex.pdb', 'w') as newfile:
+            for line in oldfile:
+                if not 'TER' in line and not 'WAT' in line and not str(ion_def[0]) in line and not str(ion_def[1]) in line::
+                  newfile.write(line)
+      
+      elif align_method == 'vmd':
+        with open('fe-ini.pdb') as oldfile, open('complex.pdb', 'w') as newfile:
+            for line in oldfile:
+                if not 'TER' in line and not 'WAT' in line and not str(ion_def[0]) in line and not str(ion_def[1]) in line::
+                # TER lines must be retained here, so that a multi-chain receptor has its chains being separated by TER.
+                # Here I have to rely on TER to differentiate chains because cpptraj doesn't write out chain information to fe-ini.pdb
+                #if not 'WAT' in line: 
+                  newfile.write(line)
 
       # Read protein anchors and size from equilibrium
       with open('../../../equil/'+pose+'/equil-%s.pdb' % mol.lower(), 'r') as f:
@@ -378,17 +407,43 @@ def build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln,
           for line in fin:
             fout.write(line.replace('MMM', mol).replace('mmm', mol.lower()).replace('NN', p1_atom).replace('P1A', p1_vmd).replace('FIRST','2').replace('LAST',str(rec_res)).replace('STAGE','fe').replace('XDIS','%4.2f' %l1_x).replace('YDIS','%4.2f' %l1_y).replace('ZDIS','%4.2f' %l1_z).replace('RANG','%4.2f' %l1_range).replace('DMAX','%4.2f' %max_adis).replace('DMIN','%4.2f' %min_adis).replace('SDRD','%4.2f' %sdr_dist))
 
-      # Align to reference structure using mustang
-      sp.call('mustang-3.2.3 -p ./ -i reference.pdb complex.pdb -o aligned -r ON', shell=True)
+      if align_method == 'mustang':
+        # Align to reference structure using mustang
+        sp.call('mustang-3.2.3 -p ./ -i reference.pdb complex.pdb -o aligned -r ON', shell=True)
 
-      # Put in AMBER format and find ligand anchor atoms
-      with open('aligned.pdb', 'r') as oldfile, open('aligned-clean.pdb', 'w') as newfile:
-          for line in oldfile:
-              splitdata = line.split()
-              if len(splitdata) > 4:
-                if line[21] != 'A':
-                  newfile.write(line)
-      sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y', shell=True)
+        # Put in AMBER format and find ligand anchor atoms
+        with open('aligned.pdb', 'r') as oldfile, open('aligned-clean.pdb', 'w') as newfile:
+            for line in oldfile:
+                splitdata = line.split()
+                if len(splitdata) > 4:
+                  if line[21] != 'A':
+                    newfile.write(line)
+        sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y', shell=True)
+
+      elif align_method == 'vmd':
+        print('align_method chosen as vmd, so vmd instead of mustang is used for structure alignment.')
+        print('This align method only works when the strucrture being aligned has the exact same atoms as the reference.')
+        print('Because equil simulations moved the structure, alignment is needed at the start of the step -s fe')
+
+        sp.call('vmd -dispdev text -e align.tcl', shell=True)
+
+        # Put back TER lines removed by vmd alignment
+        # with open('aligned.pdb', 'r') as oldfile, open('aligned-clean.pdb', 'w') as newfile:
+        #     for line in oldfile:
+        #         splitdata = line.split()
+        #         if len(splitdata) > 4:
+        #           if line[21] != 'A':
+        #             newfile.write(line)
+
+        #     if resname_list[i] == 'NME' and atom_namelist[i] == 'CH3':
+        #       build_file.write('TER\n')
+
+        sp.call('pdb4amber -i aligned.pdb -o aligned_amber.pdb -y', shell=True)
+
+      else:
+        print ('Error. Keywords align_method is not set correctly')
+        sys.exit(1)
+
       sp.call('vmd -dispdev text -e prep.tcl', shell=True)
 
       # Check size of anchor file 
@@ -554,7 +609,7 @@ def build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln,
 
     return 'all'
 
-def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ion_def):
+def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ion_def, align_method):
 
 
     # Get files or finding new anchors and building some systems
@@ -608,17 +663,33 @@ def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, nt
           for line in fin:
             fout.write(line.replace('MMM', mol).replace('mmm', mol.lower()).replace('NN', p1_atom).replace('P1A', p1_vmd).replace('FIRST','2').replace('LAST',str(rec_res)).replace('STAGE','fe').replace('XDIS','%4.2f' %l1_x).replace('YDIS','%4.2f' %l1_y).replace('ZDIS','%4.2f' %l1_z).replace('RANG','%4.2f' %l1_range).replace('DMAX','%4.2f' %max_adis).replace('DMIN','%4.2f' %min_adis).replace('SDRD','%4.2f' %sdr_dist))
 
-      # Align to reference structure using mustang
-      sp.call('mustang-3.2.3 -p ./ -i reference.pdb complex.pdb -o aligned -r ON', shell=True)
 
-      # Put in AMBER format and find ligand anchor atoms
-      with open('aligned.pdb', 'r') as oldfile, open('aligned-clean.pdb', 'w') as newfile:
-          for line in oldfile:
-              splitdata = line.split()
-              if len(splitdata) > 4:
-                if line[21] != 'A':
-                  newfile.write(line)
-      sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y', shell=True)
+
+      if align_method == 'mustang':
+        # Align to reference structure using mustang
+        sp.call('mustang-3.2.3 -p ./ -i reference.pdb complex.pdb -o aligned -r ON', shell=True)
+
+        # Put in AMBER format and find ligand anchor atoms
+        with open('aligned.pdb', 'r') as oldfile, open('aligned-clean.pdb', 'w') as newfile:
+            for line in oldfile:
+                splitdata = line.split()
+                if len(splitdata) > 4:
+                  if line[21] != 'A':
+                    newfile.write(line)
+        sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y', shell=True)
+
+      elif align_method == 'vmd':
+        print('align_method chosen as vmd, so vmd instead of mustang is used for structure alignment.')
+        print('This align method only works when the strucrture being aligned has the exact same atoms as the reference.')
+        print('Because equil simulations moved the structure, alignment is needed at the start of the step -s fe')
+
+        sp.call('vmd -dispdev text -e align.tcl', shell=True)
+        sp.call('pdb4amber -i aligned.pdb -o aligned_amber.pdb -y', shell=True)
+
+      else:
+        print ('Error. Keywords align_method is not set correctly')
+        sys.exit(1)
+
       sp.call('vmd -dispdev text -e prep.tcl', shell=True)
 
       # Check size of anchor file 
