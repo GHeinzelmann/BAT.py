@@ -1,0 +1,39 @@
+*******************************************************
+*****************************       therm2.in
+*******************************************************
+Thermalizing, NVT.
+ &cntrl
+  imin = 0,
+  ntx = 5,
+  irest = 1,
+  ntpr = 500,
+  ntwr = 25000,
+  ntwx = 0,
+  ioutfm = 1,
+  iwrap = 1,
+  ntf = 2,
+  ntc = 2,
+  cut = _cutoff_,
+  ntt = 3,
+  gamma_ln = _gamma_ln_,
+  ig = -1,
+  ntp = 0,
+  nstlim = 25000,
+  dt = _step_,
+  nmropt = 1,
+  pencut = -1,
+  ntr = 1,
+  restraint_wt = 50.0,
+  restraintmask = ':1-2',
+  infe = 1,
+ /
+ &pmd
+ output_file = 'cmass.txt'
+ output_freq = 1000
+ cv_file = 'cv.in'
+ /
+ &wt type='TEMP0', istep1=0,    istep2=25000,  value1=10.0, value2= _temperature_, /
+ &wt type = 'END', /
+DISANG=disang.rest
+LISTOUT=POUT
+

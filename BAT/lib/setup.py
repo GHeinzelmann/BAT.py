@@ -20,6 +20,9 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil,
     pdb_file = ('vac.pdb')
     ligand_pdb_file = ('vac_ligand.pdb')
 
+    if comp == 'n':
+      dec_method == 'sdr'
+
     # Restraint identifiers
     recep_tr = '#Rec_TR'
     recep_c = '#Rec_C'
@@ -70,7 +73,7 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil,
 
 
       if dec_method == 'sdr':
-        if (comp == 'e' or comp == 'v'):
+        if (comp == 'e' or comp == 'v' or comp == 'n'):
 
           rec_res = int(recep_last) + 2
           lig_res = str((int(lig_res) + 1))
@@ -90,7 +93,7 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil,
           P2 = ":"+p2_resid+"@"+p2_atom
           P3 = ":"+p3_resid+"@"+p3_atom
 
-          # Get host heavy atoms
+          # Get receptor heavy atoms
           with open('./vac.pdb') as f_in:
             lines = (line.rstrip() for line in f_in)
             lines = list(line for line in lines if line) # Non-blank lines in a list   
@@ -101,7 +104,7 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil,
                   if data == 'CA' or data == 'N' or data == 'C' or data == 'O':
                     hvy_h.append(lines[i][6:11].strip())
 
-          # Get bulk guest heavy atoms
+          # Get bulk ligand heavy atoms
           with open('./vac.pdb') as f_in:
             lines = (line.rstrip() for line in f_in)
             lines = list(line for line in lines if line) # Non-blank lines in a list   
@@ -116,6 +119,13 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil,
               for i in range(0, len(lines)):
                 if (lines[i][0:6].strip() == 'ATOM') or (lines[i][0:6].strip() == 'HETATM'):
                   if lines[i][22:26].strip() == str(int(lig_res) + 1):
+                    data = lines[i][12:16].strip()
+                    if data[0] != 'H':
+                      hvy_g.append(lines[i][6:11].strip())
+            if comp == 'n':
+              for i in range(0, len(lines)):
+                if (lines[i][0:6].strip() == 'ATOM') or (lines[i][0:6].strip() == 'HETATM'):
+                  if lines[i][22:26].strip() == str(int(lig_res)):
                     data = lines[i][12:16].strip()
                     if data[0] != 'H':
                       hvy_g.append(lines[i][6:11].strip())
@@ -157,11 +167,11 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil,
     beg = bb_start - int(first_res) + 2 
     end = bb_end - int(first_res) + 2
     if dec_method == 'sdr':
-      if (comp == 'e' or comp == 'v'):
+      if (comp == 'e' or comp == 'v' or comp == 'n'):
         beg = bb_start - int(first_res) + 3
         end = bb_end - int(first_res) + 3
     nd = 0
-    for i in range(beg, end+1):
+    for i in range(beg, end):
       j = i+1
       psi1 = ':'+str(i)+'@N' 
       psi2 = ':'+str(i)+'@CA' 
@@ -280,7 +290,7 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil,
       beg = bb_start - int(first_res) + 1 
       end = bb_end - int(first_res) + 1
       nd = 0
-      for i in range(beg, end+1):
+      for i in range(beg, end):
         j = i+1
         psi1 = ':'+str(i)+'@N' 
         psi2 = ':'+str(i)+'@CA' 
@@ -369,6 +379,21 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil,
       laf = weight*rest[3]/100
       ldhf = rest[4]
       rcom = rest[5]
+    elif comp == 'm':
+      rdhf = weight*rest[0]/100
+      rdsf = weight*rest[1]/100
+      ldf = weight*rest[2]/100
+      laf = weight*rest[3]/100
+      ldhf = weight*rest[4]/100
+      rcom = rest[5]
+    elif comp == 'n':
+      rdhf = weight*rest[0]/100
+      rdsf = weight*rest[1]/100
+      ldf = 0
+      laf = 0
+      ldhf = weight*rest[4]/100
+      rcom = rest[5]
+      lcom = rest[6]
     elif comp == 'v' or comp == 'e' or comp == 'w' or comp == 'f':
       rdhf = rest[0]
       rdsf = rest[1]
@@ -484,7 +509,7 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil,
       cv_file.write(' anchor_strength = %10.4f, %10.4f, \n' % (rcom, rcom))
       cv_file.write('/ \n')
       if dec_method == 'sdr':
-        if comp == 'e' or comp == 'v':
+        if comp == 'e' or comp == 'v' or comp == 'n':
           cv_file.write('&colvar \n')
           cv_file.write(' cv_type = \'COM_DISTANCE\' \n')
           cv_file.write(' cv_ni = %s, cv_i = 2,0,' % str(len(hvy_g)+2))
@@ -501,7 +526,7 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil,
 
       # Analysis of simulations
 
-      if (comp != 'l' and comp != 'a'):
+      if (comp != 'l' and comp != 'a' and comp != 'm' and comp != 'n'):  
         restraints_file = open('restraints.in', 'w')
         restraints_file.write('%s  %s  %s  %s  %s  %s  %s  %s  \n'%('# Anchor atoms', P1, P2, P3, L1, L2, L3, 'stage = '+stage))
         restraints_file.write('noexitonerror\n')
@@ -539,6 +564,21 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil,
         for i in range(2,11):
           restraints_file.write('trajin md%02.0f.nc\n' % i)
         for i in range(9+nd, len(rst)):
+          arr = rst[i].split()
+          if len(arr) == 2:
+            restraints_file.write('%s %s %s'%('distance d'+str(i), rst[i], 'noimage out restraints.dat\n'))
+          if len(arr) == 3:
+            restraints_file.write('%s %s %s'%('angle a'+str(i), rst[i], 'out restraints.dat\n'))
+          if len(arr) == 4:
+            restraints_file.write('%s %s %s'%('dihedral a'+str(i), rst[i], 'out restraints.dat\n'))
+      elif (comp == 'm' or comp == 'n'):
+        restraints_file = open('restraints.in', 'w')
+        restraints_file.write('%s  %s  %s  %s  %s  %s  %s  %s  \n'%('# Anchor atoms', P1, P2, P3, L1, L2, L3, 'stage = '+stage))
+        restraints_file.write('noexitonerror\n')
+        restraints_file.write('parm vac.prmtop\n')
+        for i in range(2,11):
+          restraints_file.write('trajin md%02.0f.nc\n' % i)
+        for i in range(0, len(rst)):
           arr = rst[i].split()
           if len(arr) == 2:
             restraints_file.write('%s %s %s'%('distance d'+str(i), rst[i], 'noimage out restraints.dat\n'))
@@ -705,7 +745,7 @@ def sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, steps1, st
         vac_atoms = data[-3][6:11].strip()
 
     # Create minimization and NPT equilibration files for big box and small ligand box 
-    if comp != 'c' and comp != 'r':
+    if comp != 'c' and comp != 'r' and comp != 'n':
       with open("../amber_files/mini.in", "rt") as fin:
         with open("./mini.in", "wt") as fout:
           for line in fin:
@@ -722,7 +762,7 @@ def sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, steps1, st
         with open("./eqnpt.in", "wt") as fout:
           for line in fin:
             fout.write(line.replace('_temperature_', str(temperature)))
-    else:
+    elif (comp == 'r' or comp == 'c'):
       with open("../amber_files/mini-lig.in", "rt") as fin:
         with open("./mini.in", "wt") as fout:
           for line in fin:
@@ -743,6 +783,23 @@ def sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, steps1, st
           for line in fin:
             if not 'restraint' in line and not 'ntr = 1' in line:
               fout.write(line.replace('_temperature_', str(temperature)))
+    else: # n component
+      with open("../amber_files/mini-sim.in", "rt") as fin:
+        with open("./mini.in", "wt") as fout:
+          for line in fin:
+            fout.write(line.replace('_L1_', L1).replace('_L2_', L2).replace('_L3_', L3))
+      with open("../amber_files/therm1-sim.in", "rt") as fin:
+        with open("./therm1.in", "wt") as fout:
+          for line in fin:
+            fout.write(line.replace('_L1_', L1).replace('_L2_', L2).replace('_L3_', L3))
+      with open("../amber_files/therm2-sim.in", "rt") as fin:
+        with open("./therm2.in", "wt") as fout:
+          for line in fin:
+            fout.write(line.replace('_L1_', L1).replace('_L2_', L2).replace('_L3_', L3).replace('_temperature_', str(temperature)))
+      with open("../amber_files/eqnpt-sim.in", "rt") as fin:
+        with open("./eqnpt.in", "wt") as fout:
+          for line in fin:
+            fout.write(line.replace('_temperature_', str(temperature)))
 
     # Create gradual release files for equilibrium
     if (stage == 'equil'):
@@ -772,7 +829,7 @@ def sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, steps1, st
 
     # Create free energy files
     if (stage == 'fe'):
-      if (comp != 'c' and comp != 'r'):
+      if (comp != 'c' and comp != 'r' and comp != 'n'):
         for i in range(0, num_sim+1):
           with open('../amber_files/mdin-rest', "rt") as fin:
             with open("./mdin-%02d" %int(i), "wt") as fout:
@@ -782,9 +839,19 @@ def sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, steps1, st
               else:
                 for line in fin:
                   fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(steps2)).replace('disang_file', 'disang'))
-      else:
+      elif (comp == 'r' or comp == 'c'):
         for i in range(0, num_sim+1):
           with open('../amber_files/mdin-lig', "rt") as fin:
+            with open("./mdin-%02d" %int(i), "wt") as fout:
+              if i == 1 or i == 0:
+                for line in fin:
+                  fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(steps1)).replace('disang_file', 'disang'))
+              else:
+                for line in fin:
+                  fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(steps2)).replace('disang_file', 'disang'))
+      else: # n
+        for i in range(0, num_sim+1):
+          with open('../amber_files/mdin-sim', "rt") as fin:
             with open("./mdin-%02d" %int(i), "wt") as fout:
               if i == 1 or i == 0:
                 for line in fin:
@@ -795,7 +862,7 @@ def sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, steps1, st
 
     # Create running scripts for local and server
     if (stage == 'fe'):
-      if (comp != 'c' and comp != 'r'): 
+      if (comp != 'c' and comp != 'r' and comp != 'n'): 
         with open('../run_files/local-'+stage+'.bash', "rt") as fin:
           with open("./run-local.bash", "wt") as fout:
             for line in fin:

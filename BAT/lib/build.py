@@ -10,7 +10,7 @@ import sys as sys
 from lib import scripts as scripts
 import filecmp
 
-def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ligand_ff, ligand_ph, retain_ligand_protonation, align_method):
+def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ligand_ff, ligand_ph, retain_lig_prot, ligand_charge):
 
     # Not apply SDR distance when equilibrating
     sdr_dist = 0
@@ -96,13 +96,11 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
     shutil.copy('./dum.mol2', '../ff/')
     shutil.copy('./dum.frcmod', '../ff/')
 
-    # Get parameters and adjust files
-    if calc_type == 'dock':
-
-      # Mudong's mod: optionally retain the ligand protonation state as provided in pose*.pdb, and skip Babel processing (removing H, adding H, determining total charge)
-      if retain_ligand_protonation == 'yes':
-        print('Ligand protonation is retained, because retain_ligand_protonation option is turned on')
+    # Adjust ligand files
+    # Mudong's mod: optionally retain the ligand protonation state as provided in pose*.pdb, and skip Babel processing (removing H, adding H, determining total charge)
+    if retain_lig_prot == 'yes':
       # Determine ligand net charge by reading the rightmost column of pose*.pdb, programs such as Maestro writes atom charges there
+      if ligand_charge == 'nd':
         ligand_charge = 0
         with open(''+pose+'.pdb') as f_in:
           for line in f_in:
@@ -122,23 +120,14 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
               ligand_charge += -3
             elif '4-' in line:
               ligand_charge += -4
-        print('The net charge of the ligand is %d' %ligand_charge)
-        if not os.path.exists('../ff/%s.mol2' %mol.lower()):
-          print('Antechamber parameters command: antechamber -i '+pose+'.pdb -fi pdb -o '+mol.lower()+'.mol2 -fo mol2 -c bcc -s 2 -at '+ligand_ff.lower()+' -nc %d' % ligand_charge)
-          sp.call('antechamber -i '+pose+'.pdb -fi pdb -o '+mol.lower()+'.mol2 -fo mol2 -c bcc -s 2 -at '+ligand_ff.lower()+' -nc %d' % ligand_charge, shell=True)
-          shutil.copy('./%s.mol2' %(mol.lower()), '../ff/')
-        if not os.path.exists('../ff/%s.frcmod' %mol.lower()):
-          if ligand_ff == 'gaff':
-            sp.call('parmchk2 -i '+mol.lower()+'.mol2 -f mol2 -o '+mol.lower()+'.frcmod -s 1', shell=True)
-          elif ligand_ff == 'gaff2':
-            sp.call('parmchk2 -i '+mol.lower()+'.mol2 -f mol2 -o '+mol.lower()+'.frcmod -s 2', shell=True)
-          shutil.copy('./%s.frcmod' %(mol.lower()), '../ff/')
-        sp.call('antechamber -i '+pose+'.pdb -fi pdb -o '+mol.lower()+'.pdb -fo pdb', shell=True)
-
-      else:
-        sp.call('babel -i pdb '+pose+'.pdb -o pdb '+mol.lower()+'.pdb -d', shell=True)
-        sp.call('babel -i pdb '+mol.lower()+'.pdb -o pdb '+mol.lower()+'-h.pdb -p %4.2f' %ligand_ph, shell=True)
-        sp.call('babel -i pdb '+mol.lower()+'.pdb -o mol2 '+mol.lower()+'-crg.mol2 -p %4.2f' %ligand_ph, shell=True)
+      print('The net charge of the ligand is %d' %ligand_charge)
+      shutil.copy('./'+pose+'.pdb', './'+mol.lower()+'-h.pdb')
+    else:
+      sp.call('babel -i pdb '+pose+'.pdb -o pdb '+mol.lower()+'.pdb -d', shell=True)                            # Remove all hydrogens from the ligand
+      sp.call('babel -i pdb '+mol.lower()+'.pdb -o pdb '+mol.lower()+'-h.pdb -p %4.2f' %ligand_ph, shell=True)  # Put all hydrogens back using babel
+      sp.call('babel -i pdb '+mol.lower()+'.pdb -o mol2 '+mol.lower()+'-crg.mol2 -p %4.2f' %ligand_ph, shell=True)
+      if ligand_charge == 'nd':
+        ligand_charge = 0
         # Get ligand net charge from babel
         lig_crg = 0
         with open('%s-crg.mol2' %mol.lower()) as f_in:
@@ -147,19 +136,21 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
             if len(splitdata) > 8:
               lig_crg = lig_crg + float(splitdata[8].strip())
         ligand_charge = round(lig_crg)
-        print('The protonation of the ligand is for pH %4.2f' %ligand_ph)
-        print('The net charge of the ligand is %d' %ligand_charge)
-        if not os.path.exists('../ff/%s.mol2' %mol.lower()):
-          print('Antechamber parameters command: antechamber -i '+mol.lower()+'-h.pdb -fi pdb -o '+mol.lower()+'.mol2 -fo mol2 -c bcc -s 2 -at '+ligand_ff.lower()+' -nc %d' % ligand_charge)
-          sp.call('antechamber -i '+mol.lower()+'-h.pdb -fi pdb -o '+mol.lower()+'.mol2 -fo mol2 -c bcc -s 2 -at '+ligand_ff.lower()+' -nc %d' % ligand_charge, shell=True)
-          shutil.copy('./%s.mol2' %(mol.lower()), '../ff/')
-        if not os.path.exists('../ff/%s.frcmod' %mol.lower()):
-          if ligand_ff == 'gaff':
-            sp.call('parmchk2 -i '+mol.lower()+'.mol2 -f mol2 -o '+mol.lower()+'.frcmod -s 1', shell=True)
-          elif ligand_ff == 'gaff2':
-            sp.call('parmchk2 -i '+mol.lower()+'.mol2 -f mol2 -o '+mol.lower()+'.frcmod -s 2', shell=True)
-          shutil.copy('./%s.frcmod' %(mol.lower()), '../ff/')
-        sp.call('antechamber -i '+mol.lower()+'-h.pdb -fi pdb -o '+mol.lower()+'.pdb -fo pdb', shell=True)
+      print('The babel protonation of the ligand is for pH %4.2f' %ligand_ph)
+      print('The net charge of the ligand is %d' %ligand_charge)
+
+    # Get ligand parameters
+    if not os.path.exists('../ff/%s.mol2' %mol.lower()):
+      print('Antechamber parameters command: antechamber -i '+mol.lower()+'-h.pdb -fi pdb -o '+mol.lower()+'.mol2 -fo mol2 -c bcc -s 2 -at '+ligand_ff.lower()+' -nc %d' % ligand_charge)
+      sp.call('antechamber -i '+mol.lower()+'-h.pdb -fi pdb -o '+mol.lower()+'.mol2 -fo mol2 -c bcc -s 2 -at '+ligand_ff.lower()+' -nc %d' % ligand_charge, shell=True)
+      shutil.copy('./%s.mol2' %(mol.lower()), '../ff/')
+    if not os.path.exists('../ff/%s.frcmod' %mol.lower()):
+      if ligand_ff == 'gaff':
+        sp.call('parmchk2 -i '+mol.lower()+'.mol2 -f mol2 -o '+mol.lower()+'.frcmod -s 1', shell=True)
+      elif ligand_ff == 'gaff2':
+        sp.call('parmchk2 -i '+mol.lower()+'.mol2 -f mol2 -o '+mol.lower()+'.frcmod -s 2', shell=True)
+      shutil.copy('./%s.frcmod' %(mol.lower()), '../ff/')
+    sp.call('antechamber -i '+mol.lower()+'-h.pdb -fi pdb -o '+mol.lower()+'.pdb -fo pdb', shell=True)
 
     # Create raw complex and clean it
     filenames = ['protein.pdb', '%s.pdb' %mol.lower()]
@@ -173,35 +164,17 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
             if not 'TER' in line and not 'CONECT' in line and not 'END' in line:
                 newfile.write(line)
 
-    if align_method == 'mustang':
-      # Align to reference structure using mustang
-      sp.call('mustang-3.2.3 -p ./ -i reference.pdb complex.pdb -o aligned -r ON', shell=True)
+    # Align to reference structure using mustang
+    sp.call('mustang-3.2.3 -p ./ -i reference.pdb complex.pdb -o aligned -r ON', shell=True)
 
-      # Put in AMBER format and find ligand anchor atoms
-      with open('aligned.pdb', 'r') as oldfile, open('aligned-clean.pdb', 'w') as newfile:
-          for line in oldfile:
-              splitdata = line.split()
-              if len(splitdata) > 4:
-                if line[21] != 'A':
-                  newfile.write(line)
-      sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y', shell=True)
-
-    elif align_method == 'vmd' and calc_type == 'dock': # I only have experience with calc_type == 'dock' so calc_type is checked here - Mudong
-      print('align_method chosen as vmd, so vmd instead of mustang is used for structure alignment.')
-      print('This align method only works when the strucrture being aligned has the exact same atoms as the reference.')
-      print('So all-poses/*_docked.pdb should be the exact same file as build_files/reference.pdb, and therefore no alignment is needed at the step -s equil')
-      if not filecmp.cmp('protein.pdb', 'reference.pdb'):
-        print ('Error! They are not really the exact same file')
-        sys.exit(1)
-      
-      # Call pdb4amber twice, because pdb4amber can only correct residue names of histidines before removing H (-y option).
-      sp.call('pdb4amber -i complex.pdb -o temp.pdb', shell=True)
-      sp.call('pdb4amber -i temp.pdb -o aligned_amber.pdb -y', shell=True)
-
-    else:
-      print ('Error. Keywords align_method and calc_type are not set correctly')
-      sys.exit(1)
-    
+    # Put in AMBER format and find ligand anchor atoms
+    with open('aligned.pdb', 'r') as oldfile, open('aligned-clean.pdb', 'w') as newfile:
+        for line in oldfile:
+            splitdata = line.split()
+            if len(splitdata) > 4:
+              if line[21] != 'A':
+                newfile.write(line)
+    sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y', shell=True)
     sp.call('vmd -dispdev text -e prep.tcl', shell=True)
 
     # Check size of anchor file 
@@ -345,7 +318,7 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
     return 'all'
 
 
-def build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist, ion_def, align_method):
+def build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist, ion_def):
 
       
     # Get files or finding new anchors and building some systems
@@ -397,31 +370,17 @@ def build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln,
           for line in fin:
             fout.write(line.replace('MMM', mol).replace('mmm', mol.lower()).replace('NN', p1_atom).replace('P1A', p1_vmd).replace('FIRST','2').replace('LAST',str(rec_res)).replace('STAGE','fe').replace('XDIS','%4.2f' %l1_x).replace('YDIS','%4.2f' %l1_y).replace('ZDIS','%4.2f' %l1_z).replace('RANG','%4.2f' %l1_range).replace('DMAX','%4.2f' %max_adis).replace('DMIN','%4.2f' %min_adis).replace('SDRD','%4.2f' %sdr_dist))
 
-      if align_method == 'mustang':
-        # Align to reference structure using mustang
-        sp.call('mustang-3.2.3 -p ./ -i reference.pdb complex.pdb -o aligned -r ON', shell=True)
+      # Align to reference structure using mustang
+      sp.call('mustang-3.2.3 -p ./ -i reference.pdb complex.pdb -o aligned -r ON', shell=True)
 
-        # Put in AMBER format and find ligand anchor atoms
-        with open('aligned.pdb', 'r') as oldfile, open('aligned-clean.pdb', 'w') as newfile:
-            for line in oldfile:
-                splitdata = line.split()
-                if len(splitdata) > 4:
-                  if line[21] != 'A':
-                    newfile.write(line)
-        sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y', shell=True)
-
-      elif align_method == 'vmd':
-        print('align_method chosen as vmd, so vmd instead of mustang is used for structure alignment.')
-        print('This align method only works when the strucrture being aligned has the exact same atoms as the reference.')
-        print('Because equil simulations moved the structure, alignment is needed at the start of the step -s fe')
-
-        sp.call('vmd -dispdev text -e align.tcl', shell=True)
-        sp.call('pdb4amber -i aligned.pdb -o aligned_amber.pdb -y', shell=True)
-
-      else:
-        print ('Error. Keywords align_method is not set correctly')
-        sys.exit(1)
-
+      # Put in AMBER format and find ligand anchor atoms
+      with open('aligned.pdb', 'r') as oldfile, open('aligned-clean.pdb', 'w') as newfile:
+          for line in oldfile:
+              splitdata = line.split()
+              if len(splitdata) > 4:
+                if line[21] != 'A':
+                  newfile.write(line)
+      sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y', shell=True)
       sp.call('vmd -dispdev text -e prep.tcl', shell=True)
 
       # Check size of anchor file 
@@ -519,7 +478,7 @@ def build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln,
             with open(fpath, "w") as f:
               f.write(s)
 
-    if (comp == 'a' or comp == 'l' or comp == 't'):
+    if (comp == 'a' or comp == 'l' or comp == 't' or comp == 'm'):
       # Create window directory
       if not os.path.exists('%s%02d' %(comp, int(win))):
         os.makedirs('%s%02d' %(comp, int(win)))
@@ -587,9 +546,12 @@ def build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln,
 
     return 'all'
 
-def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ion_def, align_method):
+def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ion_def):
 
 
+    if comp == 'n':
+      dec_method == 'sdr'
+    
     # Get files or finding new anchors and building some systems
 
     if (not os.path.exists('../build_files')) or (dec_method == 'sdr' and win == 0):
@@ -641,33 +603,17 @@ def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, nt
           for line in fin:
             fout.write(line.replace('MMM', mol).replace('mmm', mol.lower()).replace('NN', p1_atom).replace('P1A', p1_vmd).replace('FIRST','2').replace('LAST',str(rec_res)).replace('STAGE','fe').replace('XDIS','%4.2f' %l1_x).replace('YDIS','%4.2f' %l1_y).replace('ZDIS','%4.2f' %l1_z).replace('RANG','%4.2f' %l1_range).replace('DMAX','%4.2f' %max_adis).replace('DMIN','%4.2f' %min_adis).replace('SDRD','%4.2f' %sdr_dist))
 
+      # Align to reference structure using mustang
+      sp.call('mustang-3.2.3 -p ./ -i reference.pdb complex.pdb -o aligned -r ON', shell=True)
 
-
-      if align_method == 'mustang':
-        # Align to reference structure using mustang
-        sp.call('mustang-3.2.3 -p ./ -i reference.pdb complex.pdb -o aligned -r ON', shell=True)
-
-        # Put in AMBER format and find ligand anchor atoms
-        with open('aligned.pdb', 'r') as oldfile, open('aligned-clean.pdb', 'w') as newfile:
-            for line in oldfile:
-                splitdata = line.split()
-                if len(splitdata) > 4:
-                  if line[21] != 'A':
-                    newfile.write(line)
-        sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y', shell=True)
-
-      elif align_method == 'vmd':
-        print('align_method chosen as vmd, so vmd instead of mustang is used for structure alignment.')
-        print('This align method only works when the strucrture being aligned has the exact same atoms as the reference.')
-        print('Because equil simulations moved the structure, alignment is needed at the start of the step -s fe')
-
-        sp.call('vmd -dispdev text -e align.tcl', shell=True)
-        sp.call('pdb4amber -i aligned.pdb -o aligned_amber.pdb -y', shell=True)
-
-      else:
-        print ('Error. Keywords align_method is not set correctly')
-        sys.exit(1)
-
+      # Put in AMBER format and find ligand anchor atoms
+      with open('aligned.pdb', 'r') as oldfile, open('aligned-clean.pdb', 'w') as newfile:
+          for line in oldfile:
+              splitdata = line.split()
+              if len(splitdata) > 4:
+                if line[21] != 'A':
+                  newfile.write(line)
+      sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y', shell=True)
       sp.call('vmd -dispdev text -e prep.tcl', shell=True)
 
       # Check size of anchor file 
@@ -711,7 +657,10 @@ def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, nt
       shutil.copy('../../../equil/ff/dum.mol2', '../ff/')
       shutil.copy('../../../equil/ff/dum.frcmod', '../ff/')
 
-      os.chdir('../'+dec_method+'/')
+      if comp != 'n':
+        os.chdir('../'+dec_method+'/')
+      else:
+        os.chdir('../rest/')
 
     # Copy and replace simulation files for the first window
     if int(win) == 0:
@@ -836,7 +785,7 @@ def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, nt
                    recep_coords.append((float(lines[i][30:38].strip()), float(lines[i][38:46].strip()), float(lines[i][46:54].strip())))
                    recep_atomlist.append(lines[i][12:16].strip())
                    resname_list.append(lines[i][17:20].strip())
-                   resid_list.append(float(lines[i][22:26].strip()) + dum_atom)
+                   resid_list.append(float(lines[i][22:26].strip()) + dum_atom - 1)
                    recep_last = int(lines[i][22:26].strip())
                    recep_atom += 1
                    total_atom += 1
@@ -844,14 +793,14 @@ def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, nt
                    lig_coords.append((float(lines[i][30:38].strip()), float(lines[i][38:46].strip()), float(lines[i][46:54].strip())))
                    lig_atomlist.append(lines[i][12:16].strip())
                    resname_list.append(lines[i][17:20].strip())
-                   resid_list.append(float(lines[i][22:26].strip()) + dum_atom)
+                   resid_list.append(float(lines[i][22:26].strip()) + dum_atom - 1)
                    lig_atom += 1
                    total_atom += 1
 
 
       coords = dum_coords + recep_coords + lig_coords
       atom_namelist = dum_atomlist + recep_atomlist + lig_atomlist
-      lig_resid = recep_last + dum_atom + 1
+      lig_resid = recep_last + dum_atom 
 
       # Write the new pdb file
 
@@ -875,8 +824,10 @@ def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, nt
       # Positions of the ligand atoms
       for i in range(dum_atom + recep_atom, total_atom):
           build_file.write('%-4s  %5s %-4s %3s  %4.0f    '%('ATOM', i+1, atom_namelist[i],mol, float(lig_resid)))
-          build_file.write('%8.3f%8.3f%8.3f'%(float(coords[i][0]), float(coords[i][1]),float(coords[i][2])))
-
+          if comp != 'n':
+            build_file.write('%8.3f%8.3f%8.3f'%(float(coords[i][0]), float(coords[i][1]),float(coords[i][2])))
+          else:
+            build_file.write('%8.3f%8.3f%8.3f'%(float(coords[i][0]), float(coords[i][1]),float(coords[i][2]+sdr_dist)))
           build_file.write('%6.2f%6.2f\n'%(0, 0))
 
       build_file.write('TER\n')
