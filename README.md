@@ -3,7 +3,7 @@
 
 BAT.py version 2.1 already available in the master branch, including the new features:
 
-- Merged components for the restraints, allowing all the of them to be attached or released using a single set of windows.
+- Merged components for the restraints, allowing all of them to be attached or released using a single set of windows.
 - Choice of retaining the ligand protonation, if already starting from a protonated pdb file for the docked pose.
 - Choice of defining the ligand net charge manually, to help with the generation of partial atomic charges using Antechamber.
 - Optimized simulation times and number of windows in the tutorial files, greatly reducing the computational cost of the ABFE calculations.
