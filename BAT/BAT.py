@@ -660,10 +660,14 @@ elif stage == 'fe':
     print('\n')
     print ('WARNING: Could not find the ligand first anchor L1 for', aa1_poses)
     print ('The ligand most likely left the binding site during equilibration of these systems.')
+    for i in aa1_poses:
+      shutil.rmtree('./'+i+'')
   if len(aa2_poses) != 0:
     print('\n')
     print ('WARNING: Could not find the ligand L2 or L3 anchors for', aa2_poses)
     print ('Try reducing the min_adis parameter in the input file.')
+    for i in aa2_poses:
+      shutil.rmtree('./'+i+'')
 elif stage == 'analysis':
   # Free energies MBAR/TI and analytical calculations
   for i in range(0, len(poses_def)):
