@@ -1,23 +1,4 @@
-*Note: The master branch is for the 2.0 version of BAT. For the version associated with Ref. [1], which includes the APR method, download the package from the BATv1.0 branch.* 
-
---------------------------------------------------------
-
-*New features on BAT 2.0:*
-
- 
-*- Relative restraints between the receptor and the ligand (figure below), without the need for three fixed dummy atoms.*
-
-*- Center of mass restraints on the receptor, and the bulk ligand when the SDR method is applied, so their internal degrees of freedom are not affected.*
-
-*- Only two stages, equilibrium and free energy simulations. The preparation stage is no longer required, since the APR method is not available in the 2.0 version.*
-
-*- Possible choice between a fixed number of waters, or fixed solvation buffers in the three cartesian axes.*
-
-*- Automatic determination of the number of ions based on the chosen salt concentration.*
-
-*- Simpler procedure to add new receptors.*
-
--------------------------------------------------------
+*Note: The master branch is for the 2.x versions of BAT. For the 1.0 version released with Ref. [1], which includes the APR method, download the package from the BATv1.0 branch.* 
 
 *See also: GHOAT.py, a fully automated tool for guest-host ABFE calculations using SDR with pmemd.cuda:* 
 
@@ -26,12 +7,12 @@ https://github.com/GHeinzelmann/GHOAT.py
 *A tutorial and a detailed user guide are available, as well as necessary parameter and input files for several hosts.*
 
 
-# BAT.py v2.0
+# BAT.py v2.1
 
-The Binding Affinity Tool (BAT.py) is a python tool for fully automated absolute binding free energy calculations. Its workflow encompasses the creation of the bound complex, generation of parameters using Antechamber, preparation of the simulation files, and post-processing to retrieve the binding free energy. By using the _pmemd.cuda_ software from AMBER20, it is able to perform several calculations at a reduced computational cost using graphics processing units (GPUs).
+The Binding Affinity Tool (BAT.py) is a python tool for fully automated absolute binding free energy (ABFE) calculations. Its workflow encompasses the creation of the bound complex, generation of parameters using Antechamber, preparation of the simulation files, and post-processing to retrieve the binding free energy. By using the _pmemd.cuda_ software from AMBER20, it is able to perform several calculations at a reduced computational cost using graphics processing units (GPUs).
 
 
-The 2.0 version of BAT.py can perform binding free energy calculations by two alchemical routes in the presence of restraints, either with double decoupling (DD) procedure or with the simultaneous decoupling recoupling (SDR) method. For the use of the APR method in addition to DD and SDR, download the 1.0 version of the code at the BATv1.0 branch. BAT.py is compatible with the simulation package AMBER20, also requiring a few installed programs to work properly, which are listed in the next section. 
+The 2.1 version of BAT.py can perform ABFE calculations by two alchemical routes in the presence of restraints, either with double decoupling (DD) procedure or with the simultaneous decoupling and recoupling (SDR) method, the latter suitable for ligands with net charge. For the use of the APR method in addition to DD and SDR, download the 1.0 version of the code at the BATv1.0 branch. BAT.py is compatible with the simulation package AMBER20, also requiring a few installed programs to work properly, which are listed in the next section. 
 
 ![](doc/figure.png)
 
@@ -57,7 +38,10 @@ The folder ./BAT/all-poses contains an example of system input files, with a doc
 
 # Running a sample calculation
 
-The simulations and analysis from this example will be performed inside the ./BAT folder. The simulations are divided in two steps, equilibration (folder ./equil) and free energy calculation (folder ./fe). The input file with all the needed BAT.py parameters for double decoupling is called input-dd.in, with the meaning of each explained in more detail in the user guide, located inside the ./doc folder. For our sample calculation, we will use the values already provided in the input files included in this distribution. Briefly, the poses\_list parameter sets up the calculation for the first 5 poses from Autodock Vina, all in the ./all-poses folder. The input files can be modified to perform the calculations in the 5uf0 crystal structure, by changing the calc\_type option to "crystal", the celpp\_receptor option to "5uf0", and the ligand\_name option to "89J", which is the ligand residue name in the 5uf0 pdb structure. 
+The simulations and analysis from this example will be performed inside the ./BAT folder. The simulations are divided in two steps, equilibration (folder ./equil) and free energy calculation (folder ./fe). For the tutorial we will use the input-dd.in BAT input file, with the needed BAT.py parameters to perform a full double decoupling calculation with restraints. A similar input file called input-dd-long.in, with more free energy windows and longer simulation times, is also included as an example. 
+
+Briefly, the poses\_list parameter sets up the calculation for the first 5 poses from Autodock Vina, all in the ./all-poses folder. The input files can be modified to perform the calculations in the 5uf0 crystal structure, by changing the calc\_type option to "crystal", the celpp\_receptor option to "5uf0", and the ligand\_name option to "89J", which is the ligand residue name in the 5uf0 pdb structure. More details on the various BAT parameters can be found in the user guide, located inside the ./doc folder.
+
 
 ![](doc/workflow.png)
 
@@ -92,9 +76,18 @@ python BAT.py -i input-dd.in -s analysis
 
 You should see a ./Results directory inside each ./fe/pose folder, containing all the components and the final calculated binding free energy, located in the Results.dat file. This folder also contains the results for each of the chosen data blocks, which is useful to check for convergence and fluctuations, and is also used to calculate the uncertainties. This fully automated procedure can be readily applied for any other ligand that binds to the second BRD4 bromodomain, and with minimal adjustments it can be extended to several other proteins.
 
-## Using the SDR method
+### Computational cost
 
-The SDR method is suitable for ligands with net charge, since it keeps the two free energy topologies with the same charge during the transformations. To apply SDR, a few parameters have to be changed or added, which is shown in the input-sdr.in file included in this example. All that is needed is to perform the free energy and analysis steps again with this input file. The DD and SDR methods should produce consistent results if the reference state is the same from the equilibrium stage.  
+The full ABFE calculation for a single pose requires a total of 248.4 nanoseconds of simulations, which can be achieved in nearly one day using a single GTX 1070 NVIDIA GPU. This time is significantly reduced when using more modern GPUs, such as the NVIDIA RTX 20 and RTX 30 series.
+
+## Using the SDR method and merged restraints
+
+The SDR method is suitable for ligands with net charge, since it keeps the two topologies with the same charge during the transformations. To apply SDR, a few parameters have to be changed or added, which is shown in the input-sdr.in file included in this example. This input file also uses the merged components for the restraints, which are explained in detail in the User Guide.
+
+To apply the merged SDR method, all that is needed is to perform the free energy and analysis steps again using the input-sdr.in file. The full DD and merged SDR methods should produce consistent results if the reference state is the same from the equilibrium stage. The computational cost is also similar between the two, with a total of 284 ns of simulations for the merged SDR method.
+
+The user can also mix and match the separated/merged restraint components and the DD/SDR methods, for example using double decoupling with the merged restraints or the SDR method with the separated restraints. Another possibility is to merge only the releasing or the attaching restraints, while keeping the others separate. 
+
 
 # Extending it to other systems
 
@@ -106,9 +99,9 @@ The sample system shown here uses a particular ligand that binds to the second b
 
 To include a new receptor system, some additional input data is needed. They include a reference.pdb file to align the system using MUSTANG, three chosen protein anchors, and possibly a few variables for ligand anchor atom search. These can be found inside the ./systems-library folder for three other bromodomains (CREBBP, BRD4(1) and BAZ2B), the T4 Lysozyme, and the MCL-1 protein. Other systems will be added with time, as the program is further tested and validated.    
 
-# More information
+# More information and BAT.py citation
 
-A paper explaining the whole BAT.py theoretical aspects and calculation procedure is available in Ref [1]. For more information you can contact the author directly:
+A paper explaining the whole BAT.py theoretical aspects and calculation procedure is available in Ref [1]. Please cite this reference if using the BAT code. For more information you can contact the author directly:
 
 Germano Heinzelmann <br/>
 Departamento de Física, Universidade Federal de Santa Catarina <br/>
