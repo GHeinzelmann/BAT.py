@@ -1,3 +1,16 @@
+
+\- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+
+BAT.py version 2.1 already available in the master branch, including the new features:
+
+- Merged components for the restraints, allowing all the of them to be attached or released using a single set of windows.
+- Choice of retaining the ligand protonation, if already starting from a protonated pdb file for the docked pose.
+- Choice of defining the ligand net charge manually, to help with the generation of partial atomic charges using Antechamber.
+- Optimized simulation times and number of windows in the tutorial files, greatly reducing the computational cost of the ABFE calculations.
+- A few bug fixes.
+
+\- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+
 *Note: The master branch is for the 2.x versions of BAT. For the 1.0 version released with Ref. [1], which includes the APR method, download the package from the BATv1.0 branch.* 
 
 *See also: GHOAT.py, a fully automated tool for guest-host ABFE calculations using SDR with pmemd.cuda:* 
@@ -82,7 +95,7 @@ You should see a ./Results directory inside each ./fe/pose folder, containing al
 
 The full ABFE calculation above for a single pose requires a total of 248.4 nanoseconds of simulations, which can be achieved in nearly one day using a single GTX 1070 NVIDIA GPU. This time is significantly reduced when using more modern GPUs, such as the NVIDIA RTX 20 and RTX 30 series. 
 
-The free energy simulations from BAT are separated into several independent windows, and the poses affintities are also calculated independently, which allows for trivial parallelization across multiple GPUs. This can reduce the time needed to fully evaluate a ligand to as little as one hour using several GTX 1070 GPUs, and much less that that if using more modern GPUs.
+The free energy simulations from BAT are separated into several independent windows, and the poses affinities are also calculated independently, which allows for trivial parallelization across multiple GPUs. This can reduce the time needed to fully evaluate a ligand to as little as one hour using several GTX 1070 GPUs, and much less that that if using more modern GPUs.
 
 
 ## Using the SDR method and merged restraints
