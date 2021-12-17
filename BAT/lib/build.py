@@ -121,7 +121,10 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
             elif '4-' in line:
               ligand_charge += -4
       print('The net charge of the ligand is %d' %ligand_charge)
-      shutil.copy('./'+pose+'.pdb', './'+mol.lower()+'-h.pdb')
+      if calc_type == 'dock':
+        shutil.copy('./'+pose+'.pdb', './'+mol.lower()+'-h.pdb')
+      elif calc_type == 'crystal':
+        shutil.copy('./'+mol.lower()+'.pdb', './'+mol.lower()+'-h.pdb')
     else:
       if calc_type == 'dock':
         sp.call('babel -i pdb '+pose+'.pdb -o pdb '+mol.lower()+'.pdb -d', shell=True)                            # Remove all hydrogens from the ligand
