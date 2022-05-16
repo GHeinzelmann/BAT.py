@@ -127,11 +127,11 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
         shutil.copy('./'+mol.lower()+'.pdb', './'+mol.lower()+'-h.pdb')
     else:
       if calc_type == 'dock':
-        sp.call('babel -i pdb '+pose+'.pdb -o pdb '+mol.lower()+'.pdb -d', shell=True)                            # Remove all hydrogens from the ligand
+        sp.call('obabel -i pdb '+pose+'.pdb -o pdb -O '+mol.lower()+'.pdb -d', shell=True)                            # Remove all hydrogens from the ligand
       elif calc_type == 'crystal':
-        sp.call('babel -i pdb '+mol.lower()+'.pdb -o pdb '+mol.lower()+'.pdb -d', shell=True)                     # Remove all hydrogens from crystal ligand
-      sp.call('babel -i pdb '+mol.lower()+'.pdb -o pdb '+mol.lower()+'-h.pdb -p %4.2f' %ligand_ph, shell=True)  # Put all hydrogens back using babel
-      sp.call('babel -i pdb '+mol.lower()+'.pdb -o mol2 '+mol.lower()+'-crg.mol2 -p %4.2f' %ligand_ph, shell=True)
+        sp.call('obabel -i pdb '+mol.lower()+'.pdb -o pdb -O '+mol.lower()+'.pdb -d', shell=True)                     # Remove all hydrogens from crystal ligand
+      sp.call('obabel -i pdb '+mol.lower()+'.pdb -o pdb -O '+mol.lower()+'-h.pdb -p %4.2f' %ligand_ph, shell=True)  # Put all hydrogens back using babel
+      sp.call('obabel -i pdb '+mol.lower()+'.pdb -o mol2 -O '+mol.lower()+'-crg.mol2 -p %4.2f' %ligand_ph, shell=True)
       if ligand_charge == 'nd':
         ligand_charge = 0
         # Get ligand net charge from babel
@@ -141,6 +141,7 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
             splitdata = line.split()
             if len(splitdata) > 8:
               lig_crg = lig_crg + float(splitdata[8].strip())
+        print(lig_crg)
         ligand_charge = round(lig_crg)
       print('The babel protonation of the ligand is for pH %4.2f' %ligand_ph)
       print('The net charge of the ligand is %d' %ligand_charge)
