@@ -1,9 +1,9 @@
 
-\- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+\- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-COMING SOON: The OpenMM patch for the BAT.py 2.1 code, which will allow all simultations to be performed using the free OpenMM software!
+COMING SOON: The OpenMM patch for the BAT.py 2.1 code, which will allow all simulations to be performed using the free OpenMM software!
 
-\- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+\- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
 
 *Note: The master branch is for the 2.x versions of BAT. For the 1.0 version released with Ref. [1], which includes the APR method, download the package from the BATv1.0 branch.* 
 
