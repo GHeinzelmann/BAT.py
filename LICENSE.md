@@ -1,4 +1,4 @@
-Copyright (c) 2020 Germano Heinzelmann
+Copyright (c) 2022 Germano Heinzelmann, David Huggins, Michael Gilson
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
