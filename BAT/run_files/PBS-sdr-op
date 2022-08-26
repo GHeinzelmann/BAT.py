@@ -1,0 +1,16 @@
+#!/bin/tcsh
+
+#PBS -l walltime=40:00:00,nodes=1:ppn=2:gpu -q home-gibbs -A mgilson-gibbs
+#PBS -j oe -r n -m n 
+#PBS -N POSE-CMPN-comp
+
+### Set Environment
+source /home/gheinzel/.tcshrc
+conda activate Germano2
+module add cuda/11.2.0
+
+### Copy input files to scratch folder
+cd $PBS_O_WORKDIR
+
+rm -r trajectory
+python sdr.py > output.dat

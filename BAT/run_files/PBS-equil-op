@@ -1,0 +1,22 @@
+#!/bin/tcsh
+
+#PBS -l walltime=40:00:00,nodes=1:ppn=2:gpu -q home-gibbs -A mgilson-gibbs
+#PBS -j oe -r n -m n 
+#PBS -N equil-POSE
+
+### Set Environment
+source /home/gheinzel/.tcshrc
+conda activate Germano2
+module add cuda/11.2.0
+
+### Copy input files to scratch folder
+cd $PBS_O_WORKDIR
+
+python equil-00.py > output-00.dat
+@ i = 1
+while ($i <= RANGE)
+set x = `printf "%02.0f" $i`
+python equil-$x.py > output-$x.dat
+sleep 5
+@ i += 1
+end
