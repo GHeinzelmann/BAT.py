@@ -59,10 +59,10 @@ lig_com_force        =  10.0  # Guest COM spring constant for simultaneous decou
 # Water model, number and box size in the x and y direction
 
 water_model     = TIP3P   # Water model (SPCE, TIP4PEW or TIP3P)
-num_waters      = 13000   # Number of waters in the system
-buffer_x        = 15      # Box solvation buffer in the x axis
-buffer_y        = 15      # Box solvation buffer in the y axis 
-#buffer_z        = 18      # Box solvation buffer in the z axis 
+#num_waters      = 13000   # Number of waters in the system
+buffer_x        = 12      # Box solvation buffer in the x axis
+buffer_y        = 12      # Box solvation buffer in the y axis 
+buffer_z        = 12      # Box solvation buffer in the z axis 
 lig_buffer      = 15      # Buffer size for the three axes of the ligand-only box
 
 # Counterions 
@@ -74,24 +74,24 @@ ion_conc = 0.15          # salt concentration for all boxes
 
 # Simulation parameters
 
-hmr             = yes       # Use hydrogen mass repartitioning (yes or no)
+hmr             =  yes       # Use hydrogen mass repartitioning (yes or no)
 
-Temperature	= 298.15    # Temperature of simulation and analysis 
+Temperature	=  298.15    # Temperature of simulation and analysis 
 
-eq_steps1	= 500000    # Number of steps for equilibration gradual release 
-eq_steps2	= 15000000  # Number of steps for equilibration after release
+eq_steps1	=  500000    # Number of steps for equilibration gradual release 
+eq_steps2	=  15000000  # Number of steps for equilibration after release
+ 
+m_steps1	=  500000    # Number of steps per window for component m (equilibrium)
+m_steps2	=  1000000   # Number of steps per window for component m (production)     
 
-m_steps1	= 500000    # Number of steps per window for component m (equilibrium)
-m_steps2	= 1000000   # Number of steps per window for component m (production)     
+n_steps1	=  500000    # Number of steps per window for component n (equilibrium)
+n_steps2	=  1000000   # Number of steps per window for component n (production)     
 
-n_steps1	= 500000    # Number of steps per window for component n (equilibrium)
-n_steps2	= 1000000   # Number of steps per window for component n (production)     
+e_steps1	=  250000    # Number of steps per window for component e (equilibrium) 
+e_steps2	=  500000    # Number of steps per window for component e (production)     
 
-e_steps1	= 250000    # Number of steps per window for component e (equilibrium) 
-e_steps2	= 500000    # Number of steps per window for component e (production)     
-
-v_steps1	= 500000    # Number of steps per window for component v (equilibrium) 
-v_steps2	= 1000000   # Number of steps per window for component v (production)     
+v_steps1	=  500000    # Number of steps per window for component v (equilibrium) 
+v_steps2	=  1000000   # Number of steps per window for component v (production)     
 
 # Conformational restraints on the protein backbone
 

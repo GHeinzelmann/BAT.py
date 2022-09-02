@@ -1,7 +1,7 @@
 
 \- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-COMING SOON: The OpenMM patch for the BAT.py 2.1 code, which will allow all simulations to be performed using the free OpenMM software!
+Just released: The OpenMM patch for the BAT.py 2.1 code, which allows all simulations to be performed using the free OpenMM software! For more details and instructions, see the OpenMM section in the tutorial below. 
 
 \- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
 
@@ -16,8 +16,7 @@ https://github.com/GHeinzelmann/GHOAT.py
 
 # BAT.py v2.1
 
-The Binding Affinity Tool (BAT.py) is a python tool for fully automated absolute binding free energy (ABFE) calculations using all-atom Molecular Dynamics (MD). Its workflow encompasses the creation of the bound complex, generation of parameters using Antechamber, preparation of the simulation files, and post-processing to retrieve the binding free energy. By using the _pmemd.cuda_ software from AMBER20, it is able to perform several calculations at a reduced computational cost using graphics processing units (GPUs).
-
+The Binding Affinity Tool (BAT.py) is a python tool for fully automated absolute binding free energy (ABFE) calculations using all-atom Molecular Dynamics (MD). Its workflow encompasses the creation of the bound complex, generation of parameters using Antechamber, preparation of the simulation files, and post-processing to retrieve the binding free energy. BAT can use either the _pmemd.cuda_ software from AMBER20, or the OpenMM program combined with OpenMMtools, both capable of performing simulations at a reduced computational cost using graphics processing units (GPUs).
 
 The 2.1 version of BAT.py can perform ABFE calculations by two alchemical routes in the presence of restraints, either with double decoupling (DD) procedure or with the simultaneous decoupling and recoupling (SDR) method, the latter suitable for ligands with net charge. For the use of the APR method in addition to DD and SDR, download the 1.0 version of the code at the BATv1.0 branch, or the BAT 1.0 release. BAT.py is compatible with the simulation package AMBER20, also requiring a few installed programs to work properly, which are listed in the next section. 
 
@@ -29,23 +28,25 @@ To use BAT.py, download the files from this repository, which already contain an
 
 VMD (Visual Molecular Dynamics) [2] - https://www.ks.uiuc.edu/Development/Download/download.cgi?PackageName=VMD
 
-Openbabel 2.4.1 [3] - https://github.com/openbabel/openbabel/releases/tag/openbabel-2-4-1 &dagger;
+Openbabel 2.4.1 [3] - https://github.com/openbabel/openbabel/releases/tag/openbabel-2-4-1 <sup>a
 
 MUSTANG v3.2.3 (MUltiple (protein) STructural AligNment alGorithm) [4] - http://lcb.infotech.monash.edu.au/mustang/
 
-AmberTools20 or later [5] - http://ambermd.org/AmberTools.php &Dagger;
+AmberTools20 or later [5] - http://ambermd.org/AmberTools.php <sup>b;
 
-_pmemd.cuda_ software from AMBER20 [5] - http://ambermd.org/GetAmber.php
+_pmemd.cuda_ software from AMBER20 [5] - http://ambermd.org/GetAmber.php <sup>c;
 
-&dagger; Had protonation issues when using Openbabel 3, so keeping the 2.4.1 version for now, might change in the future. 
+<sup>a</sup> Had protonation issues when using Openbabel 3, so keeping the 2.4.1 version for now, might change in the future. 
 
-&Dagger; If pdb4amber from Ambertools does not work, add the line below to the end of your amber.sh file: 
+<sup>b</sup> If pdb4amber from Ambertools does not work, add the line below to the end of your amber.sh file: 
 
 export PYTHONPATH=$PYTHONPATH:$AMBERHOME/lib/python3.8/site-packages/pdb4amber-1.7.dev0-py3.8.egg/
 
+ <sup>c</sup> Not needed if using OpenMM for the simulations
+
 The folder ./BAT/all-poses contains examples of input coordinate files, with a docked receptor from the 5uez crystal structure (LMCSS-5uf0\_5uez\_docked.pdb), as well as 9 docked poses for the ligand with the 5uf0 crystal structure (pose0.pdb to pose8.pdb). The docking files were generated and converted to .pdb using Autodock Vina and AutodockTools, following a protocol adapted from the CELPP challenge tutorial (https://docs.google.com/document/d/1iJcPUktbdrRftAA8cuVa32Ri1TPr2XvZVqTccDja2OM). Inside the ./all-poses folder there is also the original crystal structure file for 5uf0, in pdb format. Below we show an example of using these files to calculate the standard binding free energies of the top 5 docked poses and the crystal structure, with all the necessary steps in the calculation. 
 
-# Running a sample calculation
+# Running a sample calculation with AMBER20
 
 The simulations and analysis from this tutorial will be performed inside the ./BAT folder. The simulations are divided in two steps, equilibration and free energy calculation. We will use the BAT.py input file called input-dd.in, which has the needed parameters to perform full double decoupling calculations with restraints to five docked poses. A similar input file called input-dd-long.in, with more free energy windows and longer simulation times, is also included as an example. 
 
@@ -92,7 +93,7 @@ The full ABFE calculation above for a single pose requires a total of 248.4 nano
 The free energy simulations from BAT are separated into several independent windows, and the poses affinities are also calculated independently, which allows for trivial parallelization across multiple GPUs. This can reduce the time needed to fully evaluate a ligand to as little as one hour using several GTX 1070 GPUs, and much less that that if using more modern GPUs.
 
 
-## Using the SDR method and merged restraints
+### Using the SDR method and merged restraints
 
 The SDR method is suitable for ligands with net charge, since it keeps the two MD topologies with the same charge during the transformations. To apply SDR, a few parameters have to be changed or added, which is shown in the input-sdr.in file included in this example. This input file also uses the merged components for the restraints, which are explained in detail in the User Guide.
 
@@ -100,20 +101,40 @@ To apply the merged SDR method, all that is needed is to perform the free energy
 
 The user can also mix and match the separated/merged restraint components and the DD/SDR methods, for example using double decoupling with the merged restraints or the SDR method with the separated restraint components. Another possibility is to merge only the releasing or the attaching restraints, while keeping the others separate. 
 
+# Using BAT with the OpenMM software 
+
+BAT also allows the user to run all simulations using the free OpenMM engine. In this case, instead of the _pmemd.cuda_ software from AMBER20, the OpenMM and OpenMMTools versions below should be installed and in your path:
+
+OpenMM 7.7.0 [10-13]: http://docs.openmm.org/latest/userguide/application/01_getting_started.html
+
+OpenMMTools 0.21.3 [14]: https://anaconda.org/conda-forge/openmmtools
+
+Both distributions use the Conda package manager for installation, which can be obtained at https://docs.conda.io/en/latest/ and installed following the instructions in the website. 
+
+
+## Performing the calculations with OpenMM
+
+The OpenMM simulations are fully integrated into the BAT workflow, with the equilibration, free energy and analysis steps performed the same way as explained in the tutorial. Two input files are provided as examples, input-dd-openmm.in for double decoupling with separated restraints, and input-sdr-openmm.in for the SDR method with merged restraints. More details on the OpenMM-specific BAT input variables can be found in the User Guide.  
+
+In order to run the equilibration and free energy simulations in the respective folders, inside them are included a bash script, to perform the simulations in a local machine, as well as a PBS script, to run in a queue system such as TORQUE. Both of these files might have to be adjusted, depending on your computer or server configuration. After concluding the simulations and performing the final analysis step, the results will be written in the same location and in the same format as wih the AMBER20 version.
+
+The user might want to compare the AMBER20 and OpenMM free energy results calculated over the same equilibrated poses states. In that case, the equilibration step should be performed using AMBER20, and the free energy step can be performed using both AMBER20 and OpenMM. Performing equilibration with the latter and free energy with the former may cause problems due to incompatibility between input/output files.    
+
+
 
 # Extending it to other systems
 
 ## Additional ligands to BRD4(2)
 
-The sample system shown here uses a particular ligand that binds to the second bromodomain of the BRD4 protein - BRD4(2). The system alignment, parameter generation and assignment of the ligand anchor atoms is done automatically, so these same calculations can be extended to any other ligand that binds to this receptor. The only thing needed is the files in the ./all-poses folder to be changed, including the docked receptor and poses pdb files, as well as the crystal structure if desired.     
+The sample system shown here uses a particular ligand that binds to the second bromodomain of the BRD4 protein - BRD4(2). The system alignment, parameter generation and assignment of the ligand anchor atoms is done automatically, so these same calculations can be extended to any other ligand that binds to this receptor. The only thing needed is the files in the ./all-poses folder to be changed, including the docked receptor and poses pdb files, as well as the crystal structure if desired. 
 
 ## Additional receptors
 
-To include a new receptor system, some additional input data is needed. They include a reference.pdb file to align the system using MUSTANG, three chosen protein anchors, and possibly a few variables for ligand anchor atom search. These can be found inside the ./systems-library folder for three other bromodomains (CREBBP, BRD4(1) and BAZ2B), the T4 Lysozyme, and the MCL-1 protein. Other systems will be added with time, as the program is further tested and validated.    
+To include a new receptor system, some additional input data is needed. They include a reference.pdb file to align the system using MUSTANG, three chosen protein anchors, and possibly a few variables for ligand anchor atom search. These can be found inside the ./systems-library folder for three other bromodomains (CREBBP, BRD4(1) and BAZ2B), the T4 Lysozyme, and the MCL-1 protein. Other systems will be added with time, as the program is further tested and validated.
 
-# More information and BAT.py citation
+# More information and BAT.py citations
 
-A paper explaining the whole BAT.py theoretical aspects and calculation procedure is available in Ref [1]. Please cite this reference if using the BAT code. For more information you can contact the author directly:
+A paper explaining the whole BAT.py theoretical aspects and calculation procedure is available in Ref [1]. The OpenMM calculations are based on David Huggins work on ABFE calculations, available at Ref [15]. Please cite these two references if using the BAT code. For more information you can contact the author directly:
 
 Germano Heinzelmann <br/>
 Departamento de Física, Universidade Federal de Santa Catarina <br/>
@@ -122,7 +143,7 @@ email: germanohei@gmail.com <br/>
 
 # Acknowledgments
 
-Germano Heinzelmann thanks FAPESC and CNPq for the research grants, and Prof. Michael Gilson for the support on developing the code.
+Germano Heinzelmann thanks FAPESC and CNPq for the research grants, also Michael Gilson and David Huggins for the support on developing the code.
 
 # References
 
@@ -145,7 +166,16 @@ Germano Heinzelmann thanks FAPESC and CNPq for the research grants, and Prof. Mi
 
 9. M. R. Shirts and J. Chodera (2008) “Statistically optimal analysis of samples from multiple equilibrium states.” Journal of  Chemical Physics, 129, 129105.
 
+10. M. S. Friedrichs, P. Eastman , V. Vaidyanathan, M. Houston, S. LeGrand, A. L. Beberg, D. L. Ensign, C. M. Bruns, and V. S. Pande (2009). "Accelerating molecular dynamic simulations on graphics processing unit." Journal of Computational Chemistry, 30, 864.
 
+11. P. Eastman and V. S. Pande (2010). "OpenMM: A hardware-independent framework for molecular simulations." Computing in science and engineering, 12, 34.
 
+12. P. Eastman and V. S. Pande (2010). "Efficient nonbonded interactions for molecular dynamics on a graphics processing unit." Journal of Computational Chemistry, 31, 1268.
+
+13. P. Eastman and V. S. Pande (2010). "Constant constraint matrix approximation: A robust, parallelizable constraint method for molecular simulations." Journal of Chemical Theory and Computation, 6, 434.
+
+14. J. D. Chodera and M. R. Shirts (2011). "Replica exchange and expanded ensemble simulations as Gibbs multistate: Simple improvements for enhanced mixing." Journal of Chemical Physics, 135, 194110.
+
+15. D. J. Huggins (2022) "Comparing the Performance of Different AMBER Protein Forcefields, Partial Charge Assignments, and Water Models for Absolute Binding Free Energy Calculations." Journal of Chemical Theory and Computation, 18, 2616. 
 
 

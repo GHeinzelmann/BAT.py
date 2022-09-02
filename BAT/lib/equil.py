@@ -342,22 +342,22 @@ if dum_atom >= 1:
   print('comforce.addBond('+str(com_atoms[0])+', '+str(bondParameters[0])+', '+str(bondParameters[1])+', '+str(bondParameters[2])+', '+str(bondParameters[3])+')')
   print('')
 
-if dum_atom > 1:
-
   bondGroups = []
   bondParameters = []
+  dummy_group = [ 0 ]
+  dum_fcn = 20.0
 
-  # Add bulk ligand COM restraints
-  print('Bulk ligand COM restraints:')
+  # Restrain COM dummy to use as reference later
+  print('Dummy COM restraints:')
   print('')
-  comforce.addGroup(com_atoms[1])
+  comforce.addGroup(dummy_group)
   bondGroups.append(1)
-  bondParameters.append(float(fcn_com[1])*unit_definitions.kilocalorie_per_mole/unit_definitions.angstroms**2)
-  bondParameters.append(float(xb)*unit_definitions.angstroms)
-  bondParameters.append(float(yb)*unit_definitions.angstroms)
-  bondParameters.append(float(zb)*unit_definitions.angstroms)
+  bondParameters.append(float(dum_fcn)*unit_definitions.kilocalorie_per_mole/unit_definitions.angstroms**2)
+  bondParameters.append(float(xr)*unit_definitions.angstroms)
+  bondParameters.append(float(yr)*unit_definitions.angstroms)
+  bondParameters.append(float(zr)*unit_definitions.angstroms)
   comforce.addBond(bondGroups, bondParameters)
-  print('comforce.addBond('+str(com_atoms[1])+', '+str(bondParameters[0])+', '+str(bondParameters[1])+', '+str(bondParameters[2])+', '+str(bondParameters[3])+')')
+  print('comforce.addBond('+str(dummy_group)+', '+str(bondParameters[0])+', '+str(bondParameters[1])+', '+str(bondParameters[2])+', '+str(bondParameters[3])+')')
   print('')
  
 system.addForce(harmonicforce) # after
