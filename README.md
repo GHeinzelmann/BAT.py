@@ -1,7 +1,13 @@
 
 \- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-Just released: The OpenMM patch for the BAT.py 2.1 code, which allows all simulations to be performed using the free OpenMM software! For more details and instructions, see the OpenMM section in the tutorial below. 
+Coming soon: The BAT.py 2.2 version, with the following new features:
+
+- Support for proteins with multiple chains
+
+- Inclusion of cobinders such as ions
+
+- Additional water models
 
 \- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
 
