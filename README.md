@@ -5,7 +5,6 @@ Just released: The OpenMM patch for the BAT.py 2.1 code, which allows all simula
 
 \- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
 
-*Note: The master branch is for the 2.x versions of BAT. For the 1.0 version released with Ref. [1], which includes the APR method, download the package from the BATv1.0 branch.* 
 
 *See also: GHOAT.py, a fully automated tool for guest-host ABFE calculations using SDR with pmemd.cuda:* 
 
