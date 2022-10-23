@@ -1,15 +1,15 @@
 
-\- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+\- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-Coming soon: The BAT.py 2.2 version, with the following new features:
+*COMING SOON: The BAT.py 2.2 version, with the following new features:*
 
-- Support for proteins with multiple chains
+*- Support for proteins with multiple chains*
 
-- Inclusion of cobinders such as ions
+*- Inclusion of cobinders such as ions*
 
-- Additional water models
+*- Additional water models*
 
-\- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  
+\- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
 *See also: GHOAT.py, a fully automated tool for guest-host ABFE calculations using SDR with pmemd.cuda:* 
