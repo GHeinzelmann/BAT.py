@@ -60,7 +60,7 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
       open('others.pdb', 'w').close()
 
     shutil.copy('./protein.pdb', './protein_vmd.pdb')
-    sp.call('pdb4amber -i protein_vmd.pdb -o protein.pdb', shell=True)
+    sp.call('pdb4amber -i protein_vmd.pdb -o protein.pdb -y', shell=True)
 
     # Get beginning and end of protein and save first residue as global variable
     with open('./protein_vmd.pdb') as myfile:
@@ -484,7 +484,7 @@ def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, nt
             splitdata = line.split()
             if len(splitdata) > 3:
                 newfile.write(line)
-      sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb', shell=True)
+      sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y', shell=True)
       sp.call('vmd -dispdev text -e prep.tcl', shell=True)
 
       # Check size of anchor file 

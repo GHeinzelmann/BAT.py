@@ -58,7 +58,7 @@ lig_com_force        =  10.0  # Guest COM spring constant for simultaneous decou
 
 # Water model, number and box size in the x and y direction
 
-water_model     = TIP3P   # Water model (SPCE, TIP4PEW or TIP3P)
+water_model     = TIP3P   # Water model (SPCE, TIP4PEW, TIP3P, TIP3PF or OPC)
 #num_waters      = 13000   # Number of waters in the system
 buffer_x        = 12      # Box solvation buffer in the x axis
 buffer_y        = 12      # Box solvation buffer in the y axis 
