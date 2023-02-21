@@ -13,13 +13,12 @@ set mat {}
 set sdr_dist SDRD
 
 set pr [atomselect 0 "(not resname MMM) and (resid FIRST to LAST and name CA C N O)"]
-set all [atomselect 0 "(resid FIRST to LAST and not water and not resname MMM and noh) or (resname MMM)"]
+set all [atomselect 0 "(resid FIRST to LAST and not water and not resname MMM and noh) or (resname MMM) or (resname OTHRS WAT)"]
 $all moveby [vecinvert [measure center $pr weight mass]]
 $all writepdb $filini
 mol delete all
 mol load pdb $filini
 set all [atomselect 1 all]
-$all set chain A
 $all writepdb $filpdb
 
 set lig [atomselect 1 "resname MMM"]

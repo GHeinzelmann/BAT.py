@@ -9,7 +9,7 @@ import subprocess as sp
 import sys as sys
 from lib import scripts as scripts
 
-def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method):
+def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method, other_mol):
 
     rst = []
     atm_num = []
@@ -136,16 +136,6 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil,
       L1 = L1.replace(':'+lig_res, ':1') 
       L2 = L2.replace(':'+lig_res, ':1') 
       L3 = L3.replace(':'+lig_res, ':1') 
-
-    # Adjust anchors for protein only
-    if (comp == 'r'):
-      p1_new = int(p1_res) - 1    
-      p2_new = int(p2_res) - 1    
-      p3_new = int(p3_res) - 1    
-      P1 = P1.replace(':'+p1_res, ':'+str(p1_new)) 
-      P2 = P2.replace(':'+p2_res, ':'+str(p2_new)) 
-      P3 = P3.replace(':'+p3_res, ':'+str(p3_new)) 
-    
 
     # Get a relation between atom number and masks
     atm_num = scripts.num_to_mask(pdb_file)
@@ -287,8 +277,6 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil,
       rst.append(''+P1+' '+P2+'') 
       rst.append(''+P2+' '+P3+'') 
       rst.append(''+P3+' '+P1+'') 
-      beg = bb_start - int(first_res) + 1 
-      end = bb_end - int(first_res) + 1
       nd = 0
       for i in range(beg, end):
         j = i+1
@@ -862,23 +850,13 @@ def sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, steps1, st
 
     # Create running scripts for local and server
     if (stage == 'fe'):
-      if (comp != 'c' and comp != 'r' and comp != 'n'): 
-        with open('../run_files/local-'+stage+'.bash', "rt") as fin:
-          with open("./run-local.bash", "wt") as fout:
-            for line in fin:
-              fout.write(line)
-        with open('../run_files/PBS-'+stage, "rt") as fin:
-          with open("./PBS-run", "wt") as fout:
-            for line in fin:
-              fout.write(line.replace('STAGE', pose).replace('POSE', '%s%02d' %(comp, int(win))))
-      else:
-        with open('../run_files/local-lig.bash', "rt") as fin:
-          with open("./run-local.bash", "wt") as fout:
-            for line in fin:
-              fout.write(line)
-        with open('../run_files/PBS-lig', "rt") as fin:
-          with open("./PBS-run", "wt") as fout:
-            for line in fin:
+      with open('../run_files/local-lig.bash', "rt") as fin:
+        with open("./run-local.bash", "wt") as fout:
+          for line in fin:
+            fout.write(line)
+      with open('../run_files/PBS-lig', "rt") as fin:
+        with open("./PBS-run", "wt") as fout:
+          for line in fin:
               fout.write(line.replace('STAGE', pose).replace('POSE', '%s%02d' %(comp, int(win))))
     else:
       with open('../run_files/local-'+stage+'.bash', "rt") as fin:
@@ -907,6 +885,14 @@ def dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2,
         data = myfile.readlines()
         vac_atoms = data[-3][6:11].strip()
 
+    # Get last ligand residue number
+    with open('./vac.pdb') as f_in:
+        lines = (line.rstrip() for line in f_in)
+        lines = list(line for line in lines if line) # Non-blank lines in a list   
+        for i in range(0, len(lines)):
+          if lines[i][17:20].strip() == mol.upper():
+            last_lig = lines[i][22:26].strip()
+
 
     if (comp == 'v'):
       # Create simulation files for vdw decoupling
@@ -914,7 +900,7 @@ def dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2,
       # Simulation files for simultaneous decoupling
         with open('./vac.pdb') as myfile:
           data = myfile.readlines()
-          mk2 = int(data[-3][22:26].strip())
+          mk2 = int(last_lig)
           mk1 = int(mk2 - 1)
         for i in range(0, num_sim+1):
           with open('../amber_files/mdin-lj', "rt") as fin:
@@ -955,7 +941,7 @@ def dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2,
       elif (dec_method == 'dd'): 
         with open('./vac.pdb') as myfile:
           data = myfile.readlines()
-          mk1 = int(data[-3][22:26].strip())
+          mk1 = int(last_lig)
         for i in range(0, num_sim+1):
           with open('../amber_files/mdin-lj-dd', "rt") as fin:
             with open("./mdin-%02d" %int(i), "wt") as fout:
@@ -1007,7 +993,7 @@ def dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2,
         # Simulation files for simultaneous decoupling
         with open('./vac.pdb') as myfile:
           data = myfile.readlines()
-          mk4 = int(data[-3][22:26].strip())
+          mk4 = int(last_lig)
           mk3 = int(mk4 - 1)
           mk2 = int(mk4 - 2)
           mk1 = int(mk4 - 3)
@@ -1050,7 +1036,7 @@ def dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2,
         with open('./vac.pdb') as myfile:
           # Simulation files for double decoupling
           data = myfile.readlines()
-          mk2 = int(data[-3][22:26].strip())
+          mk2 = int(last_lig)
           mk1 = int(mk2 - 1)
         for i in range(0, num_sim+1):
           with open('../amber_files/mdin-ch-dd', "rt") as fin:

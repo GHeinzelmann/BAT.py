@@ -12,16 +12,21 @@ def help_message():
     print('Use the flags -i and -s for the input file and current stage of the calculations')
     print('Example: python BAT.py -i input.in -s equil')
 
-def write_tleap(mol, water_model, water_box, buff, buffer_x, buffer_y, tleap_remove=None):
+def write_tleap(mol, water_model, water_box, buff, buffer_x, buffer_y, other_mol, tleap_remove=None):
     shutil.copy('tleap.in', 'tmp_tleap.in')
     tmp_file = open('tmp_tleap.in', 'a')
-    tmp_file.write('# Load the ligand parameters\n')        
+    tmp_file.write('# Load the necessary parameters\n')        
+    for i in range(0, len(other_mol)):
+      tmp_file.write('loadamberparams %s.frcmod\n'%(other_mol[i].lower()))
+      tmp_file.write('%s = loadmol2 %s.mol2\n'%(other_mol[i].upper(), other_mol[i].lower()))
     tmp_file.write('loadamberparams %s.frcmod\n'%(mol.lower()))
     tmp_file.write('%s = loadmol2 %s.mol2\n\n'%(mol.upper(), mol.lower()))
-    tmp_file.write('model = loadpdb build.pdb\n\n')
     tmp_file.write('# Load the water and jc ion parameters\n')        
-    tmp_file.write('source leaprc.water.%s\n'%(water_model.lower()))
-    tmp_file.write('loadamberparams frcmod.ionsjc_%s\n\n'%(water_model.lower()))
+    if water_model.lower() != 'tip3pf':
+      tmp_file.write('source leaprc.water.%s\n\n'%(water_model.lower()))
+    else:
+      tmp_file.write('source leaprc.water.fb3\n\n')
+    tmp_file.write('model = loadpdb build.pdb\n\n')
     tmp_file.write('solvatebox model ' + water_box + ' {'+ str(buffer_x) +' '+ str(buffer_y) +' '+ str(buff) + '}\n')
     if tleap_remove is not None:
         for water in tleap_remove:

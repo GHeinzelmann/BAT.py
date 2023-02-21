@@ -21,6 +21,7 @@ weights = []
 components = []  
 aa1_poses = []  
 aa2_poses = []  
+other_mol = []
 
 # Defaults
 
@@ -80,6 +81,7 @@ retain_lig_prot = 'no'
 ligand_ph = 7.0
 ligand_charge = 'nd'
 software = 'amber20'
+solv_shell = 0.0
 
 ntpr = '1000'                
 ntwr = '10000'               
@@ -222,6 +224,10 @@ for i in range(0, len(lines)):
             newline = lines[i][1].strip('\'\"-,.:;#()][').split(',')
             for j in range(0, len(newline)):
                 poses_list.append(scripts.check_input('int', newline[j], input_file, lines[i][0]))
+        elif lines[i][0] == 'other_mol':
+            newline = lines[i][1].strip('\'\"-,.:;#()][').split(',')
+            for j in range(0, len(newline)):
+                other_mol.append(newline[j])
         elif lines[i][0] == 'calc_type':
             calc_type = lines[i][1].lower()
         elif lines[i][0] == 'retain_lig_prot':
@@ -288,8 +294,12 @@ for i in range(0, len(lines)):
                 water_model = lines[i][1].upper()
             elif lines[i][1].lower() == 'spce':
                 water_model = lines[i][1].upper()
+            elif lines[i][1].lower() == 'opc':
+                water_model = lines[i][1].upper()
+            elif lines[i][1].lower() == 'tip3pf':
+                water_model = lines[i][1].upper()
             else:
-                print('Water model not supported. Please choose TIP3P, TIP4PEW or SPCE')
+                print('Water model not supported. Please choose TIP3P, TIP4PEW, SPCE, OPC or TIP3PF')
                 sys.exit(1)
         elif lines[i][0] == 'num_waters':
             num_waters = scripts.check_input('int', lines[i][1], input_file, lines[i][0])
@@ -343,6 +353,8 @@ for i in range(0, len(lines)):
             min_adis = scripts.check_input('float', lines[i][1], input_file, lines[i][0]) 
         elif lines[i][0] == 'max_adis':
             max_adis = scripts.check_input('float', lines[i][1], input_file, lines[i][0]) 
+        elif lines[i][0] == 'solv_shell':
+            solv_shell = scripts.check_input('float', lines[i][1], input_file, lines[i][0]) 
         elif lines[i][0] == 'rec_bb':
             if lines[i][1].lower() == 'yes':
                 rec_bb = 'yes'
@@ -554,6 +566,7 @@ if software == 'openmm' and stage == 'fe':
       os.chdir('../')
   os.chdir('../')
 
+
 if stage == 'equil':
   comp = 'q'
   win = 0
@@ -567,7 +580,7 @@ if stage == 'equil':
     # Get number of simulations
     num_sim = len(release_eq)
     # Create aligned initial complex
-    anch = build.build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ligand_ff, ligand_ph, retain_lig_prot, ligand_charge)
+    anch = build.build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ligand_ff, ligand_ph, retain_lig_prot, ligand_charge, other_mol, solv_shell)
     if anch == 'anch1':
       aa1_poses.append(pose)
       os.chdir('../')
@@ -578,13 +591,13 @@ if stage == 'equil':
       continue
     # Solvate system with ions
     print('Creating box...')
-    build.create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, buffer_z, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, dec_method)
+    build.create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, buffer_z, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, dec_method, other_mol)
     # Apply restraints and prepare simulation files
     print('Equil release weights:')
     for i in range(0, len(release_eq)):
       weight = release_eq[i]
       print('%s' %str(weight))
-      setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method)
+      setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method, other_mol)
       shutil.copy('./'+pose+'/disang.rest', './'+pose+'/disang%02d.rest' %int(i))
     shutil.copy('./'+pose+'/disang%02d.rest' %int(0), './'+pose+'/disang.rest')
     setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, eq_steps1, eq_steps2, rng)
@@ -628,7 +641,7 @@ elif stage == 'fe':
           win = k
           if int(win) == 0:
             print('window: %s%02d weight: %s' %(comp, int(win), str(weight)))
-            anch = build.build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist, ion_def)
+            anch = build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ion_def, other_mol, solv_shell)
             if anch == 'anch1':
               aa1_poses.append(pose)
               break
@@ -637,18 +650,20 @@ elif stage == 'fe':
               break
             print('Creating box for ligand only...')
             build.ligand_box(mol, lig_buffer, water_model, neut, ion_def, comp, ligand_ff)
-            setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method)
+            setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method, other_mol)
             setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, c_steps1, c_steps2, rng)
           else:
             print('window: %s%02d weight: %s' %(comp, int(win), str(weight)))
-            build.build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist, ion_def)
-            setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method)
+            build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ion_def, other_mol, solv_shell)
+            setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method, other_mol)
             setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, c_steps1, c_steps2, rng)
         if anch != 'all':  
           break
         os.chdir('../')  
       # Receptor conformational release in a separate box
-      elif (comp == 'r'):          
+      elif (comp == 'r' or comp == 'n'):          
+        steps1 = dic_steps1[comp]
+        steps2 = dic_steps2[comp]
         if not os.path.exists('rest'):
           os.makedirs('rest')
         os.chdir('rest')
@@ -657,50 +672,22 @@ elif stage == 'fe':
           win = k
           if int(win) == 0:
             print('window: %s%02d weight: %s' %(comp, int(win), str(weight)))
-            anch = build.build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist, ion_def)
+            anch = build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ion_def, other_mol, solv_shell)
             if anch == 'anch1':
               aa1_poses.append(pose)
               break
             if anch == 'anch2':
               aa2_poses.append(pose)
               break
-            print('Creating box for apo protein...')
-            build.create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, buffer_z, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, dec_method)
-            setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method)
-            setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, r_steps1, r_steps2, rng)
+            print('Creating box for protein release...')
+            build.create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, buffer_z, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, dec_method, other_mol)
+            setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method, other_mol)
+            setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2, rng)
           else:
             print('window: %s%02d weight: %s' %(comp, int(win), str(weight)))
-            build.build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist, ion_def)
-            setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method)
-            setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, r_steps1, r_steps2, rng)
-        if anch != 'all':  
-          break
-        os.chdir('../')  
-      elif (comp == 'n'):          
-        if not os.path.exists('rest'):
-          os.makedirs('rest')
-        os.chdir('rest')
-        for k in range(0, len(attach_rest)):
-          weight = attach_rest[k]
-          win = k
-          if int(win) == 0:
-            print('window: %s%02d weight: %s' %(comp, int(win), str(weight)))
-            anch = build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ion_def)
-            if anch == 'anch1':
-              aa1_poses.append(pose)
-              break
-            if anch == 'anch2':
-              aa2_poses.append(pose)
-              break
-            print('Creating box for simultaneous release...')
-            build.create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, buffer_z, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, dec_method)
-            setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method)
-            setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, n_steps1, n_steps2, rng)
-          else:
-            print('window: %s%02d weight: %s' %(comp, int(win), str(weight)))
-            build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ion_def)
-            setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method)
-            setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, n_steps1, n_steps2, rng)
+            build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ion_def, other_mol, solv_shell)
+            setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method, other_mol)
+            setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2, rng)
         if anch != 'all':  
           break
         os.chdir('../')  
@@ -716,18 +703,18 @@ elif stage == 'fe':
           win = k
           print('window: %s%02d lambda: %s' %(comp, int(win), str(weight)))
           if int(win) == 0:
-            anch = build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ion_def)
+            anch = build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ion_def, other_mol, solv_shell)
             if anch == 'anch1':
               aa1_poses.append(pose)
               break
             if anch == 'anch2':
               aa2_poses.append(pose)
               break
-            build.create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, buffer_z, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, dec_method)
-            setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method)
+            build.create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, buffer_z, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, dec_method, other_mol)
+            setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method, other_mol)
             setup.dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2, weight, lambdas, dec_method, ntwx)
           else:
-            build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ion_def)
+            build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ion_def, other_mol, solv_shell)
             setup.dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2, weight, lambdas, dec_method, ntwx)
         if anch != 'all':  
           break
@@ -744,7 +731,7 @@ elif stage == 'fe':
           win = k
           if int(win) == 0:
             print('window: %s%02d lambda: %s' %(comp, int(win), str(weight)))
-            anch = build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ion_def)
+            anch = build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ion_def, other_mol, solv_shell)
             if anch == 'anch1':
               aa1_poses.append(pose)
               break
@@ -753,35 +740,43 @@ elif stage == 'fe':
               break
             print('Creating box for ligand decoupling in bulk...')
             build.ligand_box(mol, lig_buffer, water_model, neut, ion_def, comp, ligand_ff)
-            setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method)
+            setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method, other_mol)
             setup.dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2, weight, lambdas, dec_method, ntwx)
           else:
             print('window: %s%02d lambda: %s' %(comp, int(win), str(weight)))
-            build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ion_def)
+            build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ion_def, other_mol, solv_shell)
             setup.dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2, weight, lambdas, dec_method, ntwx)
         if anch != 'all':  
           break
         os.chdir('../')
       # Attachments in the bound system
       else:          
+        steps1 = dic_steps1[comp]
+        steps2 = dic_steps2[comp]
         if not os.path.exists('rest'):
           os.makedirs('rest')
         os.chdir('rest')
         for k in range(0, len(attach_rest)):
           weight = attach_rest[k]
           win = k
-          print('window: %s%02d weight: %s' %(comp, int(win), str(weight)))
-          anch = build.build_rest(hmr, mol, pose, comp, win, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, fwin, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, sdr_dist, ion_def)
-          if anch == 'anch1':
-            aa1_poses.append(pose)
-            break
-          if anch == 'anch2':
-            aa2_poses.append(pose)
-            break
-          setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method)
-          steps1 = dic_steps1[comp]
-          steps2 = dic_steps2[comp]
-          setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2, rng)
+          if win == 0:
+            print('window: %s%02d weight: %s' %(comp, int(win), str(weight)))
+            anch = build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ion_def, other_mol, solv_shell)
+            if anch == 'anch1':
+              aa1_poses.append(pose)
+              break
+            if anch == 'anch2':
+              aa2_poses.append(pose)
+              break
+            print('Creating box for attaching restraints...')
+            build.create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, buffer_z, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, dec_method, other_mol)
+            setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method, other_mol)
+            setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2, rng)
+          else:
+            print('window: %s%02d weight: %s' %(comp, int(win), str(weight)))
+            build.build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ion_def, other_mol, solv_shell)
+            setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method, other_mol)
+            setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2, rng)
         if anch != 'all':
           break
         os.chdir('../')  
