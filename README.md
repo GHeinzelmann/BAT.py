@@ -35,7 +35,7 @@ VMD (Visual Molecular Dynamics) [2] - https://www.ks.uiuc.edu/Development/Downlo
 
 Openbabel 2.4.1 [3] - https://github.com/openbabel/openbabel/releases/tag/openbabel-2-4-1 <sup>a
 
-MUSTANG v3.2.3 (MUltiple (protein) STructural AligNment alGorithm) [4] - http://lcb.infotech.monash.edu.au/mustang/
+Lovoalign: Protein Structural Alignment  [4] - https://www.ime.unicamp.br/~martinez/lovoalign/home.html
 
 AmberTools20 or later [5] - http://ambermd.org/AmberTools.php <sup>b
 
@@ -135,7 +135,7 @@ The sample system shown here uses a particular ligand that binds to the second b
 
 ## Additional receptors
 
-To include a new receptor system, some additional input data is needed. They include a reference.pdb file to align the system using MUSTANG, three chosen protein anchors, and possibly a few variables for ligand anchor atom search. These can be found inside the ./systems-library folder for three other bromodomains (CREBBP, BRD4(1) and BAZ2B) and the T4 Lysozyme. Other systems will be added with time, as the program is further tested and validated.
+To include a new receptor system, some additional input data is needed. They include a reference.pdb file to align the system using lovoalign, three chosen protein anchors, and possibly a few variables for ligand anchor atom search. These can be found inside the ./systems-library folder for three other bromodomains (CREBBP, BRD4(1) and BAZ2B) and the T4 Lysozyme. Other systems will be added with time, as the program is further tested and validated.
 
 # More information and BAT.py citations
 
@@ -159,7 +159,7 @@ Germano Heinzelmann thanks FAPESC and CNPq for the research grants, also Michael
 
 3. N. M. O'Boyle, M. Banck, C. A. James, C. Morley, T. Vandermeersch, and G. R. HutchisonEmail. (2011) "Open Babel: An open chemical toolbox." Journal of Cheminformatics, 3, 33.
 
-4. A. S. Konagurthu, J. Whisstock, P. J. Stuckey, and A. M. Lesk. (2006) “MUSTANG: A multiple structural alignment algorithm”. Proteins, 64, 559-574.
+4. L. Martínez, R. Andreani, and J. M. Martínez (2007) “Convergent algorithms for protein structural alignment.” BMC Bioinformatics 8, 306.
 
 5. D.A. Case, K. Belfon, I.Y. Ben-Shalom, S.R. Brozell, D.S. Cerutti, T.E. Cheatham, III, V.W.D. Cruzeiro, T.A. Darden, R.E. Duke, G. Giambasu, M.K. Gilson, H. Gohlke, A.W. Goetz, R. Harris, S. Izadi, S.A. Izmailov, K. Kasavajhala, A. Kovalenko, R. Krasny, T. Kurtzman, T.S. Lee, S. LeGrand, P. Li, C. Lin, J. Liu, T. Luchko, R. Luo, V. Man, K.M. Merz, Y. Miao, O. Mikhailovskii, G. Monard, H. Nguyen, A. Onufriev, F.Pan, S. Pantano, R. Qi, D.R. Roe, A. Roitberg, C. Sagui, S. Schott-Verdugo, J. Shen, C. Simmerling, N.R.Skrynnikov, J. Smith, J. Swails, R.C. Walker, J. Wang, L. Wilson, R.M. Wolf, X. Wu, Y. Xiong, Y. Xue, D.M. York and P.A. Kollman (2020), AMBER 2020, University of California, San Francisco.
 
