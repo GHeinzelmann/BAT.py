@@ -616,7 +616,7 @@ def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, nt
         for line in oldfile:
           if not 'WAT' in line:
             newfile.write(line)
-      sp.call('pdb4amber -i rec_file-clean.pdb -o rec_amber.pdb', shell=True)
+      sp.call('pdb4amber -i rec_file-clean.pdb -o rec_amber.pdb -y', shell=True)
       with open('./rec_amber.pdb') as f_in:
         lines = (line.rstrip() for line in f_in)
         lines = list(line for line in lines if line) # Non-blank lines in a list   
