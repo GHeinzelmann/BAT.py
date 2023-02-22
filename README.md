@@ -1,13 +1,17 @@
 
 \- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-*COMING SOON: The BAT.py 2.2 version, with the following new features:*
+*JUST RELEASED: The BAT.py 2.2 version, with the following new features:*
 
 *- Support for proteins with multiple chains*
 
 *- Inclusion of cobinders such as ions*
 
 *- Additional water models*
+
+*- Use of the lovoalign protein alignment software, replacing MUSTANG*
+
+*The 2.2 version is still being thoroughly tested, so the user can download the latest stable release instead (BAT 2.1).* 
 
 \- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
