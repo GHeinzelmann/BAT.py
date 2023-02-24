@@ -593,8 +593,16 @@ def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, nt
     if not os.path.exists('%s%02d' %(comp, int(win))):
       os.makedirs('%s%02d' %(comp, int(win)))
     os.chdir('%s%02d' %(comp, int(win)))
-    if int(win) == 0:
-      # Copy a few files
+    # Find already built system in restraint window
+    altm = 'None'
+    altm_list = ['a00','l00','t00','m00']
+    if comp == 'a' or comp == 'l' or comp == 't' or comp == 'm':
+      for i in altm_list: 
+        if os.path.exists('../'+i+'/full.hmr.prmtop'):
+          altm = i
+          break
+    if int(win) == 0 and altm == 'None':
+      # Build new system
       for file in glob.glob('../../build_files/vac_ligand*'):
         shutil.copy(file, './')
       shutil.copy('../../build_files/%s.pdb' %mol.lower(), './')
@@ -839,8 +847,13 @@ def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, nt
         tleap_vac.close()
 
         p = sp.call('tleap -s -f tleap_vac.in > tleap_vac.log', shell=True)
-        
-    else:
+    # Copy system from other attach component
+    if int(win) == 0 and altm != 'None':
+      for file in glob.glob('../'+altm+'/*'):
+        shutil.copy(file, './')
+      return 'altm'
+    # Copy system initial window
+    if win != 0:
       for file in glob.glob('../'+comp+'00/*'):
         shutil.copy(file, './')
     
@@ -1060,6 +1073,7 @@ def create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buf
           # Get number of waters
           scripts.write_tleap(mol, water_model, water_box, buff, buffer_x, buffer_y, other_mol)
           num_added = scripts.check_tleap()       
+      print(str(count)+' iterations for fixed water number')   
     # Fixed z buffer 
     elif buffer_z != 0:
       buff = buffer_z
