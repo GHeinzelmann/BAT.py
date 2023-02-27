@@ -388,6 +388,19 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
     f_in.close()
     build_file.close()
 
+    # Write dry build file
+
+    with open('build.pdb') as f_in:
+      lines = (line.rstrip() for line in f_in)
+      lines = list(line for line in lines if line) # Non-blank lines in a list   
+    with open('./build-dry.pdb', 'w') as outfile:
+      for i in range(0,len(lines)):
+        if lines[i][17:20].strip() == 'WAT':
+          break
+        outfile.write(lines[i]+'\n')
+
+    outfile.close()
+
     os.chdir('../')
 
     return 'all'
@@ -815,6 +828,19 @@ def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, nt
       build_file.write('END\n')
       build_file.close()
 
+      # Write dry build file
+
+      with open('build.pdb') as f_in:
+        lines = (line.rstrip() for line in f_in)
+        lines = list(line for line in lines if line) # Non-blank lines in a list   
+      with open('./build-dry.pdb', 'w') as outfile:
+        for i in range(0,len(lines)):
+          if lines[i][17:20].strip() == 'WAT':
+            break
+          outfile.write(lines[i]+'\n')
+
+      outfile.close()
+
       if (comp == 'f' or comp == 'w' or comp == 'c'):
         # Create system with one or two ligands
         build_file = open('build.pdb', 'w')
@@ -905,7 +931,7 @@ def create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buf
       tleap_vac.write('source leaprc.water.%s\n\n'%(water_model.lower()))
     else:
       tleap_vac.write('source leaprc.water.fb3\n\n')
-    tleap_vac.write('model = loadpdb build.pdb\n\n')
+    tleap_vac.write('model = loadpdb build-dry.pdb\n\n')
     tleap_vac.write('check model\n')
     tleap_vac.write('savepdb model vac.pdb\n')
     tleap_vac.write('saveamberparm model vac.prmtop vac.inpcrd\n')
