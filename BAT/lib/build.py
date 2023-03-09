@@ -1049,7 +1049,7 @@ def create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buf
 
       # Update target number of residues according to the ion definitions and vacuum waters
       vac_wt = 0
-      with open('./vac.pdb') as myfile:
+      with open('./build.pdb') as myfile:
         for line in myfile:
           if 'WAT' in line and ' O ' in line:
             vac_wt += 1
