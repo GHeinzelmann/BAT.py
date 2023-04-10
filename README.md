@@ -11,7 +11,7 @@
 
 *- Use of the lovoalign protein alignment software, replacing MUSTANG*
 
-*The 2.2 version is still being thoroughly tested, so the user can download the latest stable release instead (BAT 2.1).* 
+*More details on the new features, such as the system setup and input variables, can be found in the user guide. BAT 2.2 is currently a beta release, so the user can download the latest stable release instead (BAT 2.1).* 
 
 \- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -23,11 +23,11 @@ https://github.com/GHeinzelmann/GHOAT.py
 *A tutorial and a detailed user guide are available, as well as necessary parameter and input files for several hosts.*
 
 
-# BAT.py v2.1
+# BAT.py v2.2
 
 The Binding Affinity Tool (BAT.py) is a python tool for fully automated absolute binding free energy (ABFE) calculations using all-atom Molecular Dynamics (MD). Its workflow encompasses the creation of the bound complex, generation of parameters using Antechamber, preparation of the simulation files, and post-processing to retrieve the binding free energy. BAT can set up simulations for the _pmemd.cuda_ software from AMBER20, or the OpenMM program combined with OpenMMtools, both capable of performing simulations at a reduced computational cost using graphics processing units (GPUs).
 
-The 2.1 version of BAT.py can perform ABFE calculations by two alchemical routes in the presence of restraints, either with the double decoupling (DD) procedure or with the simultaneous decoupling and recoupling (SDR) method, the latter suitable for ligands with net charge. For binding free energy calculations using the attach-pull-release (APR) method, download the 1.0 version of the code at the BATv1.0 branch, or the BAT 1.0 release. In addition to AMBER20 _pmemd.cuda_ or OpenMM 7.7.0, BAT.py also requires a few additional programs to work properly, which are listed in the next section. 
+BAT.py can perform ABFE calculations by two alchemical routes in the presence of restraints, either with the double decoupling (DD) procedure or with the simultaneous decoupling and recoupling (SDR) method, the latter suitable for ligands with net charge. For binding free energy calculations using the attach-pull-release (APR) method, download the 1.0 version of the code at the BATv1.0 branch, or the BAT 1.0 release. In addition to AMBER20 _pmemd.cuda_ or OpenMM 7.7.0, BAT.py also requires a few additional programs to work properly, which are listed in the next section. 
 
 ![](doc/figure.png)
 
