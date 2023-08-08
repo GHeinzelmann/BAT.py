@@ -1,7 +1,7 @@
 
 \- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-*JUST RELEASED: The BAT.py 2.2 version, with the following new features:*
+*JuST RELEASED: The BAT.py 2.2 version, with the following new features:*
 
 *- Support for proteins with multiple chains*
 
