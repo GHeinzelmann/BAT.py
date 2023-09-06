@@ -1,7 +1,7 @@
 
 \- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-*JuST RELEASED: The BAT.py 2.2 version, with the following new features:*
+*New features in the BAT.py 2.2 version:*
 
 *- Support for proteins with multiple chains*
 
@@ -11,7 +11,9 @@
 
 *- Use of the lovoalign protein alignment software, replacing MUSTANG*
 
-*More details on the new features, such as the system setup and input variables, can be found in the user guide. BAT 2.2 is currently a beta release, so the user can download the latest stable release instead (BAT 2.1).* 
+*- Compatibility with AMBER22*
+
+*More details on the new features, such as the system setup and input variables, can be found in the user guide.* 
 
 \- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -25,9 +27,9 @@ https://github.com/GHeinzelmann/GHOAT.py
 
 # BAT.py v2.2
 
-The Binding Affinity Tool (BAT.py) is a python tool for fully automated absolute binding free energy (ABFE) calculations using all-atom Molecular Dynamics (MD). Its workflow encompasses the creation of the bound complex, generation of parameters using Antechamber, preparation of the simulation files, and post-processing to retrieve the binding free energy. BAT can set up simulations for the _pmemd.cuda_ software from AMBER20, or the OpenMM program combined with OpenMMtools, both capable of performing simulations at a reduced computational cost using graphics processing units (GPUs).
+The Binding Affinity Tool (BAT.py) is a python tool for fully automated absolute binding free energy (ABFE) calculations using all-atom Molecular Dynamics (MD). Its workflow encompasses the creation of the bound complex, generation of parameters using Antechamber, preparation of the simulation files, and post-processing to retrieve the binding free energy. BAT can set up simulations for the _pmemd.cuda_ software from AMBER, or the OpenMM program combined with OpenMMtools, both capable of performing simulations at a reduced computational cost using graphics processing units (GPUs).
 
-BAT.py can perform ABFE calculations by two alchemical routes in the presence of restraints, either with the double decoupling (DD) procedure or with the simultaneous decoupling and recoupling (SDR) method, the latter suitable for ligands with net charge. For binding free energy calculations using the attach-pull-release (APR) method, download the 1.0 version of the code at the BATv1.0 branch, or the BAT 1.0 release. In addition to AMBER20 _pmemd.cuda_ or OpenMM 7.7.0, BAT.py also requires a few additional programs to work properly, which are listed in the next section. 
+BAT.py can perform ABFE calculations by two alchemical routes in the presence of restraints, either with the double decoupling (DD) procedure or with the simultaneous decoupling and recoupling (SDR) method, the latter suitable for ligands with net charge. For binding free energy calculations using the attach-pull-release (APR) method, download the 1.0 version of the code at the BATv1.0 branch, or the BAT 1.0 release. In addition to AMBER _pmemd.cuda_ or OpenMM, BAT.py also requires a few additional programs to work properly, which are listed in the next section. 
 
 ![](doc/figure.png)
 
@@ -43,7 +45,7 @@ Lovoalign: Protein Structural Alignment  [4] - https://www.ime.unicamp.br/~marti
 
 AmberTools20 or later [5] - http://ambermd.org/AmberTools.php <sup>b
 
-_pmemd.cuda_ software from AMBER20 [5] - http://ambermd.org/GetAmber.php <sup>c
+_pmemd.cuda_ software from AMBER (version 20 or later) [5] - http://ambermd.org/GetAmber.php <sup>c
 
 <sup>a</sup> Had protonation issues when using Openbabel 3, so keeping the 2.4.1 version for now, might change in the future. 
 
@@ -55,7 +57,7 @@ export PYTHONPATH=$PYTHONPATH:$AMBERHOME/lib/python3.8/site-packages/pdb4amber-1
 
 The folder ./BAT/all-poses contains examples of input coordinate files, with a docked receptor from the 5uez crystal structure (LMCSS-5uf0\_5uez\_docked.pdb), as well as 9 docked poses for the ligand with the 5uf0 crystal structure (pose0.pdb to pose8.pdb). The docking files were generated and converted to .pdb using Autodock Vina and AutodockTools, following a protocol adapted from the CELPP challenge tutorial (https://docs.google.com/document/d/1iJcPUktbdrRftAA8cuVa32Ri1TPr2XvZVqTccDja2OM). Inside the ./all-poses folder there is also the original crystal structure file for 5uf0, in pdb format. Below we show an example of using these files to calculate the standard binding free energies of the top 5 docked poses and the crystal structure, with all the necessary steps in the calculation. 
 
-# Running a sample calculation with AMBER20
+# Running a sample calculation with AMBER
 
 The simulations and analysis from this tutorial will be performed inside the ./BAT folder. The simulations are divided in two steps, equilibration and free energy calculation. We will use the BAT.py input file called input-dd.in, which has the needed parameters to perform full double decoupling calculations with restraints to five docked poses. A similar input file called input-dd-long.in, with more free energy windows and longer simulation times, is also included as an example. 
 
@@ -112,11 +114,11 @@ The user can also mix and match the separated/merged restraint components and th
 
 # Using BAT with the OpenMM software 
 
-BAT also allows the user to run all simulations using the free OpenMM engine. In this case, instead of the _pmemd.cuda_ software from AMBER20, the OpenMM and OpenMMTools versions below should be installed and in your path:
+BAT also allows the user to run all simulations using the free OpenMM engine. In this case, instead of the _pmemd.cuda_ software from AMBER, the OpenMM and OpenMMTools versions below should be installed and in your path:
 
-OpenMM 7.7.0 [10-14]: http://docs.openmm.org/latest/userguide/application/01_getting_started.html
+OpenMM 7.7.0 or later [10-14]: http://docs.openmm.org/latest/userguide/application/01_getting_started.html
 
-OpenMMTools 0.21.3 [15]: https://anaconda.org/conda-forge/openmmtools
+OpenMMTools 0.21.3 or later [15]: https://anaconda.org/conda-forge/openmmtools
 
 Both distributions use the Conda package manager for installation, which can be obtained at https://docs.conda.io/en/latest/ and installed following the instructions in the website. 
 
@@ -125,9 +127,9 @@ Both distributions use the Conda package manager for installation, which can be 
 
 The OpenMM simulations are fully integrated into the BAT workflow, with the equilibration, free energy and analysis steps performed the same way as explained in the tutorial above. Two input files are provided as examples, input-dd-openmm.in for double decoupling with separated restraints, and input-sdr-openmm.in for the SDR method with merged restraints. More details on the OpenMM-specific BAT input variables can be found in the User Guide.  
 
-In order to run the equilibration and free energy simulations in the respective folders, inside them are included a bash script, to perform the simulations in a local machine, as well as a PBS script, to run in a queue system such as TORQUE. Both of these files might have to be adjusted, depending on your computer or server configuration. After concluding the simulations and performing the final analysis step, the results will be written in the same location and in the same format as with the AMBER20 version.
+In order to run the equilibration and free energy simulations in the respective folders, inside them are included a bash script, to perform the simulations in a local machine, as well as a PBS script, to run in a queue system such as TORQUE. Both of these files might have to be adjusted, depending on your computer or server configuration. After concluding the simulations and performing the final analysis step, the results will be written in the same location and in the same format as with the AMBER version.
 
-The user might want to compare the AMBER20 and OpenMM free energy results calculated over the same equilibrated poses states. In that case, the equilibration step should be performed using AMBER20, and the free energy step can be performed using both AMBER20 and OpenMM. Performing equilibration with the latter and free energy with the former may cause problems due to incompatibility between input/output files.    
+The user might want to compare the AMBER and OpenMM free energy results calculated over the same equilibrated poses states. In that case, the equilibration step should be performed using AMBER, and the free energy step can be performed using both AMBER and OpenMM. Performing equilibration with the latter and free energy with the former may cause problems due to incompatibility between input/output files.    
 
 
 
