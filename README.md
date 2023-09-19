@@ -1,19 +1,19 @@
 
 \- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-*New features in the BAT.py 2.2 version:*
+*COMING SOON: The BAT.py 2.3 version, with the new features*
 
-*- Support for proteins with multiple chains*
+*- TI calculations with Gaussian Quadrature for OpenMM*
 
-*- Inclusion of cobinders such as ions*
+*- Choice of multiple restrained protein backbone sections*
 
-*- Additional water models*
+*- Output of total simulation time of each calculation*
 
-*- Use of the lovoalign protein alignment software, replacing MUSTANG*
+*- Automatic adjustment of solvation buffers when using the solv_shell option*
 
-*- Compatibility with AMBER22*
+*- Additional sample systems and input files*
 
-*More details on the new features, such as the system setup and input variables, can be found in the user guide.* 
+*The release of the 2.3 version will be followed by the publication of the BAT2 manuscript* 
 
 \- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
