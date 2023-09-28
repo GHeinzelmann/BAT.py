@@ -153,30 +153,30 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil,
     rst.append(''+P3+' '+P1+'') 
 
     # Define protein dihedral restraints in the given range
-
-    beg = bb_start - int(first_res) + 2 
-    end = bb_end - int(first_res) + 2
-    if dec_method == 'sdr':
-      if (comp == 'e' or comp == 'v' or comp == 'n'):
-        beg = bb_start - int(first_res) + 3
-        end = bb_end - int(first_res) + 3
     nd = 0
-    for i in range(beg, end):
-      j = i+1
-      psi1 = ':'+str(i)+'@N' 
-      psi2 = ':'+str(i)+'@CA' 
-      psi3 = ':'+str(i)+'@C' 
-      psi4 = ':'+str(j)+'@N' 
-      psit = '%s %s %s %s' % (psi1, psi2, psi3, psi4)
-      rst.append(psit)
-      nd += 1  
-      phi1 = ':'+str(i)+'@C' 
-      phi2 = ':'+str(j)+'@N' 
-      phi3 = ':'+str(j)+'@CA' 
-      phi4 = ':'+str(j)+'@C' 
-      phit = '%s %s %s %s' % (phi1, phi2, phi3, phi4)
-      rst.append(phit)
-      nd += 1  
+    for i in range(0, len(bb_start)):
+      beg = bb_start[i] - int(first_res) + 2 
+      end = bb_end[i] - int(first_res) + 2
+      if dec_method == 'sdr':
+        if (comp == 'e' or comp == 'v' or comp == 'n'):
+          beg = bb_start[i] - int(first_res) + 3
+          end = bb_end[i] - int(first_res) + 3
+      for i in range(beg, end):
+        j = i+1
+        psi1 = ':'+str(i)+'@N' 
+        psi2 = ':'+str(i)+'@CA' 
+        psi3 = ':'+str(i)+'@C' 
+        psi4 = ':'+str(j)+'@N' 
+        psit = '%s %s %s %s' % (psi1, psi2, psi3, psi4)
+        rst.append(psit)
+        nd += 1  
+        phi1 = ':'+str(i)+'@C' 
+        phi2 = ':'+str(j)+'@N' 
+        phi3 = ':'+str(j)+'@CA' 
+        phi4 = ':'+str(j)+'@C' 
+        phit = '%s %s %s %s' % (phi1, phi2, phi3, phi4)
+        rst.append(phit)
+        nd += 1  
 
     # Define translational/rotational and anchor atom distance restraints on the ligand
 
@@ -802,7 +802,7 @@ def sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, steps1, st
                 fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(steps1)).replace('disang_file', 'disang%02d' %int(i)))
 
 
-    # Create preparation files
+    # Create preparation files (not used anymore)
     if (stage == 'prep'):
       for i in range(0, num_sim):
         with open('../amber_files/mdin-prep', "rt") as fin:
@@ -823,7 +823,7 @@ def sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, steps1, st
             with open("./mdin-%02d" %int(i), "wt") as fout:
               if i == 1 or i == 0:
                 for line in fin:
-                  fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(steps1)).replace('disang_file', 'disang'))
+                  fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(round(steps1/2))).replace('disang_file', 'disang'))
               else:
                 for line in fin:
                   fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(steps2)).replace('disang_file', 'disang'))
@@ -833,7 +833,7 @@ def sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, steps1, st
             with open("./mdin-%02d" %int(i), "wt") as fout:
               if i == 1 or i == 0:
                 for line in fin:
-                  fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(steps1)).replace('disang_file', 'disang'))
+                  fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(round(steps1/2))).replace('disang_file', 'disang'))
               else:
                 for line in fin:
                   fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(steps2)).replace('disang_file', 'disang'))
@@ -843,7 +843,7 @@ def sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, steps1, st
             with open("./mdin-%02d" %int(i), "wt") as fout:
               if i == 1 or i == 0:
                 for line in fin:
-                  fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(steps1)).replace('disang_file', 'disang'))
+                  fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(round(steps1/2))).replace('disang_file', 'disang'))
               else:
                 for line in fin:
                   fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(steps2)).replace('disang_file', 'disang'))
@@ -907,7 +907,7 @@ def dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2,
             with open("./mdin-%02d" %int(i), "wt") as fout:
               if i == 1 or i == 0:
                 for line in fin:
-                  fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(steps1)).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)).replace('mk2',str(mk2)))
+                  fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(round(steps1/2))).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)).replace('mk2',str(mk2)))
               else:
                 for line in fin:
                   fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(steps2)).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)).replace('mk2',str(mk2)))
@@ -947,7 +947,7 @@ def dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2,
             with open("./mdin-%02d" %int(i), "wt") as fout:
               if i == 1 or i == 0:
                 for line in fin:
-                  fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(steps1)).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)))
+                  fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(round(steps1/2))).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)))
               else:
                 for line in fin:
                   fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(steps2)).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)))
@@ -1002,7 +1002,7 @@ def dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2,
             with open("./mdin-%02d" %int(i), "wt") as fout:
               if i == 1 or i == 0:
                 for line in fin:
-                  fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(steps1)).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)).replace('mk2',str(mk2)).replace('mk3',str(mk3)).replace('mk4',str(mk4)))
+                  fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(round(steps1/2))).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)).replace('mk2',str(mk2)).replace('mk3',str(mk3)).replace('mk4',str(mk4)))
               else:
                 for line in fin:
                   fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(steps2)).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)).replace('mk2',str(mk2)).replace('mk3',str(mk3)).replace('mk4',str(mk4)))
@@ -1043,7 +1043,7 @@ def dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2,
             with open("./mdin-%02d" %int(i), "wt") as fout:
               if i == 1 or i == 0:
                 for line in fin:
-                  fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(steps1)).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)).replace('mk2',str(mk2)))
+                  fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(round(steps1/2))).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)).replace('mk2',str(mk2)))
               else:
                 for line in fin:
                   fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(steps2)).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)).replace('mk2',str(mk2)))
@@ -1092,7 +1092,7 @@ def dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2,
             if i == 1 or i == 0:
               for line in fin:
                 if not 'restraint' in line and not 'ntr = 1' in line and not 'ntwprt' in line and not 'infe' in line:
-                  fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(steps1)).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)).replace('mk2',str(mk2)))
+                  fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(round(steps1/2))).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)).replace('mk2',str(mk2)))
             else:
               for line in fin:
                 if not 'restraint' in line and not 'ntr = 1' in line and not 'ntwprt' in line and not 'infe' in line:
@@ -1135,7 +1135,7 @@ def dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2,
             if i == 1 or i == 0:
               for line in fin:
                 if not 'restraint' in line and not 'ntr = 1' in line and not 'ntwprt' in line:
-                  fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(steps1)).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)))
+                  fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(round(steps1/2))).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)))
             else:
               for line in fin:
                 if not 'restraint' in line and not 'ntr = 1' in line and not 'ntwprt' in line:

@@ -12,7 +12,17 @@ from lib.pymbar import MBAR # multistate Bennett acceptance ratio
 from lib.pymbar import timeseries # timeseries analysis
 from pathlib import Path
 
-def fe_openmm(components, temperature, pose, dec_method, rest):
+def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lambdas, dic_itera1, dic_itera2, itera_steps, dt):
+
+    # Total simulation time
+    total_time = 0
+    for i in components:
+      if i == 'a' or i == 'l' or i == 't' or i == 'c' or i == 'r' or i == 'm' or i == 'n':
+        total_time = total_time + (dic_itera1[i]+dic_itera2[i])*itera_steps*len(attach_rest)*float(dt)/1000
+      else:
+        total_time = total_time + (dic_itera1[i]+dic_itera2[i])*itera_steps*len(lambdas)*float(dt)/1000
+#    print(total_time)
+
 
     # Set initial values to zero
     fe_a = fe_bd = fe_t = fe_m = fe_n = fe_v = fe_e = fe_c = fe_r = fe_l = fe_f = fe_w = fe_vs = fe_es = 0
@@ -182,12 +192,25 @@ def fe_openmm(components, temperature, pose, dec_method, rest):
         resfile.write('%-20s %8.2f (%3.2f)\n\n' % ('Release all', fe_rel, sd_n))
         resfile.write('%-20s %8.2f (%3.2f)\n' % ('Binding free energy', merged_sdr, sd_merg_sdr))
     resfile.write('\n----------------------------------------------\n\n')
-    resfile.write('Energies in kcal/mol\n')
+    resfile.write('Energies in kcal/mol\n\n')
+    resfile.write('Total simulation time (based on input file): %6.1f nanoseconds\n\n' % total_time)
+    resfile.write('Please cite:\n\n')
+    resfile.write('G. Heinzelmann and M. K. Gilson (2021). “Automation of absolute protein-ligand binding free energy calculations for docking refinement and compound evaluation”. Scientific Reports, 11, 1116.\n\n')
+    resfile.write('D. J. Huggins (2022) "Comparing the Performance of Different AMBER Protein Forcefields, Partial Charge Assignments, and Water Models for Absolute Binding Free Energy Calculations." Journal of Chemical Theory and Computation, 18, 2616.\n\n')
     resfile.close()
 
 
-def fe_values(blocks, components, temperature, pose, attach_rest, lambdas, weights, dec_int, dec_method, rest):
+def fe_values(blocks, components, temperature, pose, attach_rest, lambdas, weights, dec_int, dec_method, rest, dic_steps1, dic_steps2, dt):
 
+    # Total simulation time
+    total_time = 0
+    for i in components:
+      if i == 'a' or i == 'l' or i == 't' or i == 'c' or i == 'r' or i == 'm' or i == 'n':
+        total_time = total_time + (dic_steps1[i]+dic_steps2[i])*len(attach_rest)*float(dt)/1000
+      else:
+        total_time = total_time + (dic_steps1[i]+dic_steps2[i])*len(lambdas)*float(dt)/1000
+#    print(total_time)
+         
 
     # Set initial values to zero
     fe_a = fe_bd = fe_t = fe_m = fe_n = fe_v = fe_e = fe_c = fe_r = fe_l = fe_f = fe_w = fe_vs = fe_es = 0
@@ -745,7 +768,11 @@ def fe_values(blocks, components, temperature, pose, attach_rest, lambdas, weigh
         resfile.write('%-20s %8.2f (%3.2f)\n\n' % ('Release all', fe_rel, sd_n))
         resfile.write('%-20s %8.2f (%3.2f)\n' % ('Binding free energy', merged_sdr, sd_merg_sdr))
     resfile.write('\n----------------------------------------------\n\n')
-    resfile.write('Energies in kcal/mol\n')
+    resfile.write('Energies in kcal/mol\n\n')
+    resfile.write('Total simulation time (based on input file): %6.1f nanoseconds\n\n' % total_time)
+    resfile.write('Please cite:\n\n')
+    resfile.write('G. Heinzelmann and M. K. Gilson (2021). “Automation of absolute protein-ligand binding free energy calculations for docking refinement and compound evaluation”. Scientific Reports, 11, 1116.\n\n')
+    resfile.write('D. J. Huggins (2022) "Comparing the Performance of Different AMBER Protein Forcefields, Partial Charge Assignments, and Water Models for Absolute Binding Free Energy Calculations." Journal of Chemical Theory and Computation, 18, 2616.\n\n')
     resfile.close()
 
 

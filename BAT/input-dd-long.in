@@ -117,8 +117,8 @@ f_steps2	= 600000    # Number of steps per window for component f (production)
 # Conformational restraints on the protein backbone
 
 rec_bb		= yes       # Use protein backbone dihedrals conformational restraints
-bb_start        = 379       # First residue of the restrained range (original protein numbering)
-bb_end          = 390       # Last residue of the restrained range
+bb_start        = 379       # First residues of the restrained ranges
+bb_end          = 390       # Last residues of the restrained ranges
 bb_equil        = yes       # Keep this backbone section rigid during equilibration 
 
 # Ligand anchor search definitions

@@ -22,6 +22,8 @@ components = []
 aa1_poses = []  
 aa2_poses = []  
 other_mol = []
+bb_start = []
+bb_end = []
 
 # Defaults
 
@@ -80,7 +82,7 @@ ion_conc = 0.0
 retain_lig_prot = 'no'
 ligand_ph = 7.0
 ligand_charge = 'nd'
-software = 'amber20'
+software = 'amber'
 solv_shell = 0.0
 
 ntpr = '1000'                
@@ -365,9 +367,16 @@ for i in range(0, len(lines)):
                       'will be used.')
                 sys.exit(1)
         elif lines[i][0] == 'bb_start':
-            bb_start = scripts.check_input('int', lines[i][1], input_file, lines[i][0]) 
+            newline = lines[i][1].strip('\'\"-,.:;#()][').split(',')
+            for j in range(0, len(newline)):
+                bb_start.append(scripts.check_input('int', newline[j], input_file, lines[i][0]))
         elif lines[i][0] == 'bb_end':
-            bb_end = scripts.check_input('int', lines[i][1], input_file, lines[i][0]) 
+            newline = lines[i][1].strip('\'\"-,.:;#()][').split(',')
+            for j in range(0, len(newline)):
+                bb_end.append(scripts.check_input('int', newline[j], input_file, lines[i][0]))
+            if len(bb_start) != len(bb_end):
+                print('Wrong input! Please use arrays of the same size for bb_start and bb_end')
+                sys.exit(1)
         elif lines[i][0] == 'bb_equil':
             if lines[i][1].lower() == 'yes':
                 bb_equil = lines[i][1].lower()
@@ -426,10 +435,10 @@ for i in range(0, len(lines)):
         elif lines[i][0] == 'software':
             if lines[i][1].lower() == 'openmm':
                 software = lines[i][1].lower()
-            elif lines[i][1].lower() == 'amber20':
+            elif lines[i][1].lower() == 'amber':
                 software = lines[i][1].lower()
             else:
-                print('Simulation software not recognized, please choose openmm or amber20')
+                print('Simulation software not recognized, please choose openmm or amber')
                 sys.exit(1)
 
 
@@ -439,6 +448,14 @@ if num_waters == 0 and buffer_z == 0:
 
 if num_waters != 0 and buffer_z != 0:
   print('Wrong input! Please choose either a number of water molecules or a z buffer value.')
+  sys.exit(1)
+
+if buffer_x <= solv_shell or buffer_y <= solv_shell:
+  print('Wrong input! Solvation buffers cannot be smaller than the solv_shell variable.')
+  sys.exit(1)
+
+if buffer_z != 0 and buffer_z <= solv_shell:
+  print('Wrong input! Solvation buffers cannot be smaller than the solv_shell variable.')
   sys.exit(1)
 
 
@@ -483,8 +500,8 @@ for i in components:
 
 # Do not apply protein backbone restraints
 if rec_bb == 'no':
-  bb_start =  1
-  bb_end   =  0
+  bb_start = [1]
+  bb_end = [0]
   bb_equil = 'no'
 
 # Create poses definitions
@@ -500,7 +517,7 @@ rest = [rec_dihcf_force, rec_discf_force, lig_distance_force, lig_angle_force, l
 # Create ion definitions
 ion_def = [cation, anion, ion_conc]
 
-# Define number of steps for all stages
+# Define number of steps for all stages (amber)
 dic_steps1 = {}
 dic_steps2 = {}
 dic_steps1['a'] = a_steps1
@@ -525,6 +542,32 @@ dic_steps1['w'] = w_steps1
 dic_steps2['w'] = w_steps2
 dic_steps1['f'] = f_steps1
 dic_steps2['f'] = f_steps2
+
+# Define number of steps for all stages (openmm)
+dic_itera1 = {}
+dic_itera2 = {}
+dic_itera1['a'] = a_itera1
+dic_itera2['a'] = a_itera2
+dic_itera1['l'] = l_itera1
+dic_itera2['l'] = l_itera2
+dic_itera1['t'] = t_itera1
+dic_itera2['t'] = t_itera2
+dic_itera1['m'] = m_itera1
+dic_itera2['m'] = m_itera2
+dic_itera1['n'] = n_itera1
+dic_itera2['n'] = n_itera2
+dic_itera1['c'] = c_itera1
+dic_itera2['c'] = c_itera2
+dic_itera1['r'] = r_itera1
+dic_itera2['r'] = r_itera2
+dic_itera1['v'] = v_itera1
+dic_itera2['v'] = v_itera2
+dic_itera1['e'] = e_itera1
+dic_itera2['e'] = e_itera2
+dic_itera1['w'] = w_itera1
+dic_itera2['w'] = w_itera2
+dic_itera1['f'] = f_itera1
+dic_itera2['f'] = f_itera2
 
 # Adjust components and windows for OpenMM
 
@@ -591,7 +634,7 @@ if stage == 'equil':
       continue
     # Solvate system with ions
     print('Creating box...')
-    build.create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, buffer_z, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, dec_method, other_mol)
+    build.create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, buffer_z, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, dec_method, other_mol, solv_shell)
     # Apply restraints and prepare simulation files
     print('Equil release weights:')
     for i in range(0, len(release_eq)):
@@ -680,7 +723,7 @@ elif stage == 'fe':
               aa2_poses.append(pose)
               break
             print('Creating box for protein/simultaneous release...')
-            build.create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, buffer_z, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, dec_method, other_mol)
+            build.create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, buffer_z, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, dec_method, other_mol, solv_shell)
             setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method, other_mol)
             setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2, rng)
           else:
@@ -710,7 +753,7 @@ elif stage == 'fe':
             if anch == 'anch2':
               aa2_poses.append(pose)
               break
-            build.create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, buffer_z, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, dec_method, other_mol)
+            build.create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, buffer_z, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, dec_method, other_mol, solv_shell)
             setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method, other_mol)
             setup.dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2, weight, lambdas, dec_method, ntwx)
           else:
@@ -770,7 +813,7 @@ elif stage == 'fe':
               break
             if anch != 'altm':
               print('Creating box for attaching restraints...')
-              build.create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, buffer_z, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, dec_method, other_mol)
+              build.create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, buffer_z, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, dec_method, other_mol, solv_shell)
             setup.restraints(pose, rest, bb_start, bb_end, weight, stage, mol, comp, bb_equil, sdr_dist, dec_method, other_mol)
             setup.sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2, rng)
           else:
@@ -799,13 +842,13 @@ elif stage == 'analysis':
   if software == 'openmm':
     for i in range(0, len(poses_def)):
       pose = poses_def[i]
-      analysis.fe_openmm(components, temperature, pose, dec_method, rest)
+      analysis.fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lambdas, dic_itera1, dic_itera2, itera_steps, dt)
       os.chdir('../../')
   else: 
   # Free energy analysis for AMBER20
     for i in range(0, len(poses_def)):
       pose = poses_def[i]
-      analysis.fe_values(blocks, components, temperature, pose, attach_rest, lambdas, weights, dec_int, dec_method, rest)
+      analysis.fe_values(blocks, components, temperature, pose, attach_rest, lambdas, weights, dec_int, dec_method, rest, dic_steps1, dic_steps2, dt)
       os.chdir('../../')
 
 
@@ -834,6 +877,10 @@ if software == 'openmm' and stage == 'equil':
       for file in glob.glob('../'+pose+'-amber/full*'):
         shutil.copy(file, './')
       for file in glob.glob('../'+pose+'-amber/disang*'):
+        shutil.copy(file, './')
+      for file in glob.glob('../'+pose+'-amber/build*'):
+        shutil.copy(file, './')
+      for file in glob.glob('../'+pose+'-amber/tleap_solvate*'):
         shutil.copy(file, './')
       fin = open('../../run_files/PBS-equil-op', "rt")
       data = fin.read()
@@ -883,32 +930,6 @@ if software == 'openmm' and stage == 'fe':
     lambdas_rest.append(lbd_rst) 
   Input = lambdas_rest
   lambdas_rest = ['{:.5f}'.format(elem) for elem in Input]
-
-  # Define number of steps for all stages
-  dic_itera1 = {}
-  dic_itera2 = {}
-  dic_itera1['a'] = a_itera1
-  dic_itera2['a'] = a_itera2
-  dic_itera1['l'] = l_itera1
-  dic_itera2['l'] = l_itera2
-  dic_itera1['t'] = t_itera1
-  dic_itera2['t'] = t_itera2
-  dic_itera1['m'] = m_itera1
-  dic_itera2['m'] = m_itera2
-  dic_itera1['n'] = n_itera1
-  dic_itera2['n'] = n_itera2
-  dic_itera1['c'] = c_itera1
-  dic_itera2['c'] = c_itera2
-  dic_itera1['r'] = r_itera1
-  dic_itera2['r'] = r_itera2
-  dic_itera1['v'] = v_itera1
-  dic_itera2['v'] = v_itera2
-  dic_itera1['e'] = e_itera1
-  dic_itera2['e'] = e_itera2
-  dic_itera1['w'] = w_itera1
-  dic_itera2['w'] = w_itera2
-  dic_itera1['f'] = f_itera1
-  dic_itera2['f'] = f_itera2
 
   # Start script
 
@@ -963,15 +984,33 @@ if software == 'openmm' and stage == 'fe':
             shutil.copy('../../../../'+stage+'/'+poses_def[i]+'/rest/c00/disang.rest', './')
             for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/c00/full*'):
               shutil.copy(file, './')
+            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/c00/vac*'):
+              shutil.copy(file, './')
+            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/c00/build*'):
+              shutil.copy(file, './')
+            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/c00/tleap_solvate*'):
+              shutil.copy(file, './')
           elif comp == 'n':
             shutil.copy('../../../../'+stage+'/'+poses_def[i]+'/rest/n00/disang.rest', './')
             shutil.copy('../../../../'+stage+'/'+poses_def[i]+'/rest/n00/cv.in', './')
             for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/n00/full*'):
               shutil.copy(file, './')
+            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/n00/vac*'):
+              shutil.copy(file, './')
+            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/n00/build*'):
+              shutil.copy(file, './')
+            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/n00/tleap_solvate*'):
+              shutil.copy(file, './')
           else:
             shutil.copy('../../../../'+stage+'/'+poses_def[i]+'/rest/t00/disang.rest', './')
             shutil.copy('../../../../'+stage+'/'+poses_def[i]+'/rest/t00/cv.in', './')
             for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/t00/full*'):
+              shutil.copy(file, './')
+            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/t00/vac*'):
+              shutil.copy(file, './')
+            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/t00/build*'):
+              shutil.copy(file, './')
+            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/t00/tleap_solvate*'):
               shutil.copy(file, './')
       elif comp == 'e' or comp == 'v' or comp == 'w' or comp == 'f':
         if dec_method == 'sdr':
@@ -1005,6 +1044,12 @@ if software == 'openmm' and stage == 'fe':
           shutil.copy('../../../../'+stage+'/'+poses_def[i]+'/sdr/v00/disang.rest', './')
           shutil.copy('../../../../'+stage+'/'+poses_def[i]+'/sdr/v00/cv.in', './')
           for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/sdr/v00/full*'):
+            shutil.copy(file, './')
+          for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/sdr/v00/vac*'):
+            shutil.copy(file, './')
+          for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/sdr/v00/tleap_solvate*'):
+            shutil.copy(file, './')
+          for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/sdr/v00/build*'):
             shutil.copy(file, './')
         elif dec_method == 'dd':
           if not os.path.exists('dd'):
@@ -1040,10 +1085,22 @@ if software == 'openmm' and stage == 'fe':
             shutil.copy('../../../../'+stage+'/'+poses_def[i]+'/rest/c00/disang.rest', './')
             for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/c00/full*'):
               shutil.copy(file, './')
+            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/c00/vac*'):
+              shutil.copy(file, './')
+            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/c00/tleap_solvate*'):
+              shutil.copy(file, './')
+            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/c00/build*'):
+              shutil.copy(file, './')
           else:
             shutil.copy('../../../../'+stage+'/'+poses_def[i]+'/rest/t00/disang.rest', './')
             shutil.copy('../../../../'+stage+'/'+poses_def[i]+'/rest/t00/cv.in', './')
             for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/t00/full*'):
+              shutil.copy(file, './')
+            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/t00/vac*'):
+              shutil.copy(file, './')
+            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/t00/tleap_solvate*'):
+              shutil.copy(file, './')
+            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/t00/build*'):
               shutil.copy(file, './')
       os.chdir('../../') 
     # Clean up amber windows

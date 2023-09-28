@@ -885,8 +885,18 @@ def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, nt
     
     return 'all'
 
-def create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, buffer_z, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, dec_method, other_mol):
+def create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, buffer_z, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, dec_method, other_mol, solv_shell):
     
+    # Adjust buffers to solvation shell
+    if stage == 'fe' and solv_shell != 0:
+      buffer_x = buffer_x - solv_shell
+      buffer_y = buffer_y - solv_shell
+      if buffer_z != 0:
+        if ((dec_method == 'sdr') and (comp == 'e' or comp == 'v')) or comp == 'n':
+          buffer_z = buffer_z - (solv_shell/2)
+        else: 
+          buffer_z = buffer_z - solv_shell
+
     # Copy and replace simulation files
     if stage != 'fe':
       if os.path.exists('amber_files'):
