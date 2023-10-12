@@ -3,7 +3,9 @@
 
 *COMING SOON: The BAT.py 2.3 version, with the new features*
 
-*- TI calculations with Gaussian Quadrature for OpenMM*
+*- TI calculations with Gaussian Quadrature (TI-GQ) for OpenMM*
+
+*- Automatic determination of TI-GQ lambdas and weights using only the number of points as as input*
 
 *- Choice of multiple restrained protein backbone sections*
 
