@@ -854,8 +854,12 @@ def sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, steps1, st
         with open("./run-local.bash", "wt") as fout:
           for line in fin:
             fout.write(line)
-      with open('../run_files/PBS-lig', "rt") as fin:
+      with open('../run_files/PBS-Am', "rt") as fin:
         with open("./PBS-run", "wt") as fout:
+          for line in fin:
+              fout.write(line.replace('STAGE', pose).replace('POSE', '%s%02d' %(comp, int(win))))
+      with open('../run_files/SLURMM-Am', "rt") as fin:
+        with open("./SLURMM-run", "wt") as fout:
           for line in fin:
               fout.write(line.replace('STAGE', pose).replace('POSE', '%s%02d' %(comp, int(win))))
     else:
@@ -863,10 +867,14 @@ def sim_files(hmr, temperature, mol, num_sim, pose, comp, win, stage, steps1, st
         with open("./run-local.bash", "wt") as fout:
           for line in fin:
             fout.write(line.replace('RANGE', str(rng)))
-      with open('../run_files/PBS-'+stage, "rt") as fin:
+      with open('../run_files/PBS-Am', "rt") as fin:
         with open("./PBS-run", "wt") as fout:
           for line in fin:
-            fout.write(line.replace('STAGE', stage).replace('POSE', pose).replace('RANGE', str(rng)))
+            fout.write(line.replace('STAGE', stage).replace('POSE', pose))
+      with open('../run_files/SLURMM-Am', "rt") as fin:
+        with open("./SLURMM-run", "wt") as fout:
+          for line in fin:
+            fout.write(line.replace('STAGE', stage).replace('POSE', pose))
 
     os.chdir('../')
 
@@ -982,8 +990,12 @@ def dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2,
         with open("./run-local.bash", "wt") as fout:
           for line in fin:
             fout.write(line)
-      with open('../run_files/PBS-dd', "rt") as fin:
+      with open('../run_files/PBS-Am', "rt") as fin:
         with open("./PBS-run", "wt") as fout:
+          for line in fin:
+            fout.write(line.replace('STAGE', pose).replace('POSE', '%s%02d' %(comp, int(win))))
+      with open('../run_files/SLURMM-Am', "rt") as fin:
+        with open("./SLURMM-run", "wt") as fout:
           for line in fin:
             fout.write(line.replace('STAGE', pose).replace('POSE', '%s%02d' %(comp, int(win))))
 
@@ -1078,8 +1090,12 @@ def dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2,
         with open("./run-local.bash", "wt") as fout:
           for line in fin:
             fout.write(line)
-      with open('../run_files/PBS-dd', "rt") as fin:
+      with open('../run_files/PBS-Am', "rt") as fin:
         with open("./PBS-run", "wt") as fout:
+          for line in fin:
+            fout.write(line.replace('STAGE', pose).replace('POSE', '%s%02d' %(comp, int(win))))
+      with open('../run_files/SLURMM-Am', "rt") as fin:
+        with open("./SLURMM-run", "wt") as fout:
           for line in fin:
             fout.write(line.replace('STAGE', pose).replace('POSE', '%s%02d' %(comp, int(win))))
 
@@ -1122,8 +1138,12 @@ def dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2,
         with open("./run-local.bash", "wt") as fout:
           for line in fin:
             fout.write(line)
-      with open('../run_files/PBS-dd', "rt") as fin:
+      with open('../run_files/PBS-Am', "rt") as fin:
         with open("./PBS-run", "wt") as fout:
+          for line in fin:
+            fout.write(line.replace('STAGE', pose).replace('POSE', '%s%02d' %(comp, int(win))))
+      with open('../run_files/SLURMM-Am', "rt") as fin:
+        with open("./SLURMM-run", "wt") as fout:
           for line in fin:
             fout.write(line.replace('STAGE', pose).replace('POSE', '%s%02d' %(comp, int(win))))
 
@@ -1165,8 +1185,12 @@ def dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2,
         with open("./run-local.bash", "wt") as fout:
           for line in fin:
             fout.write(line)
-      with open('../run_files/PBS-dd', "rt") as fin:
+      with open('../run_files/PBS-Am', "rt") as fin:
         with open("./PBS-run", "wt") as fout:
+          for line in fin:
+            fout.write(line.replace('STAGE', pose).replace('POSE', '%s%02d' %(comp, int(win))))
+      with open('../run_files/SLURMM-Am', "rt") as fin:
+        with open("./SLURMM-run", "wt") as fout:
           for line in fin:
             fout.write(line.replace('STAGE', pose).replace('POSE', '%s%02d' %(comp, int(win))))
 

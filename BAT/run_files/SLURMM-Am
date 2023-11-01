@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#SBATCH --job-name="STAGE-POSE"
+#SBATCH --partition=defq
+#SBATCH --gpus=1
+#SBATCH --ntasks=1
+#SBATCH --mem=4G
+#SBATCH -t 24:00:00
+
+# Main command goes here
+module add amber/22
+source run-local.bash
+
+exit
+

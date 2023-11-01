@@ -51,8 +51,8 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
         else:
           other_mol_vmd = 'XXX'
         for line in fin:
-          if 'MMM' not in line and 'mmm' not in line:
-            fout.write(line.replace('SHLL','%4.2f' %solv_shell).replace('OTHRS', str(other_mol_vmd)))
+          if 'lig' not in line:
+            fout.write(line.replace('SHLL','%4.2f' %solv_shell).replace('OTHRS', str(other_mol_vmd)).replace('MMM', mol.upper()))
     sp.call('vmd -dispdev text -e split.tcl', shell=True)
 
     # Remove possible remaining molecules 
@@ -152,8 +152,14 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
         sp.call('obabel -i pdb '+pose+'.pdb -o pdb -O '+mol.lower()+'.pdb -d', shell=True)                            # Remove all hydrogens from the ligand
       elif calc_type == 'crystal':
         sp.call('obabel -i pdb '+mol.lower()+'.pdb -o pdb -O '+mol.lower()+'.pdb -d', shell=True)                     # Remove all hydrogens from crystal ligand
-      sp.call('obabel -i pdb '+mol.lower()+'.pdb -o pdb -O '+mol.lower()+'-h.pdb -p %4.2f' %ligand_ph, shell=True)  # Put all hydrogens back using babel
+      sp.call('obabel -i pdb '+mol.lower()+'.pdb -o pdb -O '+mol.lower()+'-h-ini.pdb -p %4.2f' %ligand_ph, shell=True)  # Put all hydrogens back using babel
       sp.call('obabel -i pdb '+mol.lower()+'.pdb -o mol2 -O '+mol.lower()+'-crg.mol2 -p %4.2f' %ligand_ph, shell=True)
+      # Clean ligand protonated pdb file
+      with open(mol.lower()+'-h-ini.pdb') as oldfile, open(mol.lower()+'-h.pdb', 'w') as newfile:
+        for line in oldfile:
+            if 'ATOM' in line or 'HETATM' in line:
+                newfile.write(line)
+        newfile.close()
       if ligand_charge == 'nd':
         ligand_charge = 0
         # Get ligand net charge from babel

@@ -41,7 +41,6 @@ else:
 timeStep=TSTP*unit_definitions.femtoseconds
 stepsPerIteration=SPITR
 productionIterations=PRIT
-equilibrationIterations=EQIT
 iterationsPerCheckpoint=ITCH
 extendIterations=1000
 
@@ -50,6 +49,19 @@ extendIterations=1000
 prmtop = AmberPrmtopFile('PRMFL')
 inpcrd = AmberInpcrdFile('full.inpcrd')
 system = prmtop.createSystem(nonbondedMethod=PME, nonbondedCutoff=CTF*nanometer, constraints=HBonds, rigidWater=True, ewaldErrorTolerance=0.0005)
+
+# Read restart file
+
+integrator=LangevinIntegrator(TMPRT*unit_definitions.kelvin, GAMMA_LN/unit_definitions.picoseconds, TSTP*unit_definitions.femtoseconds)
+simulation = Simulation(prmtop.topology, system, integrator)
+with open('restart.chk', 'rb') as f:
+  simulation.context.loadCheckpoint(f.read())
+state = simulation.context.getState(getPositions=True, getVelocities=True)
+veloc = state.getVelocities()
+posit = state.getPositions()
+box_vec = state.getPeriodicBoxVectors()
+with open('equil.pdb', 'w') as output:
+    PDBFile.writeFile(simulation.topology, state.getPositions(), output)
 
 ################# Read AMBER restraint file and set ligand decoupling atoms #############
 
@@ -412,19 +424,19 @@ compound_state = openmmtools.states.CompoundThermodynamicState(thermodynamic_sta
 reload(openmmtools.alchemy)
 
 #DEBUG info
-sys = compound_state.get_system()
-file = open('DEBUG_dd.xml','w')
-file.write(XmlSerializer.serialize(sys))
-file.close()
+#sys = compound_state.get_system()
+#file = open('DEBUG_dd.xml','w')
+#file.write(XmlSerializer.serialize(sys))
+#file.close()
 
 # Get lambda values
-lambdas = LAMBDAS
+lambdas = [LBD1 , LBD2]
 
 nstates=len(lambdas)
 print("There will be ", nstates, " states in total")
-print("stepsPerIteration:", stepsPerIteration, " productionIterations: ", productionIterations, "equilibrationIterations: ", equilibrationIterations)
+print("stepsPerIteration:", stepsPerIteration, " productionIterations: ", productionIterations)
 print("Timestep: ", timeStep)
-box_vec = alchemical_system_in.getDefaultPeriodicBoxVectors()
+#box_vec = alchemical_system_in.getDefaultPeriodicBoxVectors()
 print("Box vectors:", box_vec)
 
 #Sanity check
@@ -453,14 +465,13 @@ for k in range(nstates):
         compound_state.lambda_electrostatics_A=0.0
     compound_state.lambda_restraints=1.0
     sys = compound_state.get_system()
-    sampler_states.append(openmmtools.states.SamplerState(positions=inpcrd.positions, box_vectors=box_vec))
+    sampler_states.append(openmmtools.states.SamplerState(positions=posit, velocities=veloc, box_vectors=box_vec))
     thermodynamic_states.append(compound_state)
 
 print("Integrator: LangevinSplittingDynamicsMove")
 print("Sampler: ReplicaExchangeSampler")
 
 lsd_move = openmmtools.mcmc.LangevinSplittingDynamicsMove(timestep=timeStep, collision_rate=GAMMA_LN/unit_definitions.picoseconds, n_steps=stepsPerIteration)
-print('Minimizing......')
 for k in range(nstates):
 	sampler_state = sampler_states[k]
 	thermodynamic_state = thermodynamic_states[k]
@@ -487,12 +498,8 @@ for k in range(nstates):
 	sampler_state.apply_to_context(context)
 	initial_energy = thermodynamic_state.reduced_potential(context)
 	print("Sampler state {}: initial energy {:8.3f}kT".format(k, initial_energy))
-	LocalEnergyMinimizer.minimize(context)
 	sampler_state.update_from_context(context)
-	final_energy = thermodynamic_state.reduced_potential(context)
-	print("Sampler state {}: final energy {:8.3f}kT".format(k, final_energy))
 	del context
-print('Minimized......')
 
 if runflag == 'run':
 	repex_simulation = ReplicaExchangeSampler(mcmc_moves=lsd_move, number_of_iterations=productionIterations)
@@ -504,8 +511,6 @@ if runflag != 'run':
     repex_simulation = ReplicaExchangeSampler.from_storage(reporter)
 else:
     repex_simulation.create(thermodynamic_states, sampler_states, reporter)
-    print('Equilibrating......')
-    repex_simulation.equilibrate(equilibrationIterations)
     print('Simulating......')
 if runflag == 'recover' or runflag == 'run':
         repex_simulation.run()

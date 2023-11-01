@@ -12,7 +12,7 @@ from lib.pymbar import MBAR # multistate Bennett acceptance ratio
 from lib.pymbar import timeseries # timeseries analysis
 from pathlib import Path
 
-def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lambdas, dic_itera1, dic_itera2, itera_steps, dt):
+def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lambdas, dic_itera1, dic_itera2, itera_steps, dt, dlambda, dec_int, weights):
 
     # Total simulation time
     total_time = 0
@@ -91,31 +91,74 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
         os.chdir(dec_method)
         os.chdir('%s-comp' %(comp))
         out_file=Path('./output.dat')
-        if out_file.exists(): 
-          with open(out_file, "r") as f_in:
-            lines = (line.rstrip() for line in f_in)
-            lines = list(line for line in lines if line) # Non-blank lines in a list   
-            for k in range(0, len(lines)):
-              splitdata = lines[k].split()
-              if (splitdata[0].strip() == 'Relative'):
-                if comp == 'e' and dec_method == 'dd':
-                  fe_e = -1.00*float(splitdata[7])
-                  sd_e = float(splitdata[10])
-                elif comp == 'v' and dec_method == 'dd':
-                  fe_v = -1.00*float(splitdata[7])
-                  sd_v = float(splitdata[10])
-                elif comp == 'e' and dec_method == 'sdr':
-                  fe_es = -1.00*float(splitdata[7])
-                  sd_es = float(splitdata[10])
-                elif comp == 'v' and dec_method == 'sdr':
-                  fe_vs = -1.00*float(splitdata[7])
-                  sd_vs = float(splitdata[10])
-                elif comp == 'f':
-                  fe_f = float(splitdata[7])
-                  sd_f = float(splitdata[10])
-                elif comp == 'w':
-                  fe_w = float(splitdata[7])
-                  sd_w = float(splitdata[10])
+        if dec_int == 'mbar':
+          if out_file.exists(): 
+            with open(out_file, "r") as f_in:
+              lines = (line.rstrip() for line in f_in)
+              lines = list(line for line in lines if line) # Non-blank lines in a list   
+              for k in range(0, len(lines)):
+                splitdata = lines[k].split()
+                if (splitdata[0].strip() == 'Relative'):
+                  if comp == 'e' and dec_method == 'dd':
+                    fe_e = -1.00*float(splitdata[7])
+                    sd_e = float(splitdata[10])
+                  elif comp == 'v' and dec_method == 'dd':
+                    fe_v = -1.00*float(splitdata[7])
+                    sd_v = float(splitdata[10])
+                  elif comp == 'e' and dec_method == 'sdr':
+                    fe_es = -1.00*float(splitdata[7])
+                    sd_es = float(splitdata[10])
+                  elif comp == 'v' and dec_method == 'sdr':
+                    fe_vs = -1.00*float(splitdata[7])
+                    sd_vs = float(splitdata[10])
+                  elif comp == 'f':
+                    fe_f = float(splitdata[7])
+                    sd_f = float(splitdata[10])
+                  elif comp == 'w':
+                    fe_w = float(splitdata[7])
+                    sd_w = float(splitdata[10])
+        elif dec_int == 'ti':
+          ### Determine Number of windows
+          K = 0
+          filename = './'+comp+'%02.0f/output.dat' % K
+          while os.path.isfile(filename):
+            K = K+1
+            filename = './'+comp+'%02.0f/output.dat' % K
+          deltagop = 0
+          deltagop_er = 0
+          for k in range(K):
+            filename = './'+comp+'%02.0f/output.dat' % k
+            wind_d = 0
+            wind_er = 0
+            if  os.path.exists(filename):
+              with open(filename, "r") as f_in:
+                lines = (line.rstrip() for line in f_in)
+                lines = list(line for line in lines if line) # Non-blank lines in a list   
+                for j in range(0, len(lines)):
+                  splitdata = lines[j].split()
+                  if (splitdata[0].strip() == 'Relative'):
+                    wind_d = float(splitdata[7])
+                    wind_er = float(splitdata[10])
+            deltagop = deltagop + wind_d*weights[k]   
+            deltagop_er = deltagop_er + wind_er*weights[k]   
+          if comp == 'e' and dec_method == 'dd':
+            fe_e = -1.00*float(deltagop/dlambda)
+            sd_e = float(deltagop_er/dlambda)
+          elif comp == 'v' and dec_method == 'dd':
+            fe_v = -1.00*float(deltagop/dlambda)
+            sd_v = float(deltagop_er/dlambda)
+          elif comp == 'e' and dec_method == 'sdr':
+            fe_es = -1.00*float(deltagop/dlambda)
+            sd_es = float(deltagop_er/dlambda)
+          elif comp == 'v' and dec_method == 'sdr':
+            fe_vs = -1.00*float(deltagop/dlambda)
+            sd_vs = float(deltagop_er/dlambda)
+          elif comp == 'f':
+            fe_f = float(deltagop/dlambda)
+            sd_f = float(deltagop_er/dlambda)
+          elif comp == 'w':
+            fe_w = float(deltagop/dlambda)
+            sd_w = float(deltagop_er/dlambda)
       os.chdir('../../') 
 
     # Write final results
@@ -142,10 +185,10 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
         resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach protein CF', fe_a, sd_a))
         resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach ligand CF', fe_l, sd_l))
         resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach ligand TR', fe_t, sd_t))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Site Elect (HRE)', fe_e, sd_e))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Site LJ (HRE)', fe_v, sd_v))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Bulk LJ (HRE)', fe_w, sd_w))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Bulk Elect (HRE)', fe_f, sd_f))
+        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Site Elect ('+dec_int.upper()+')', fe_e, sd_e))
+        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Site LJ ('+dec_int.upper()+')', fe_v, sd_v))
+        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Bulk LJ ('+dec_int.upper()+')', fe_w, sd_w))
+        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Bulk Elect ('+dec_int.upper()+')', fe_f, sd_f))
         resfile.write('%-20s %8.2f \n' % ('Release ligand TR',fe_bd))
         resfile.write('%-20s %8.2f (%3.2f)\n' % ('Release ligand CF', fe_c, sd_c))
         resfile.write('%-20s %8.2f (%3.2f)\n\n' % ('Release protein CF', fe_r, sd_r))
@@ -158,10 +201,10 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
         resfile.write('\n----------------------------------------------\n\n')
         resfile.write('%-21s %-10s\n\n' % ('Component', 'Free Energy'))
         resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach all', fe_m, sd_m))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Site Elect (HRE)', fe_e, sd_e))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Site LJ (HRE)', fe_v, sd_v))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Bulk LJ (HRE)', fe_w, sd_w))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Bulk Elect (HRE)', fe_f, sd_f))
+        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Site Elect ('+dec_int.upper()+')', fe_e, sd_e))
+        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Site LJ ('+dec_int.upper()+')', fe_v, sd_v))
+        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Bulk LJ ('+dec_int.upper()+')', fe_w, sd_w))
+        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Bulk Elect ('+dec_int.upper()+')', fe_f, sd_f))
         resfile.write('%-20s %8.2f (%3.2f)\n\n' % ('Release all', fe_rel, sd_n))
         resfile.write('%-20s %8.2f (%3.2f)\n' % ('Binding free energy', merged_dd, sd_merg_dd))
     if dec_method == 'sdr':
@@ -173,8 +216,8 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
         resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach protein CF', fe_a, sd_a))
         resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach ligand CF', fe_l, sd_l))
         resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach ligand TR', fe_t, sd_t))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Electrostatic (HRE)', fe_es, sd_es))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Lennard-Jones (HRE)', fe_vs, sd_vs))
+        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Electrostatic ('+dec_int.upper()+')', fe_es, sd_es))
+        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Lennard-Jones ('+dec_int.upper()+')', fe_vs, sd_vs))
         resfile.write('%-20s %8.2f \n' % ('Release ligand TR',fe_bd))
         resfile.write('%-20s %8.2f (%3.2f)\n' % ('Release ligand CF', fe_c, sd_c))
         resfile.write('%-20s %8.2f (%3.2f)\n\n' % ('Release protein CF', fe_r, sd_r))
@@ -187,8 +230,8 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
         resfile.write('\n----------------------------------------------\n\n')
         resfile.write('%-21s %-10s\n\n' % ('Component', 'Free Energy'))
         resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach all', fe_m, sd_m))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Electrostatic (HRE)', fe_es, sd_es))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Lennard-Jones (HRE)', fe_vs, sd_vs))
+        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Electrostatic ('+dec_int.upper()+')', fe_es, sd_es))
+        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Lennard-Jones ('+dec_int.upper()+')', fe_vs, sd_vs))
         resfile.write('%-20s %8.2f (%3.2f)\n\n' % ('Release all', fe_rel, sd_n))
         resfile.write('%-20s %8.2f (%3.2f)\n' % ('Binding free energy', merged_sdr, sd_merg_sdr))
     resfile.write('\n----------------------------------------------\n\n')

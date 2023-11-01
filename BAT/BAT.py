@@ -10,6 +10,7 @@ from lib import build
 from lib import scripts 
 from lib import setup
 from lib import analysis
+import numpy as np 
 
 ion_def = []
 poses_list = []
@@ -84,6 +85,7 @@ ligand_ph = 7.0
 ligand_charge = 'nd'
 software = 'amber'
 solv_shell = 0.0
+dlambda = 0.001
 
 ntpr = '1000'                
 ntwr = '10000'               
@@ -91,6 +93,7 @@ ntwe = '0'
 ntwx = '2500'                
 cut = '9.0'                  
 barostat = '2'               
+ti_points = 0
 
 # Read arguments that define input file and stage
 if len(sys.argv) < 5:
@@ -222,6 +225,8 @@ for i in range(0, len(lines)):
         elif lines[i][0] == 'itcheck':
             itcheck = lines[i][1]
         ####
+        elif lines[i][0] == 'ti_points':
+            ti_points = scripts.check_input('int', lines[i][1], input_file, lines[i][0]) 
         elif lines[i][0] == 'poses_list':
             newline = lines[i][1].strip('\'\"-,.:;#()][').split(',')
             for j in range(0, len(newline)):
@@ -357,6 +362,8 @@ for i in range(0, len(lines)):
             max_adis = scripts.check_input('float', lines[i][1], input_file, lines[i][0]) 
         elif lines[i][0] == 'solv_shell':
             solv_shell = scripts.check_input('float', lines[i][1], input_file, lines[i][0]) 
+        elif lines[i][0] == 'dlambda':
+            dlambda = scripts.check_input('float', lines[i][1], input_file, lines[i][0]) 
         elif lines[i][0] == 'rec_bb':
             if lines[i][1].lower() == 'yes':
                 rec_bb = 'yes'
@@ -394,10 +401,6 @@ for i in range(0, len(lines)):
             strip_line = lines[i][1].strip('\'\"-,.:;#()][').split()
             for j in range(0, len(strip_line)):
                 lambdas.append(scripts.check_input('float', strip_line[j], input_file, lines[i][0]))
-        elif lines[i][0] == 'weights':
-            strip_line = lines[i][1].strip('\'\"-,.:;#()][').split()
-            for j in range(0, len(strip_line)):
-                weights.append(scripts.check_input('float', strip_line[j], input_file, lines[i][0]))
         elif lines[i][0] == 'components':
             strip_line = lines[i][1].strip('\'\"-,.:;#()][').split()
             for j in range(0, len(strip_line)):
@@ -458,6 +461,8 @@ if buffer_z != 0 and buffer_z <= solv_shell:
   print('Wrong input! Solvation buffers cannot be smaller than the solv_shell variable.')
   sys.exit(1)
 
+if other_mol == ['']:
+  other_mol = []
 
 
 # Number of simulations, 1 equilibrium and 1 production
@@ -568,6 +573,34 @@ dic_itera1['w'] = w_itera1
 dic_itera2['w'] = w_itera2
 dic_itera1['f'] = f_itera1
 dic_itera2['f'] = f_itera2
+
+# Obtain Gaussian Quadrature lambdas and weights
+
+if dec_int == 'ti': 
+  if ti_points != 0:
+    lambdas = []
+    weights = []
+    x,y = np.polynomial.legendre.leggauss(ti_points)
+    # Adjust Gaussian lambdas
+    for i in range(0, len(x)):
+      lambdas.append(float((x[i]+1)/2))
+    # Adjust Gaussian weights
+    for i in range(0, len(y)):
+      weights.append(float(y[i]/2))
+  else:
+    print('Wrong input! Please choose a positive integer for the ti_points variable when using the TI-GQ method')
+    sys.exit(1)
+  print('lambda values:', lambdas) 
+  print('Gaussian weights:', weights) 
+elif dec_int == 'mbar': 
+  if lambdas == []:
+    print('Wrong input! Please choose a set of lambda values when using the MBAR method')
+    sys.exit(1)
+  if ti_points != 0:
+    print('Wrong input! Do not define the ti_points variable when applying the MBAR method, instead choose a set of lambda values')
+    sys.exit(1)
+  print('lambda values:', lambdas) 
+
 
 # Adjust components and windows for OpenMM
 
@@ -842,7 +875,7 @@ elif stage == 'analysis':
   if software == 'openmm':
     for i in range(0, len(poses_def)):
       pose = poses_def[i]
-      analysis.fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lambdas, dic_itera1, dic_itera2, itera_steps, dt)
+      analysis.fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lambdas, dic_itera1, dic_itera2, itera_steps, dt, dlambda, dec_int, weights)
       os.chdir('../../')
   else: 
   # Free energy analysis for AMBER20
@@ -882,18 +915,25 @@ if software == 'openmm' and stage == 'equil':
         shutil.copy(file, './')
       for file in glob.glob('../'+pose+'-amber/tleap_solvate*'):
         shutil.copy(file, './')
-      fin = open('../../run_files/PBS-equil-op', "rt")
-      data = fin.read()
-      data = data.replace('RANGE', '%02d' %rng).replace('POSE', pose) 
-      fin.close()
-      fin = open('PBS-equil', "wt")
-      fin.write(data)
-      fin.close()
       fin = open('../../run_files/local-equil-op.bash', "rt")
       data = fin.read()
       data = data.replace('RANGE', '%02d' %rng)
       fin.close()
-      fin = open('local-equil.bash', "wt")
+      fin = open('run-local.bash', "wt")
+      fin.write(data)
+      fin.close()
+      fin = open('../../run_files/PBS-Op', "rt")
+      data = fin.read()
+      data = data.replace('STAGE', stage).replace('POSE', pose) 
+      fin.close()
+      fin = open('PBS-run', "wt")
+      fin.write(data)
+      fin.close()
+      fin = open('../../run_files/SLURMM-Op', "rt")
+      data = fin.read()
+      data = data.replace('STAGE', stage).replace('POSE', pose) 
+      fin.close()
+      fin = open('SLURMM-run', "wt")
       fin.write(data)
       fin.close()
       for j in range(0, len(release_eq)):
@@ -944,6 +984,8 @@ if software == 'openmm' and stage == 'fe':
   print('')
   print('Restraint lambdas: ', lambdas_rest)
   print('')
+  print('Integration Method: ', dec_int.upper())
+  print('')
 
   # Generate folder and restraints for all components and windows
   for i in range(0, len(poses_def)):
@@ -961,12 +1003,19 @@ if software == 'openmm' and stage == 'fe':
           os.chdir(comp+'-comp')
           itera1 = dic_itera1[comp]
           itera2 = dic_itera2[comp]
-          shutil.copy('../../../../run_files/local-rest-op.bash', './local-rest.bash')
-          fin = open('../../../../run_files/PBS-rest-op', "rt")
+          shutil.copy('../../../../run_files/local-rest-op.bash', './run-local.bash')
+          fin = open('../../../../run_files/PBS-Op', "rt")
           data = fin.read()
-          data = data.replace('CMPN', comp).replace('POSE', poses_def[i]) 
+          data = data.replace('POSE', comp).replace('STAGE', poses_def[i]) 
           fin.close()
-          fin = open('PBS-'+comp, "wt")
+          fin = open('PBS-run', "wt")
+          fin.write(data)
+          fin.close()
+          fin = open('../../../../run_files/SLURMM-Op', "rt")
+          data = fin.read()
+          data = data.replace('POSE', comp).replace('STAGE', poses_def[i]) 
+          fin.close()
+          fin = open('SLURMM-run', "wt")
           fin.write(data)
           fin.close()
           fin = open('../../../../lib/rest.py', "rt")
@@ -1012,97 +1061,251 @@ if software == 'openmm' and stage == 'fe':
               shutil.copy(file, './')
             for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/t00/tleap_solvate*'):
               shutil.copy(file, './')
+          os.chdir('../../') 
       elif comp == 'e' or comp == 'v' or comp == 'w' or comp == 'f':
         if dec_method == 'sdr':
           if not os.path.exists('sdr'):
             os.makedirs('sdr')
           os.chdir('sdr')
-          if not os.path.exists(comp+'-comp'):
-            os.makedirs(comp+'-comp')
-          os.chdir(comp+'-comp')
-          itera1 = dic_itera1[comp]
-          itera2 = dic_itera2[comp]
-          shutil.copy('../../../../run_files/local-sdr-op.bash', './local-sdr.bash')
-          fin = open('../../../../run_files/PBS-sdr-op', "rt")
-          data = fin.read()
-          data = data.replace('CMPN', comp).replace('POSE', poses_def[i]) 
-          fin.close()
-          fin = open('PBS-'+comp, "wt")
-          fin.write(data)
-          fin.close()
-          fin = open('../../../../lib/sdr.py', "rt")
-          data = fin.read()
-          data = data.replace('LAMBDAS', '[%s]' % ' , '.join(map(str, lambdas))).replace('LIG', mol.upper()).replace('TMPRT', str(temperature)).replace('TSTP', str(dt)).replace('SPITR', str(itera_steps)).replace('PRIT', str(itera2)).replace('EQIT', str(itera1)).replace('ITCH', str(itcheck)).replace('GAMMA_LN', str(gamma_ln)).replace('CMPN', str(comp)).replace('CTF', cut) 
-          if hmr == 'yes':
-            data = data.replace('PRMFL', 'full.hmr.prmtop') 
-          else:
-            data = data.replace('PRMFL', 'full.prmtop') 
-          fin.close()
-          fin = open('sdr.py', "wt")
-          fin.write(data)
-          fin.close()
-          shutil.copy('../../../../'+stage+'/'+poses_def[i]+'/sdr/v00/disang.rest', './')
-          shutil.copy('../../../../'+stage+'/'+poses_def[i]+'/sdr/v00/cv.in', './')
-          for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/sdr/v00/full*'):
-            shutil.copy(file, './')
-          for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/sdr/v00/vac*'):
-            shutil.copy(file, './')
-          for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/sdr/v00/tleap_solvate*'):
-            shutil.copy(file, './')
-          for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/sdr/v00/build*'):
-            shutil.copy(file, './')
+          if dec_int == 'mbar':
+            if not os.path.exists(comp+'-comp'):
+              os.makedirs(comp+'-comp')
+            os.chdir(comp+'-comp')
+            itera1 = dic_itera1[comp]
+            itera2 = dic_itera2[comp]
+            shutil.copy('../../../../run_files/local-sdr-op.bash', './run-local.bash')
+            fin = open('../../../../run_files/PBS-Op', "rt")
+            data = fin.read()
+            data = data.replace('POSE', comp).replace('STAGE', poses_def[i]) 
+            fin.close()
+            fin = open('PBS-run', "wt")
+            fin.write(data)
+            fin.close()
+            fin = open('../../../../run_files/SLURMM-Op', "rt")
+            data = fin.read()
+            data = data.replace('POSE', comp).replace('STAGE', poses_def[i]) 
+            fin.close()
+            fin = open('SLURMM-run', "wt")
+            fin.write(data)
+            fin.close()
+            fin = open('../../../../lib/sdr.py', "rt")
+            data = fin.read()
+            data = data.replace('LAMBDAS', '[%s]' % ' , '.join(map(str, lambdas))).replace('LIG', mol.upper()).replace('TMPRT', str(temperature)).replace('TSTP', str(dt)).replace('SPITR', str(itera_steps)).replace('PRIT', str(itera2)).replace('EQIT', str(itera1)).replace('ITCH', str(itcheck)).replace('GAMMA_LN', str(gamma_ln)).replace('CMPN', str(comp)).replace('CTF', cut) 
+            if hmr == 'yes':
+              data = data.replace('PRMFL', 'full.hmr.prmtop') 
+            else:
+              data = data.replace('PRMFL', 'full.prmtop') 
+            fin.close()
+            fin = open('sdr.py', "wt")
+            fin.write(data)
+            fin.close()
+            shutil.copy('../../../../'+stage+'/'+poses_def[i]+'/sdr/v00/disang.rest', './')
+            shutil.copy('../../../../'+stage+'/'+poses_def[i]+'/sdr/v00/cv.in', './')
+            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/sdr/v00/full*'):
+              shutil.copy(file, './')
+            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/sdr/v00/vac*'):
+              shutil.copy(file, './')
+            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/sdr/v00/tleap_solvate*'):
+              shutil.copy(file, './')
+            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/sdr/v00/build*'):
+              shutil.copy(file, './')
+            os.chdir('../') 
+          elif dec_int == 'ti':
+            if not os.path.exists(comp+'-comp'):
+              os.makedirs(comp+'-comp')
+            os.chdir(comp+'-comp')
+            itera1 = int(dic_itera1[comp]*itera_steps)
+            itera2 = int(dic_itera2[comp]/2)
+            for k in range(0, len(lambdas)):               
+              if not os.path.exists('%s%02d' %(comp, int(k))):
+                os.makedirs('%s%02d' %(comp, int(k)))
+              os.chdir('%s%02d' %(comp, int(k)))
+              shutil.copy('../../../../../run_files/local-sdr-op-ti.bash', './run-local.bash')
+              fin = open('../../../../../run_files/SLURMM-Op', "rt")
+              data = fin.read()
+              data = data.replace('STAGE', pose).replace('POSE', '%s%02d' %(comp, int(k)))
+              fin.close()
+              fin = open("SLURMM-run", "wt")
+              fin.write(data)
+              fin.close()
+              fin = open('../../../../../run_files/PBS-Op', "rt")
+              data = fin.read()
+              data = data.replace('STAGE', pose).replace('POSE', '%s%02d' %(comp, int(k)))
+              fin.close()
+              fin = open("PBS-run", "wt")
+              fin.write(data)
+              fin.close()
+              fin = open('../../../../../lib/equil-sdr.py', "rt")
+              data = fin.read()
+              data = data.replace('LBD0', '%8.6f' % lambdas[k]).replace('LIG', mol.upper()).replace('TMPRT', str(temperature)).replace('TSTP', str(dt)).replace('SPITR', str(itera_steps)).replace('PRIT', str(itera2)).replace('EQIT', str(itera1)).replace('ITCH', str(itcheck)).replace('GAMMA_LN', str(gamma_ln)).replace('CMPN', str(comp)).replace('CTF', cut) 
+              if hmr == 'yes':
+                data = data.replace('PRMFL', 'full.hmr.prmtop') 
+              else:
+                data = data.replace('PRMFL', 'full.prmtop') 
+              fin.close()
+              fin = open('equil-sdr.py', "wt")
+              fin.write(data)
+              fin.close()
+              fin = open('../../../../../lib/sdr-ti.py', "rt")
+              data = fin.read()
+              # "Split" initial lambda into two close windows 
+              lambda1 = float(lambdas[k] - dlambda/2)
+              lambda2 = float(lambdas[k] + dlambda/2)
+              data = data.replace('LBD1', '%8.6f' % lambda1).replace('LBD2', '%8.6f' % lambda2).replace('LIG', mol.upper()).replace('TMPRT', str(temperature)).replace('TSTP', str(dt)).replace('SPITR', str(itera_steps)).replace('PRIT', str(itera2)).replace('EQIT', str(itera1)).replace('ITCH', str(itcheck)).replace('GAMMA_LN', str(gamma_ln)).replace('CMPN', str(comp)).replace('CTF', cut) 
+              if hmr == 'yes':
+                data = data.replace('PRMFL', 'full.hmr.prmtop') 
+              else:
+                data = data.replace('PRMFL', 'full.prmtop') 
+              fin.close()
+              fin = open('sdr-ti.py', "wt")
+              fin.write(data)
+              fin.close()
+              shutil.copy('../../../../../'+stage+'/'+poses_def[i]+'/sdr/v00/disang.rest', './')
+              shutil.copy('../../../../../'+stage+'/'+poses_def[i]+'/sdr/v00/cv.in', './')
+              for file in glob.glob('../../../../../'+stage+'/'+poses_def[i]+'/sdr/v00/full*'):
+                shutil.copy(file, './')
+              for file in glob.glob('../../../../../'+stage+'/'+poses_def[i]+'/sdr/v00/vac*'):
+                shutil.copy(file, './')
+              for file in glob.glob('../../../../../'+stage+'/'+poses_def[i]+'/sdr/v00/tleap_solvate*'):
+                shutil.copy(file, './')
+              for file in glob.glob('../../../../../'+stage+'/'+poses_def[i]+'/sdr/v00/build*'):
+                shutil.copy(file, './')
+              os.chdir('../') 
+            os.chdir('../') 
         elif dec_method == 'dd':
           if not os.path.exists('dd'):
             os.makedirs('dd')
           os.chdir('dd')
-          if not os.path.exists(comp+'-comp'):
-            os.makedirs(comp+'-comp')
-          os.chdir(comp+'-comp')
-          itera1 = dic_itera1[comp]
-          itera2 = dic_itera2[comp]
-          if not os.path.exists('../run_files'):
-            shutil.copytree('../../../../run_files', '../run_files')
-          shutil.copy('../../../../run_files/local-dd-op.bash', './local-dd.bash')
-          fin = open('../../../../run_files/PBS-dd-op', "rt")
-          data = fin.read()
-          data = data.replace('CMPN', comp).replace('POSE', poses_def[i]) 
-          fin.close()
-          fin = open('PBS-'+comp, "wt")
-          fin.write(data)
-          fin.close()
-          fin = open('../../../../lib/dd.py', "rt")
-          data = fin.read()
-          data = data.replace('LAMBDAS', '[%s]' % ' , '.join(map(str, lambdas))).replace('LIG', mol.upper()).replace('TMPRT', str(temperature)).replace('TSTP', str(dt)).replace('SPITR', str(itera_steps)).replace('PRIT', str(itera2)).replace('EQIT', str(itera1)).replace('ITCH', str(itcheck)).replace('GAMMA_LN', str(gamma_ln)).replace('CMPN', str(comp)).replace('CTF', cut) 
-          if hmr == 'yes':
-            data = data.replace('PRMFL', 'full.hmr.prmtop') 
-          else:
-            data = data.replace('PRMFL', 'full.prmtop') 
-          fin.close()
-          fin = open('dd.py', "wt")
-          fin.write(data)
-          fin.close()
-          if comp == 'f' or comp == 'w':
-            shutil.copy('../../../../'+stage+'/'+poses_def[i]+'/rest/c00/disang.rest', './')
-            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/c00/full*'):
-              shutil.copy(file, './')
-            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/c00/vac*'):
-              shutil.copy(file, './')
-            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/c00/tleap_solvate*'):
-              shutil.copy(file, './')
-            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/c00/build*'):
-              shutil.copy(file, './')
-          else:
-            shutil.copy('../../../../'+stage+'/'+poses_def[i]+'/rest/t00/disang.rest', './')
-            shutil.copy('../../../../'+stage+'/'+poses_def[i]+'/rest/t00/cv.in', './')
-            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/t00/full*'):
-              shutil.copy(file, './')
-            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/t00/vac*'):
-              shutil.copy(file, './')
-            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/t00/tleap_solvate*'):
-              shutil.copy(file, './')
-            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/t00/build*'):
-              shutil.copy(file, './')
-      os.chdir('../../') 
+          if dec_int == 'mbar':
+            if not os.path.exists(comp+'-comp'):
+              os.makedirs(comp+'-comp')
+            os.chdir(comp+'-comp')
+            itera1 = dic_itera1[comp]
+            itera2 = dic_itera2[comp]
+            if not os.path.exists('../run_files'):
+              shutil.copytree('../../../../run_files', '../run_files')
+            shutil.copy('../../../../run_files/local-dd-op.bash', './run-local.bash')
+            fin = open('../../../../run_files/PBS-Op', "rt")
+            data = fin.read()
+            data = data.replace('POSE', comp).replace('STAGE', poses_def[i]) 
+            fin.close()
+            fin = open('PBS-run', "wt")
+            fin.write(data)
+            fin.close()
+            fin = open('../../../../run_files/SLURMM-Op', "rt")
+            data = fin.read()
+            data = data.replace('POSE', comp).replace('STAGE', poses_def[i]) 
+            fin.close()
+            fin = open('SLURMM-run', "wt")
+            fin.write(data)
+            fin.close()
+            fin = open('../../../../lib/dd.py', "rt")
+            data = fin.read()
+            data = data.replace('LAMBDAS', '[%s]' % ' , '.join(map(str, lambdas))).replace('LIG', mol.upper()).replace('TMPRT', str(temperature)).replace('TSTP', str(dt)).replace('SPITR', str(itera_steps)).replace('PRIT', str(itera2)).replace('EQIT', str(itera1)).replace('ITCH', str(itcheck)).replace('GAMMA_LN', str(gamma_ln)).replace('CMPN', str(comp)).replace('CTF', cut) 
+            if hmr == 'yes':
+              data = data.replace('PRMFL', 'full.hmr.prmtop') 
+            else:
+              data = data.replace('PRMFL', 'full.prmtop') 
+            fin.close()
+            fin = open('dd.py', "wt")
+            fin.write(data)
+            fin.close()
+            if comp == 'f' or comp == 'w':
+              shutil.copy('../../../../'+stage+'/'+poses_def[i]+'/rest/c00/disang.rest', './')
+              for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/c00/full*'):
+                shutil.copy(file, './')
+              for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/c00/vac*'):
+                shutil.copy(file, './')
+              for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/c00/tleap_solvate*'):
+                shutil.copy(file, './')
+              for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/c00/build*'):
+                shutil.copy(file, './')
+            else:
+              shutil.copy('../../../../'+stage+'/'+poses_def[i]+'/rest/t00/disang.rest', './')
+              shutil.copy('../../../../'+stage+'/'+poses_def[i]+'/rest/t00/cv.in', './')
+              for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/t00/full*'):
+                shutil.copy(file, './')
+              for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/t00/vac*'):
+                shutil.copy(file, './')
+              for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/t00/tleap_solvate*'):
+                shutil.copy(file, './')
+              for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/rest/t00/build*'):
+                shutil.copy(file, './')
+            os.chdir('../') 
+          elif dec_int == 'ti':
+            if not os.path.exists(comp+'-comp'):
+              os.makedirs(comp+'-comp')
+            os.chdir(comp+'-comp')
+            itera1 = int(dic_itera1[comp]*itera_steps)
+            itera2 = int(dic_itera2[comp]/2)
+            for k in range(0, len(lambdas)):
+              if not os.path.exists('%s%02d' %(comp, int(k))):
+                os.makedirs('%s%02d' %(comp, int(k)))
+              os.chdir('%s%02d' %(comp, int(k)))
+              shutil.copy('../../../../../run_files/local-dd-op-ti.bash', './run-local.bash')
+              fin = open('../../../../../run_files/SLURMM-Op', "rt")
+              data = fin.read()
+              data = data.replace('STAGE', pose).replace('POSE', '%s%02d' %(comp, int(k)))
+              fin.close()
+              fin = open("SLURMM-run", "wt")
+              fin.write(data)
+              fin.close()
+              fin = open('../../../../../run_files/PBS-Op', "rt")
+              data = fin.read()
+              data = data.replace('STAGE', pose).replace('POSE', '%s%02d' %(comp, int(k)))
+              fin.close()
+              fin = open("PBS-run", "wt")
+              fin.write(data)
+              fin.close()
+              fin = open('../../../../../lib/equil-dd.py', "rt")
+              data = fin.read()
+              data = data.replace('LBD0', '%8.6f' % lambdas[k]).replace('LIG', mol.upper()).replace('TMPRT', str(temperature)).replace('TSTP', str(dt)).replace('SPITR', str(itera_steps)).replace('PRIT', str(itera2)).replace('EQIT', str(itera1)).replace('ITCH', str(itcheck)).replace('GAMMA_LN', str(gamma_ln)).replace('CMPN', str(comp)).replace('CTF', cut)
+              if hmr == 'yes':
+                data = data.replace('PRMFL', 'full.hmr.prmtop')
+              else:
+                data = data.replace('PRMFL', 'full.prmtop')
+              fin.close()
+              fin = open('equil-dd.py', "wt")
+              fin.write(data)
+              fin.close()
+              fin = open('../../../../../lib/dd-ti.py', "rt")
+              data = fin.read()
+              # "Split" initial lambda into two close windows 
+              lambda1 = float(lambdas[k] - dlambda/2)
+              lambda2 = float(lambdas[k] + dlambda/2)
+              data = data.replace('LBD1', '%8.6f' % lambda1).replace('LBD2', '%8.6f' % lambda2).replace('LIG', mol.upper()).replace('TMPRT', str(temperature)).replace('TSTP', str(dt)).replace('SPITR', str(itera_steps)).replace('PRIT', str(itera2)).replace('EQIT', str(itera1)).replace('ITCH', str(itcheck)).replace('GAMMA_LN', str(gamma_ln)).replace('CMPN', str(comp)).replace('CTF', cut)
+              if hmr == 'yes':
+                data = data.replace('PRMFL', 'full.hmr.prmtop')
+              else:
+                data = data.replace('PRMFL', 'full.prmtop')
+              fin.close()
+              fin = open('dd-ti.py', "wt")
+              fin.write(data)
+              fin.close()
+              if comp == 'f' or comp == 'w':
+                shutil.copy('../../../../../'+stage+'/'+poses_def[i]+'/rest/c00/disang.rest', './')
+                for file in glob.glob('../../../../../'+stage+'/'+poses_def[i]+'/rest/c00/full*'):
+                  shutil.copy(file, './')
+                for file in glob.glob('../../../../../'+stage+'/'+poses_def[i]+'/rest/c00/vac*'):
+                  shutil.copy(file, './')
+                for file in glob.glob('../../../../../'+stage+'/'+poses_def[i]+'/rest/c00/tleap_solvate*'):
+                  shutil.copy(file, './')
+                for file in glob.glob('../../../../../'+stage+'/'+poses_def[i]+'/rest/c00/build*'):
+                  shutil.copy(file, './')
+              else:
+                shutil.copy('../../../../../'+stage+'/'+poses_def[i]+'/rest/t00/disang.rest', './')
+                shutil.copy('../../../../../'+stage+'/'+poses_def[i]+'/rest/t00/cv.in', './')
+                for file in glob.glob('../../../../../'+stage+'/'+poses_def[i]+'/rest/t00/full*'):
+                  shutil.copy(file, './')
+                for file in glob.glob('../../../../../'+stage+'/'+poses_def[i]+'/rest/t00/vac*'):
+                  shutil.copy(file, './')
+                for file in glob.glob('../../../../../'+stage+'/'+poses_def[i]+'/rest/t00/tleap_solvate*'):
+                  shutil.copy(file, './')
+                for file in glob.glob('../../../../../'+stage+'/'+poses_def[i]+'/rest/t00/build*'):
+                  shutil.copy(file, './')
+              os.chdir('../')
+            os.chdir('../')
+        os.chdir('../') 
     # Clean up amber windows
     dirpath = os.path.join('rest', 't00')
     if os.path.exists(dirpath) and os.path.isdir(dirpath):

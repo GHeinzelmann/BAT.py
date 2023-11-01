@@ -414,57 +414,12 @@ reload(openmmtools.alchemy)
 factory = openmmtools.alchemy.AbsoluteAlchemicalFactory(consistent_exceptions=False, split_alchemical_forces = True, alchemical_pme_treatment = 'exact')  #RIZZI CHECK
 reference_system = system
 
-#OpenMM crashes if one adds nonexistent alchemical angles or torsions
-if(num_a_bonds == 0):
-	if(num_a_angles == 0):
-		if(num_a_torsions == 0):
-			alchemical_region_A = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_a_atoms, name='A')
-		else:
-			alchemical_region_A = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_a_atoms,alchemical_torsions = ligand_a_torsions, name='A')
-	else:
-		if(num_a_torsions == 0):
-			alchemical_region_A = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_a_atoms, alchemical_angles = ligand_a_angles, name='A')
-		else:
-			alchemical_region_A = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_a_atoms, alchemical_angles = ligand_a_angles, alchemical_torsions = ligand_a_torsions, name='A')
-else:
-	if(num_a_angles == 0):
-		if(num_a_torsions == 0):
-			alchemical_region_A = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_a_atoms, alchemical_bonds=ligand_a_bonds, name='A')
-		else:
-			alchemical_region_A = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_a_atoms, alchemical_bonds=ligand_a_bonds, alchemical_torsions = ligand_a_torsions, name='A')
-	else:
-		if(num_a_torsions == 0):
-			alchemical_region_A = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_a_atoms, alchemical_bonds=ligand_a_bonds, alchemical_angles = ligand_a_angles, name='A')
-		else:
-			alchemical_region_A = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_a_atoms, alchemical_bonds=ligand_a_bonds, alchemical_angles = ligand_a_angles, alchemical_torsions = ligand_a_torsions, name='A')
-
-#OpenMM crashes if one adds nonexistent alchemical angles or torsions
-if(num_b_bonds == 0):
-        if(num_b_angles == 0):
-                        if(num_b_torsions == 0):
-                                        alchemical_region_B = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_b_atoms, name='B')
-                        else:
-                                        alchemical_region_B = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_b_atoms,alchemical_torsions = ligand_b_torsions, name='B')
-        else:
-                        if(num_b_torsions == 0):
-                                        alchemical_region_B = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_b_atoms, alchemical_angles = ligand_b_angles, name='B')
-                        else:
-                                        alchemical_region_B = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_b_atoms, alchemical_angles = ligand_b_angles, alchemical_torsions = ligand_b_torsions, name='B')
-else:
-        if(num_b_angles == 0):
-                if(num_b_torsions == 0):
-                        alchemical_region_B = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_b_atoms, alchemical_bonds=ligand_b_bonds, name='B')
-                else:
-                        alchemical_region_B = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_b_atoms, alchemical_bonds=ligand_b_bonds, alchemical_torsions = ligand_b_torsions, name='B')
-        else:
-                if(num_b_torsions == 0):
-                        alchemical_region_B = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_b_atoms, alchemical_bonds=ligand_b_bonds, alchemical_angles = ligand_b_angles, name='B')
-                else:
-                        alchemical_region_B = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_b_atoms, alchemical_bonds=ligand_b_bonds, alchemical_angles = ligand_b_angles, alchemical_torsions = ligand_b_torsions, name='B')
-
+# Define alchemical regions A and B
+alchemical_region_A = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_a_atoms, name='A')
+alchemical_region_B = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_b_atoms, name='B')
 alchemical_system_in = factory.create_alchemical_system(reference_system, alchemical_regions = [alchemical_region_A, alchemical_region_B])
 
-
+# Create alchemical states
 alchemical_state_A = openmmtools.alchemy.AlchemicalState.from_system(alchemical_system_in, parameters_name_suffix = 'A')
 alchemical_state_B = openmmtools.alchemy.AlchemicalState.from_system(alchemical_system_in, parameters_name_suffix = 'B')
 reload(openmmtools.alchemy)

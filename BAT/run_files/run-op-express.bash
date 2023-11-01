@@ -1,17 +1,17 @@
 cd rest
 cd m-comp
-qsub PBS-m
+sbatch SLURMM-run
 cd ../
 cd n-comp
-qsub PBS-n
+sbatch SLURMM-run
 cd ../
 cd ../
 
 cd sdr
 cd e-comp
-qsub PBS-e
+sbatch SLURMM-run
 cd ../
 cd v-comp
-qsub PBS-v
+sbatch SLURMM-run
 cd ../
 cd ../

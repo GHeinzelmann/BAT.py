@@ -1,0 +1,23 @@
+#!/bin/tcsh
+
+#PBS -l walltime=30:00:00,nodes=1:ppn=2:gpu -q home-gibbs -A mgilson-gpu
+#PBS -j oe -r n -m n 
+#PBS -N STAGE-POSE
+
+### Set Environment
+module swap intel gnu
+module load python
+module load scipy/2.7
+setenv PATH "/home/henrikse/gnu44-bin:/opt/mvapich2/gnu/ib/bin:$PATH"
+setenv CUDA_HOME "/opt/cuda/7.5.18"
+setenv LD_LIBRARY_PATH "${CUDA_HOME}/lib64:/opt/mvapich2/gnu/ib/lib:$LD_LIBRARY_PATH"
+source /home/gheinzel/amber20.csh
+
+### Copy input files to scratch folder
+cd $PBS_O_WORKDIR
+
+### Execute
+source run-local.bash
+
+### Copy back to Original Work Dir.
+

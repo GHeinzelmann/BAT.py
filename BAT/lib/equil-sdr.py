@@ -37,15 +37,6 @@ else:
 	if runflag not in allowedrunflags:
 		raise ValueError('Please select runflag from {}'.format(allowedrunflags))
 
-#Dynamics
-timeStep=TSTP*unit_definitions.femtoseconds
-stepsPerIteration=SPITR
-productionIterations=PRIT
-equilibrationIterations=EQIT
-iterationsPerCheckpoint=ITCH
-extendIterations=1000
-
-
 # Generate system from AMBER
 prmtop = AmberPrmtopFile('PRMFL')
 inpcrd = AmberInpcrdFile('full.inpcrd')
@@ -216,7 +207,7 @@ if dum_atom >= 1:
 atoms_list = []
 eq_values = []
 
-# Get ligand atoms for decoupling
+# Get ligand atoms for decoupling and recoupling
 
 # Read atoms list from pdb file
 with open('full.pdb') as f_in:
@@ -235,10 +226,23 @@ for i in range(0, len(atoms_list)):
 
 dec_atoms=list(atoms_list)
 
+def split_list(a_list):
+    half = len(a_list)//2
+    return a_list[:half], a_list[half:]
+
+A = dec_atoms
+dec_atoms_A, dec_atoms_B = split_list(A)
+
 print('')
 print('Ligand decoupling atoms')
 print('')
-print(dec_atoms)
+print(dec_atoms_A)
+print('')
+
+print('')
+print('Ligand recoupling atoms')
+print('')
+print(dec_atoms_B)
 print('')
 
 #########################################################################################
@@ -247,11 +251,18 @@ print('')
 #Pressure control
 system.addForce(MonteCarloBarostat(1*unit_definitions.atmospheres, TMPRT*unit_definitions.kelvin, 25))
 
+# Decoupling/recoupling atoms
 restraint_state = RestraintComposableState(lambda_restraints=1.0)
-ligand_a_atoms = list(dec_atoms)
+
+ligand_a_atoms = list(dec_atoms_A)
 ligand_a_bonds = []
 ligand_a_angles =[]
 ligand_a_torsions =[]
+
+ligand_b_atoms = list(dec_atoms_B)
+ligand_b_bonds = []
+ligand_b_angles =[]
+ligand_b_torsions =[]
 
 #Apply harmonic restraints
 
@@ -326,6 +337,7 @@ for i in range(0, len(atoms_lc)):
       print('torsionforce.addTorsion('+str(atoms_lc[i][0])+','+str(atoms_lc[i][1])+','+str(atoms_lc[i][2])+','+str(atoms_lc[i][3])+', [1, '+str(eq_lc[i])+','+str(torsionconst)+'])')
 print('')
 
+
 # Center of Mass (COM) restraints for receptor and the bulk ligand 
 
 bondGroups = []
@@ -370,7 +382,7 @@ if dum_atom > 1:
   comforce.addBond(bondGroups, bondParameters)
   print('comforce.addBond('+str(com_atoms[1])+', '+str(bondParameters[0])+', '+str(bondParameters[1])+', '+str(bondParameters[2])+', '+str(bondParameters[3])+')')
   print('')
-
+ 
 system.addForce(harmonicforce) # after
 system.addForce(angleforce) # after
 system.addForce(torsionforce) # after 
@@ -383,20 +395,27 @@ num_a_bonds=len(ligand_a_bonds)
 num_a_angles=len(ligand_a_angles)
 num_a_torsions=len(ligand_a_torsions)
 
+num_b_atoms=len(ligand_b_atoms)
+num_b_bonds=len(ligand_b_bonds)
+num_b_angles=len(ligand_b_angles)
+num_b_torsions=len(ligand_b_torsions)
+
 #Setup alchemical system
 reload(openmmtools.alchemy)
 factory = openmmtools.alchemy.AbsoluteAlchemicalFactory(consistent_exceptions=False, split_alchemical_forces = True, alchemical_pme_treatment = 'exact')  #RIZZI CHECK
 reference_system = system
 
-# Define alchemical region A
+# Define alchemical regions A and B
 alchemical_region_A = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_a_atoms, name='A')
-alchemical_system_in = factory.create_alchemical_system(reference_system, alchemical_regions = [alchemical_region_A])
+alchemical_region_B = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_b_atoms, name='B')
+alchemical_system_in = factory.create_alchemical_system(reference_system, alchemical_regions = [alchemical_region_A, alchemical_region_B])
 
 # Create alchemical states
 alchemical_state_A = openmmtools.alchemy.AlchemicalState.from_system(alchemical_system_in, parameters_name_suffix = 'A')
+alchemical_state_B = openmmtools.alchemy.AlchemicalState.from_system(alchemical_system_in, parameters_name_suffix = 'B')
 reload(openmmtools.alchemy)
 TS = openmmtools.states.ThermodynamicState(alchemical_system_in, temperature=TMPRT*unit_definitions.kelvin, pressure=1*unit_definitions.bar)
-composable_states = [alchemical_state_A, restraint_state]
+composable_states = [alchemical_state_A, alchemical_state_B, restraint_state]
 compound_state = openmmtools.states.CompoundThermodynamicState(thermodynamic_state=TS, composable_states=composable_states)
 reload(openmmtools.alchemy)
 integrator=LangevinIntegrator(TMPRT*unit_definitions.kelvin, GAMMA_LN/unit_definitions.picoseconds, TSTP*unit_definitions.femtoseconds)
@@ -405,129 +424,62 @@ alchemical_system_in=context.getSystem()
 
 #Use offsets to interpolate
 alchemical_state_A = openmmtools.alchemy.AlchemicalState.from_system(alchemical_system_in, parameters_name_suffix = 'A')
+alchemical_state_B = openmmtools.alchemy.AlchemicalState.from_system(alchemical_system_in, parameters_name_suffix = 'B')
 reload(openmmtools.alchemy)
 TS = openmmtools.states.ThermodynamicState(alchemical_system_in, temperature=TMPRT*unit_definitions.kelvin, pressure=1*unit_definitions.bar)
-composable_states = [alchemical_state_A, restraint_state]
+composable_states = [alchemical_state_A, alchemical_state_B, restraint_state]
 compound_state = openmmtools.states.CompoundThermodynamicState(thermodynamic_state=TS, composable_states=composable_states)
 reload(openmmtools.alchemy)
 
 #DEBUG info
-sys = compound_state.get_system()
-file = open('DEBUG_dd.xml','w')
-file.write(XmlSerializer.serialize(sys))
-file.close()
+#sys = compound_state.get_system()
+#file = open('DEBUG_sdr.xml','w')
+#file.write(XmlSerializer.serialize(sys))
+#file.close()
 
-# Get lambda values
-lambdas = LAMBDAS
+#setup integrator
 
-nstates=len(lambdas)
-print("There will be ", nstates, " states in total")
-print("stepsPerIteration:", stepsPerIteration, " productionIterations: ", productionIterations, "equilibrationIterations: ", equilibrationIterations)
-print("Timestep: ", timeStep)
-box_vec = alchemical_system_in.getDefaultPeriodicBoxVectors()
-print("Box vectors:", box_vec)
+integrator=LangevinIntegrator(TMPRT*unit_definitions.kelvin, GAMMA_LN/unit_definitions.picoseconds, TSTP*unit_definitions.femtoseconds)
 
-#Sanity check
-print("")
-print("Lambdas matrix")
-if comp == 'e' or comp =='f':
-  print("Lelec_A")
+simulation = Simulation(prmtop.topology, alchemical_system_in, integrator)
+
+simulation.context.setPositions(inpcrd.positions)
+if inpcrd.boxVectors is not None:
+  simulation.context.setPeriodicBoxVectors(*inpcrd.boxVectors)
+
+#specify lambdas 
+
+lambdas = LBD0
+if comp == 'e' or comp == 'f':
+  simulation.context.setParameter('lambda_electrostatics_A', lambdas)
+  simulation.context.setParameter('lambda_electrostatics_B', float(1-lambdas))
+  simulation.context.setParameter('lambda_sterics_A', 1.0)
+  simulation.context.setParameter('lambda_sterics_B', 1.0)
+  simulation.context.setParameter('lambda_restraints', 1.0)
 elif comp == 'v' or comp == 'w':
-  print("Lsterics_A")
-for j in range(len(lambdas)):
-    print("%-15.6f" % lambdas[j], end=' ')
-    print("")
-print("")
+  simulation.context.setParameter('lambda_electrostatics_A', 0.0)
+  simulation.context.setParameter('lambda_electrostatics_B', 0.0)
+  simulation.context.setParameter('lambda_sterics_A', lambdas)
+  simulation.context.setParameter('lambda_sterics_B', float(1-lambdas))
+  simulation.context.setParameter('lambda_restraints', 1.0)
 
-sampler_states = list()
-thermodynamic_states = list()
+#Minimize and run
 
-for k in range(nstates):
-    compound_state = openmmtools.states.CompoundThermodynamicState(thermodynamic_state=TS, composable_states=composable_states)
-    if(num_a_atoms != 0):
-      if comp == 'e' or comp =='f':
-        compound_state.lambda_sterics_A=1.0
-        compound_state.lambda_electrostatics_A=lambdas[k]
-      elif comp == 'v' or comp =='w':
-        compound_state.lambda_sterics_A=lambdas[k]
-        compound_state.lambda_electrostatics_A=0.0
-    compound_state.lambda_restraints=1.0
-    sys = compound_state.get_system()
-    sampler_states.append(openmmtools.states.SamplerState(positions=inpcrd.positions, box_vectors=box_vec))
-    thermodynamic_states.append(compound_state)
+simulation.minimizeEnergy()
 
-print("Integrator: LangevinSplittingDynamicsMove")
-print("Sampler: ReplicaExchangeSampler")
+simulation.context.setVelocitiesToTemperature(TMPRT*unit_definitions.kelvin)
 
-lsd_move = openmmtools.mcmc.LangevinSplittingDynamicsMove(timestep=timeStep, collision_rate=GAMMA_LN/unit_definitions.picoseconds, n_steps=stepsPerIteration)
-print('Minimizing......')
-for k in range(nstates):
-	sampler_state = sampler_states[k]
-	thermodynamic_state = thermodynamic_states[k]
-	integrator=LangevinIntegrator(TMPRT*unit_definitions.kelvin, GAMMA_LN/unit_definitions.picoseconds, TSTP*unit_definitions.femtoseconds)
-	context = thermodynamic_state.create_context(integrator)
-	system = context.getSystem()
-	for force in system.getForces(): #RIZZI CHECK
-		if isinstance(force, CustomBondForce):
-			force.updateParametersInContext(context)
-		elif isinstance(force, HarmonicBondForce):
-			force.updateParametersInContext(context)
-		elif isinstance(force, HarmonicAngleForce):
-			force.updateParametersInContext(context)
-		elif isinstance(force, PeriodicTorsionForce):
-			force.updateParametersInContext(context)
-		elif isinstance(force, CustomAngleForce):
-			force.updateParametersInContext(context)
-		elif isinstance(force, NonbondedForce):
-			force.updateParametersInContext(context)
-		elif isinstance(force, CustomNonbondedForce):
-			force.updateParametersInContext(context)
-		elif isinstance(force, CustomTorsionForce):
-			force.updateParametersInContext(context)
-	sampler_state.apply_to_context(context)
-	initial_energy = thermodynamic_state.reduced_potential(context)
-	print("Sampler state {}: initial energy {:8.3f}kT".format(k, initial_energy))
-	LocalEnergyMinimizer.minimize(context)
-	sampler_state.update_from_context(context)
-	final_energy = thermodynamic_state.reduced_potential(context)
-	print("Sampler state {}: final energy {:8.3f}kT".format(k, final_energy))
-	del context
-print('Minimized......')
+simulation.reporters.append(app.DCDReporter('complex_trajectory_0.dcd', int(EQIT/10)))
 
-if runflag == 'run':
-	repex_simulation = ReplicaExchangeSampler(mcmc_moves=lsd_move, number_of_iterations=productionIterations)
+simulation.reporters.append(CheckpointReporter('restart.chk', int(EQIT/10)))
 
-tmp_dir = './trajectory/'
-storage = os.path.join(tmp_dir, 'dd.nc')
-reporter = MultiStateReporter(storage, checkpoint_interval=iterationsPerCheckpoint)
-if runflag != 'run':
-    repex_simulation = ReplicaExchangeSampler.from_storage(reporter)
-else:
-    repex_simulation.create(thermodynamic_states, sampler_states, reporter)
-    print('Equilibrating......')
-    repex_simulation.equilibrate(equilibrationIterations)
-    print('Simulating......')
-if runflag == 'recover' or runflag == 'run':
-        repex_simulation.run()
-elif runflag == 'extend':
-        repex_simulation.extend(extendIterations)
+simulation.reporters.append(app.StateDataReporter(stdout, int(EQIT/10), step=True,
 
-#will add all iterations even if coming from a previous restart
-all_iters = repex_simulation.iteration
-print('All iterations = {}'.format(all_iters))
+        potentialEnergy=True, temperature=True, progress=True, remainingTime=True,
 
-analyzer = ReplicaExchangeAnalyzer(reporter)
-iterations_to_analyze=int(all_iters/10)
-print('Iterations to analyze = {}'.format(iterations_to_analyze))
-for i in range(1, iterations_to_analyze+1):
-	samples_to_analyze=i*10
-	analyzer.max_n_iterations = samples_to_analyze
-	Delta_f_ij, dDelta_f_ij = analyzer.get_free_energy()
-	print("Relative free energy change during {0} = {1} +- {2}"
-		.format('decoupling', Delta_f_ij[0, nstates - 1]*kTtokcal, dDelta_f_ij[0, nstates - 1]*kTtokcal))
+        speed=True, totalSteps=EQIT, separator='      '))
 
-[matrix,eigenvalues,ineff]=analyzer.generate_mixing_statistics()
-print("Mixing Stats")
-print(matrix)
-print(eigenvalues)
-print(ineff)
+simulation.step(EQIT)
+
+simulation.saveState('restart.dat')
+
