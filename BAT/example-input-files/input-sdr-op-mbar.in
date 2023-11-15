@@ -28,7 +28,7 @@ solv_shell = 4      # Water molecules around the protein that will be kept in th
 
 # Variables for setting up equilibrium and free energy calculations, also used on analysis       
 
-fe_type = dd-rest  # Type of free energy calculations (rest, dd, sdr, dd-rest, sdr-rest, custom)
+fe_type = express  # Type of free energy calculations (rest, dd, sdr, dd-rest, sdr-rest, custom)
 
 components = [ e v ] # Used with custom option for fe_type. Do not include b component here. 
 
@@ -38,11 +38,13 @@ attach_rest = [ 0.00 0.10 0.24 0.56 1.33 3.16 7.50 17.78 42.17 100.0 ]   # Short
 
 lambdas = [ 0.0001 0.02 0.04 0.06 0.08 0.10  0.15  0.20  0.25  0.30  0.40  0.50  0.60  0.70 0.75 0.80 0.85 0.90 0.92 0.94 0.96 0.98 0.9999 ] # MBAR
 
-#sdr_dist = 32.00
+sdr_dist = 32.00
 
-#dec_method = dd
+dec_method = sdr
 
-dec_int = mbar                               # Integration method for double decoupling (MBAR or TI with Gaussian quadrature)
+dec_int = mbar
+
+blocks = 5                                    # Number of blocks for block data analysis
 
 # Force constants
 
@@ -79,32 +81,17 @@ Temperature	=   298.15    # Temperature of simulation and analysis
 eq_steps1	=   500000    # Number of steps for equilibration gradual release 
 eq_steps2	=   15000000  # Number of steps for equilibration after release
 
-a_itera1	=   200       # Number of iterations for component a (equilibrium)
-a_itera2	=   400       # Number of iterations for component a (production) 
+m_itera1	=   200       # Number of iterations for component m (equilibrium)   
+m_itera2	=   400       # Number of iterations for component m (production) 
 
-l_itera1	=   200       # Number of iterations for component l (equilibrium)   
-l_itera2	=   400       # Number of iterations for component l (production)         
-
-t_itera1	=   200       # Number of iterations for component t (equilibrium)   
-t_itera2	=   400       # Number of iterations for component t (production) 
-
-c_itera1	=   200       # Number of iterations for component c (equilibrium)   
-c_itera2	=   400       # Number of iterations for component c (production) 
-
-r_itera1	=   200       # Number of iterations for component r (equilibrium)   
-r_itera2	=   400       # Number of iterations for component r (production) 
+n_itera1	=   200       # Number of iterations for component n (equilibrium)   
+n_itera2	=   400       # Number of iterations for component n (production) 
 
 e_itera1	=   400       # Number of iterations for component e (equilibrium)   
 e_itera2	=   800       # Number of iterations for component e (production) 
 
 v_itera1	=   400       # Number of iterations for component v (equilibrium)   
 v_itera2	=   800       # Number of iterations for component v (production) 
-
-w_itera1	=   200       # Number of iterations for component w (equilibrium)   
-w_itera2	=   400       # Number of iterations for component w (production) 
-
-f_itera1	=   200       # Number of iterations for component f (equilibrium)   
-f_itera2	=   400       # Number of iterations for component f (production) 
 
 itera_steps     =   500       # Number of steps per iteration (total steps will be the number of iterations multiplied by this number)
 
@@ -118,7 +105,7 @@ cut = 9.0                      # Simulation interaction cutoff
 # Conformational restraints on the protein backbone
 
 rec_bb		= yes       # Use protein backbone dihedrals conformational restraints
-bb_start        = 379       # First residues of the restrained ranges
+bb_start        = 379       # First residues of the restrained ranges 
 bb_end          = 390       # Last residues of the restrained ranges
 bb_equil        = yes       # Keep this backbone section rigid during equilibration 
 

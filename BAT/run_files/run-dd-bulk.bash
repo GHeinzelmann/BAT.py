@@ -1,7 +1,7 @@
 
 
 x=0
-while [  $x -lt 7 ]; do
+while [  $x -lt 10 ]; do
 cd f0$x
 sbatch SLURMM-run
 cd ../

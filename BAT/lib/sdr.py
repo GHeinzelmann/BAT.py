@@ -549,15 +549,28 @@ elif runflag == 'extend':
 all_iters = repex_simulation.iteration
 print('All iterations = {}'.format(all_iters))
 
+final_en = 0
+blocks = BLCKS
+print('Blocks to analyze = {}'.format(blocks))
+for i in range(0, blocks):
+    init_n=int(round(i*(all_iters/blocks)))
+    max_n=int(round((i+1)*(all_iters/blocks)))
+    print(init_n)
+    print(max_n)
+    analyzer = ReplicaExchangeAnalyzer(reporter, n_equilibration_iterations=init_n)
+    analyzer.max_n_iterations = max_n
+    Delta_f_ij, dDelta_f_ij = analyzer.get_free_energy()
+    print("Relative free energy change for block {0} = {1} +- {2}".format(i+1, Delta_f_ij[0, nstates - 1]*kTtokcal, dDelta_f_ij[0, nstates - 1]*kTtokcal))
+    block_en = Delta_f_ij[0, nstates - 1]*kT/kcal
+    print(block_en)
+    final_en = final_en + block_en/blocks
+
+print(final_en)
+
 analyzer = ReplicaExchangeAnalyzer(reporter)
-iterations_to_analyze=int(all_iters/10)
-print('Iterations to analyze = {}'.format(iterations_to_analyze))
-for i in range(1, iterations_to_analyze+1):
-	samples_to_analyze=i*10
-	analyzer.max_n_iterations = samples_to_analyze
-	Delta_f_ij, dDelta_f_ij = analyzer.get_free_energy()
-	print("Relative free energy change during {0} = {1} +- {2}"
-		.format('decoupling/recoupling', Delta_f_ij[0, nstates - 1]*kTtokcal, dDelta_f_ij[0, nstates - 1]*kTtokcal))
+analyzer.max_n_iterations = all_iters
+Delta_f_ij, dDelta_f_ij = analyzer.get_free_energy()
+print("Relative free energy change for the whole {0} = {1} +- {2}".format('decoupling/recoupling', Delta_f_ij[0, nstates - 1]*kTtokcal, dDelta_f_ij[0, nstates - 1]*kTtokcal))
 
 [matrix,eigenvalues,ineff]=analyzer.generate_mixing_statistics()
 print("Mixing Stats")

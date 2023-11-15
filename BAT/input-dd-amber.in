@@ -7,7 +7,7 @@
 # Calculation definitions
 
 calc_type = dock                                # docked or crystal structure
-celpp_receptor = LMCSS-5uf0_5uez              # Choose CELPP receptor in upper case or pdb code in lower case
+celpp_receptor = LMCSS-5uf0_5uez                # Choose CELPP receptor in upper case or pdb code in lower case
 poses_list = [0,1,2,3,4]                        # List of poses for docked calculations, called pose0.pdb, pose1.pdb, pose2.pdb, etc. 
 
 # Ligand residue name
@@ -28,7 +28,7 @@ solv_shell = 4      # Water molecules around the protein that will be kept in th
 
 # Variables for setting up equilibrium and free energy calculations, also used on analysis       
 
-fe_type = express  # Type of free energy calculations (rest, dd, sdr, dd-rest, sdr-rest, custom)
+fe_type = dd-rest  # Type of free energy calculations (rest, dd, sdr, dd-rest, sdr-rest, custom)
 
 components = [ e v ] # Used with custom option for fe_type. Do not include b component here. 
 
@@ -36,17 +36,19 @@ release_eq = [ 5.00 2.50 1.00 0.50 0.20 0.10 0.05 0.02 0.00 ]   # Equilibrium gr
 
 attach_rest = [ 0.00 0.10 0.24 0.56 1.33 3.16 7.50 17.78 42.17 100.0 ]   # Short attach/release weights
 
+ti_points = 10
+
 #lambdas = [ 0.0001 0.02 0.04 0.06 0.08 0.10  0.15  0.20  0.25  0.30  0.40  0.50  0.60  0.70 0.75 0.80 0.85 0.90 0.92 0.94 0.96 0.98 0.9999 ] # MBAR
 
-sdr_dist = 32.00
+#sdr_dist = 32.00
 
-dec_method = sdr
+#dec_method = dd
 
-dec_int = ti                                  # Integration method for double decoupling (MBAR or TI with Gaussian quadrature)
+# Additional variables for analysis 
 
-ti_points = 12                                # Number of TI-GQ points
+dec_int = ti # Integration method for double decoupling (MBAR or TI with Gaussian quadrature)
 
-blocks = 5                                    # Number of blocks for block data analysis
+blocks = 5 # Number of blocks for block data analysis
 
 # Force constants
 
@@ -76,38 +78,44 @@ ion_conc = 0.15          # salt concentration for all boxes
 
 # Simulation parameters
 
-hmr             = yes       # Use hydrogen mass repartitioning (yes or no)
+hmr             =  yes       # Use hydrogen mass repartitioning (yes or no)
 
-Temperature	=   298.15    # Temperature of simulation and analysis 
+Temperature	=  298.15    # Temperature of simulation and analysis 
 
-eq_steps1	=   500000    # Number of steps for equilibration gradual release 
-eq_steps2	=   15000000  # Number of steps for equilibration after release
+eq_steps1	=  500000    # Number of steps for equilibration gradual release 
+eq_steps2	=  15000000  # Number of steps for equilibration after release
 
-m_itera1	=   200       # Number of iterations for component m (equilibrium)   
-m_itera2	=   400       # Number of iterations for component m (production) 
+a_steps1	=  100000    # Number of steps per window for component a (equilibrium)
+a_steps2	=  200000    # Number of steps per window for component a (production) 
 
-n_itera1	=   200       # Number of iterations for component n (equilibrium)   
-n_itera2	=   400       # Number of iterations for component n (production) 
+l_steps1	=  100000    # Number of steps per window for component l (equilibrium)  
+l_steps2	=  200000    # Number of steps per window for component l (production)             
 
-e_itera1	=   400       # Number of iterations for component e (equilibrium)   
-e_itera2	=   800       # Number of iterations for component e (production) 
+t_steps1	=  100000    # Number of steps per window for component t (equilibrium)
+t_steps2	=  200000    # Number of steps per window for component t (production)     
 
-v_itera1	=   400       # Number of iterations for component v (equilibrium)   
-v_itera2	=   800       # Number of iterations for component v (production) 
+c_steps1	=  100000    # Number of steps per window for component c (equilibrium)
+c_steps2	=  200000    # Number of steps per window for component c (production)     
 
-itera_steps     =   500       # Number of steps per iteration (total steps will be the number of iterations multiplied by this number)
+r_steps1	=  100000    # Number of steps per window for component r (equilibrium) 
+r_steps2	=  200000    # Number of steps per window for component r (production)     
 
-# OpenMM simulation options 
+e_steps1	=  200000    # Number of steps per window for component e (equilibrium) 
+e_steps2	=  400000    # Number of steps per window for component e (production)     
 
-itcheck = 100                # write checkpoint file every itcheck iterations
-gamma_ln = 1.0               # collision frequency in ps^-1 for Langevin Dynamics (temperature control)
-dt = 0.004                     # simulation time step in ps
-cut = 9.0                      # Simulation interaction cutoff
+v_steps1	=  200000    # Number of steps per window for component v (equilibrium) 
+v_steps2	=  400000    # Number of steps per window for component v (production)     
+
+w_steps1	=  100000    # Number of steps per window for component w (equilibrium) 
+w_steps2	=  200000    # Number of steps per window for component w (production)     
+
+f_steps1	=  100000    # Number of steps per window for component f (equilibrium) 
+f_steps2	=  200000    # Number of steps per window for component f (production)     
 
 # Conformational restraints on the protein backbone
 
 rec_bb		= yes       # Use protein backbone dihedrals conformational restraints
-bb_start        = 379       # First residues of the restrained ranges 
+bb_start        = 379       # First residues of the restrained ranges
 bb_end          = 390       # Last residues of the restrained ranges
 bb_equil        = yes       # Keep this backbone section rigid during equilibration 
 
@@ -120,12 +128,19 @@ l1_range        =  2.50     # search radius for the first ligand anchor L1
 min_adis        =  3.00     # minimum distance between anchors
 max_adis        =  7.00     # maximum distance between anchors
 
+# Amber options for production simulations
+
+ntpr = 1000                # print energy every ntpr steps to output file (controls DD output)
+ntwr = 10000               # write the restart file every ntwr steps
+ntwe = 0                   # write energies and temperatures to mden file every ntwe steps (0 = not write to this file)
+ntwx = 2500                # write coordinates to trajectory file every ntwx steps (controls PMF and restraints output)
+cut = 9.0                  # cutoff for nonbonded interactions 
+gamma_ln = 1.0             # collision frequency in ps^-1 for Langevin Dynamics (temperature control)
+barostat = 2               # type of barostat to keep the pressure constant (1 = Berendsen-default /2 - Monte Carlo)
+dt = 0.004                 # simulation time step in ps
+
 # Force field options for receptor and ligand
 
 receptor_ff = protein.ff14SB   # Force field for receptor atoms
 ligand_ff = gaff               # Force field for ligand atoms (gaff or gaff2 available)
 ligand_ph = 7.0                # Choose pH for ligand protonation
-
-# Simulation software
-
-software = openmm

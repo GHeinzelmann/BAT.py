@@ -875,7 +875,7 @@ elif stage == 'analysis':
   if software == 'openmm':
     for i in range(0, len(poses_def)):
       pose = poses_def[i]
-      analysis.fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lambdas, dic_itera1, dic_itera2, itera_steps, dt, dlambda, dec_int, weights)
+      analysis.fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lambdas, dic_itera1, dic_itera2, itera_steps, dt, dlambda, dec_int, weights, blocks)
       os.chdir('../../')
   else: 
   # Free energy analysis for AMBER20
@@ -1020,7 +1020,7 @@ if software == 'openmm' and stage == 'fe':
           fin.close()
           fin = open('../../../../lib/rest.py', "rt")
           data = fin.read()
-          data = data.replace('LAMBDAS', '[%s]' % ' , '.join(map(str, lambdas_rest))).replace('LIG', mol.upper()).replace('TMPRT', str(temperature)).replace('TSTP', str(dt)).replace('SPITR', str(itera_steps)).replace('PRIT', str(itera2)).replace('EQIT', str(itera1)).replace('ITCH', str(itcheck)).replace('GAMMA_LN', str(gamma_ln)).replace('CMPN', str(comp)).replace('CTF', cut) 
+          data = data.replace('LAMBDAS', '[%s]' % ' , '.join(map(str, lambdas_rest))).replace('LIG', mol.upper()).replace('TMPRT', str(temperature)).replace('TSTP', str(dt)).replace('SPITR', str(itera_steps)).replace('PRIT', str(itera2)).replace('EQIT', str(itera1)).replace('ITCH', str(itcheck)).replace('GAMMA_LN', str(gamma_ln)).replace('CMPN', str(comp)).replace('CTF', cut).replace('BLCKS', str(blocks)) 
           if hmr == 'yes':
             data = data.replace('PRMFL', 'full.hmr.prmtop') 
           else:
@@ -1090,7 +1090,7 @@ if software == 'openmm' and stage == 'fe':
             fin.close()
             fin = open('../../../../lib/sdr.py', "rt")
             data = fin.read()
-            data = data.replace('LAMBDAS', '[%s]' % ' , '.join(map(str, lambdas))).replace('LIG', mol.upper()).replace('TMPRT', str(temperature)).replace('TSTP', str(dt)).replace('SPITR', str(itera_steps)).replace('PRIT', str(itera2)).replace('EQIT', str(itera1)).replace('ITCH', str(itcheck)).replace('GAMMA_LN', str(gamma_ln)).replace('CMPN', str(comp)).replace('CTF', cut) 
+            data = data.replace('LAMBDAS', '[%s]' % ' , '.join(map(str, lambdas))).replace('LIG', mol.upper()).replace('TMPRT', str(temperature)).replace('TSTP', str(dt)).replace('SPITR', str(itera_steps)).replace('PRIT', str(itera2)).replace('EQIT', str(itera1)).replace('ITCH', str(itcheck)).replace('GAMMA_LN', str(gamma_ln)).replace('CMPN', str(comp)).replace('CTF', cut).replace('BLCKS', str(blocks)) 
             if hmr == 'yes':
               data = data.replace('PRMFL', 'full.hmr.prmtop') 
             else:
@@ -1123,14 +1123,14 @@ if software == 'openmm' and stage == 'fe':
               shutil.copy('../../../../../run_files/local-sdr-op-ti.bash', './run-local.bash')
               fin = open('../../../../../run_files/SLURMM-Op', "rt")
               data = fin.read()
-              data = data.replace('STAGE', pose).replace('POSE', '%s%02d' %(comp, int(k)))
+              data = data.replace('STAGE', poses_def[i]).replace('POSE', '%s%02d' %(comp, int(k)))
               fin.close()
               fin = open("SLURMM-run", "wt")
               fin.write(data)
               fin.close()
               fin = open('../../../../../run_files/PBS-Op', "rt")
               data = fin.read()
-              data = data.replace('STAGE', pose).replace('POSE', '%s%02d' %(comp, int(k)))
+              data = data.replace('STAGE', poses_def[i]).replace('POSE', '%s%02d' %(comp, int(k)))
               fin.close()
               fin = open("PBS-run", "wt")
               fin.write(data)
@@ -1151,7 +1151,7 @@ if software == 'openmm' and stage == 'fe':
               # "Split" initial lambda into two close windows 
               lambda1 = float(lambdas[k] - dlambda/2)
               lambda2 = float(lambdas[k] + dlambda/2)
-              data = data.replace('LBD1', '%8.6f' % lambda1).replace('LBD2', '%8.6f' % lambda2).replace('LIG', mol.upper()).replace('TMPRT', str(temperature)).replace('TSTP', str(dt)).replace('SPITR', str(itera_steps)).replace('PRIT', str(itera2)).replace('EQIT', str(itera1)).replace('ITCH', str(itcheck)).replace('GAMMA_LN', str(gamma_ln)).replace('CMPN', str(comp)).replace('CTF', cut) 
+              data = data.replace('LBD1', '%8.6f' % lambda1).replace('LBD2', '%8.6f' % lambda2).replace('LIG', mol.upper()).replace('TMPRT', str(temperature)).replace('TSTP', str(dt)).replace('SPITR', str(itera_steps)).replace('PRIT', str(itera2)).replace('EQIT', str(itera1)).replace('ITCH', str(itcheck)).replace('GAMMA_LN', str(gamma_ln)).replace('CMPN', str(comp)).replace('CTF', cut).replace('BLCKS', str(blocks)) 
               if hmr == 'yes':
                 data = data.replace('PRMFL', 'full.hmr.prmtop') 
               else:
@@ -1201,7 +1201,7 @@ if software == 'openmm' and stage == 'fe':
             fin.close()
             fin = open('../../../../lib/dd.py', "rt")
             data = fin.read()
-            data = data.replace('LAMBDAS', '[%s]' % ' , '.join(map(str, lambdas))).replace('LIG', mol.upper()).replace('TMPRT', str(temperature)).replace('TSTP', str(dt)).replace('SPITR', str(itera_steps)).replace('PRIT', str(itera2)).replace('EQIT', str(itera1)).replace('ITCH', str(itcheck)).replace('GAMMA_LN', str(gamma_ln)).replace('CMPN', str(comp)).replace('CTF', cut) 
+            data = data.replace('LAMBDAS', '[%s]' % ' , '.join(map(str, lambdas))).replace('LIG', mol.upper()).replace('TMPRT', str(temperature)).replace('TSTP', str(dt)).replace('SPITR', str(itera_steps)).replace('PRIT', str(itera2)).replace('EQIT', str(itera1)).replace('ITCH', str(itcheck)).replace('GAMMA_LN', str(gamma_ln)).replace('CMPN', str(comp)).replace('CTF', cut).replace('BLCKS', str(blocks)) 
             if hmr == 'yes':
               data = data.replace('PRMFL', 'full.hmr.prmtop') 
             else:
@@ -1245,14 +1245,14 @@ if software == 'openmm' and stage == 'fe':
               shutil.copy('../../../../../run_files/local-dd-op-ti.bash', './run-local.bash')
               fin = open('../../../../../run_files/SLURMM-Op', "rt")
               data = fin.read()
-              data = data.replace('STAGE', pose).replace('POSE', '%s%02d' %(comp, int(k)))
+              data = data.replace('STAGE', poses_def[i]).replace('POSE', '%s%02d' %(comp, int(k)))
               fin.close()
               fin = open("SLURMM-run", "wt")
               fin.write(data)
               fin.close()
               fin = open('../../../../../run_files/PBS-Op', "rt")
               data = fin.read()
-              data = data.replace('STAGE', pose).replace('POSE', '%s%02d' %(comp, int(k)))
+              data = data.replace('STAGE', poses_def[i]).replace('POSE', '%s%02d' %(comp, int(k)))
               fin.close()
               fin = open("PBS-run", "wt")
               fin.write(data)
@@ -1273,7 +1273,7 @@ if software == 'openmm' and stage == 'fe':
               # "Split" initial lambda into two close windows 
               lambda1 = float(lambdas[k] - dlambda/2)
               lambda2 = float(lambdas[k] + dlambda/2)
-              data = data.replace('LBD1', '%8.6f' % lambda1).replace('LBD2', '%8.6f' % lambda2).replace('LIG', mol.upper()).replace('TMPRT', str(temperature)).replace('TSTP', str(dt)).replace('SPITR', str(itera_steps)).replace('PRIT', str(itera2)).replace('EQIT', str(itera1)).replace('ITCH', str(itcheck)).replace('GAMMA_LN', str(gamma_ln)).replace('CMPN', str(comp)).replace('CTF', cut)
+              data = data.replace('LBD1', '%8.6f' % lambda1).replace('LBD2', '%8.6f' % lambda2).replace('LIG', mol.upper()).replace('TMPRT', str(temperature)).replace('TSTP', str(dt)).replace('SPITR', str(itera_steps)).replace('PRIT', str(itera2)).replace('EQIT', str(itera1)).replace('ITCH', str(itcheck)).replace('GAMMA_LN', str(gamma_ln)).replace('CMPN', str(comp)).replace('CTF', cut).replace('BLCKS', str(blocks)) 
               if hmr == 'yes':
                 data = data.replace('PRMFL', 'full.hmr.prmtop')
               else:

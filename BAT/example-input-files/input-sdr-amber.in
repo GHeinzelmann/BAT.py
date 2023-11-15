@@ -28,21 +28,21 @@ solv_shell = 4      # Water molecules around the protein that will be kept in th
 
 # Variables for setting up equilibrium and free energy calculations, also used on analysis       
 
-fe_type = dd-rest  # Type of free energy calculations (rest, dd, sdr, dd-rest, sdr-rest, custom)
+fe_type = express  # Type of free energy calculations (rest, dd, sdr, dd-rest, sdr-rest, custom)
 
-components = [ e v ] # Used with custom option for fe_type. Do not include b component here. 
+components = [ e v ] # Used with custom option for fe_type. Do not include b component here.
 
 release_eq = [ 5.00 2.50 1.00 0.50 0.20 0.10 0.05 0.02 0.00 ]   # Equilibrium gradual release weights
 
 attach_rest = [ 0.00 0.10 0.24 0.56 1.33 3.16 7.50 17.78 42.17 100.0 ]   # Short attach/release weights
 
-ti_points = 7
+ti_points = 12
 
 #lambdas = [ 0.0001 0.02 0.04 0.06 0.08 0.10  0.15  0.20  0.25  0.30  0.40  0.50  0.60  0.70 0.75 0.80 0.85 0.90 0.92 0.94 0.96 0.98 0.9999 ] # MBAR
 
-#sdr_dist = 32.00
+sdr_dist = 32.00
 
-#dec_method = dd
+#dec_method = sdr
 
 # Additional variables for analysis 
 
@@ -84,33 +84,18 @@ Temperature	=  298.15    # Temperature of simulation and analysis
 
 eq_steps1	=  500000    # Number of steps for equilibration gradual release 
 eq_steps2	=  15000000  # Number of steps for equilibration after release
+ 
+m_steps1	=  100000    # Number of steps per window for component m (equilibrium)
+m_steps2	=  200000    # Number of steps per window for component m (production)     
 
-a_steps1	=  250000    # Number of steps per window for component a (equilibrium)
-a_steps2	=  500000    # Number of steps per window for component a (production) 
+n_steps1	=  100000    # Number of steps per window for component n (equilibrium)
+n_steps2	=  200000    # Number of steps per window for component n (production)     
 
-l_steps1	=  250000    # Number of steps per window for component l (equilibrium)  
-l_steps2	=  500000    # Number of steps per window for component l (production)             
+e_steps1	=  200000    # Number of steps per window for component e (equilibrium) 
+e_steps2	=  400000    # Number of steps per window for component e (production)     
 
-t_steps1	=  250000    # Number of steps per window for component t (equilibrium)
-t_steps2	=  500000    # Number of steps per window for component t (production)     
-
-c_steps1	=  250000    # Number of steps per window for component c (equilibrium)
-c_steps2	=  500000    # Number of steps per window for component c (production)     
-
-r_steps1	=  250000    # Number of steps per window for component r (equilibrium) 
-r_steps2	=  500000    # Number of steps per window for component r (production)     
-
-e_steps1	=  250000    # Number of steps per window for component e (equilibrium) 
-e_steps2	=  500000    # Number of steps per window for component e (production)     
-
-v_steps1	=  250000    # Number of steps per window for component v (equilibrium) 
-v_steps2	=  500000    # Number of steps per window for component v (production)     
-
-w_steps1	=  100000    # Number of steps per window for component w (equilibrium) 
-w_steps2	=  200000    # Number of steps per window for component w (production)     
-
-f_steps1	=  100000    # Number of steps per window for component f (equilibrium) 
-f_steps2	=  200000    # Number of steps per window for component f (production)     
+v_steps1	=  200000    # Number of steps per window for component v (equilibrium) 
+v_steps2	=  400000    # Number of steps per window for component v (production)     
 
 # Conformational restraints on the protein backbone
 

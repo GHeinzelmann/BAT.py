@@ -12,7 +12,7 @@ from lib.pymbar import MBAR # multistate Bennett acceptance ratio
 from lib.pymbar import timeseries # timeseries analysis
 from pathlib import Path
 
-def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lambdas, dic_itera1, dic_itera2, itera_steps, dt, dlambda, dec_int, weights):
+def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lambdas, dic_itera1, dic_itera2, itera_steps, dt, dlambda, dec_int, weights, blocks):
 
     # Total simulation time
     total_time = 0
@@ -29,8 +29,7 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
     fb_a = fb_bd = fb_t = fb_m = fb_n = fb_v = fb_e = fb_c = fb_r = fb_l = fb_f = fb_w = fb_es = fb_vs = 0
     sd_a = sd_bd = sd_t = sd_m = sd_n = sd_v = sd_e = sd_c = sd_r = sd_l = sd_f = sd_w = sd_vs = sd_es = 0
 
-
-    # Acquire simulation data
+    # Get free energies for the whole run
     os.chdir('fe')
     os.chdir(pose)
     for i in range(0, len(components)):
@@ -65,28 +64,21 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
             lines = list(line for line in lines if line) # Non-blank lines in a list   
             for k in range(0, len(lines)):
               splitdata = lines[k].split()
-              if (splitdata[0].strip() == 'Relative'):
+              if (splitdata[0].strip() == 'Relative' and splitdata[6].strip() == 'whole'):
                 if comp == 'c':
-                  fe_c = -1.00*float(splitdata[7])
-                  sd_c = float(splitdata[10])
+                  fe_c = -1.00*float(splitdata[9])
                 elif comp == 'a':
-                  fe_a = float(splitdata[7])
-                  sd_a = float(splitdata[10])
+                  fe_a = float(splitdata[9])
                 elif comp == 't':
-                  fe_t = float(splitdata[7])
-                  sd_t = float(splitdata[10])
+                  fe_t = float(splitdata[9])
                 elif comp == 'n':
-                  fe_n = -1.00*float(splitdata[7])
-                  sd_n = float(splitdata[10])
+                  fe_n = -1.00*float(splitdata[9])
                 elif comp == 'm':
-                  fe_m = float(splitdata[7])
-                  sd_m = float(splitdata[10])
+                  fe_m = float(splitdata[9])
                 elif comp == 'l':
-                  fe_l = float(splitdata[7])
-                  sd_l = float(splitdata[10])
+                  fe_l = float(splitdata[9])
                 elif comp == 'r':
-                  fe_r = -1.00*float(splitdata[7])
-                  sd_r = float(splitdata[10])
+                  fe_r = -1.00*float(splitdata[9])
       elif comp == 'e' or comp == 'v' or comp == 'f' or comp == 'w':
         os.chdir(dec_method)
         os.chdir('%s-comp' %(comp))
@@ -98,25 +90,19 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
               lines = list(line for line in lines if line) # Non-blank lines in a list   
               for k in range(0, len(lines)):
                 splitdata = lines[k].split()
-                if (splitdata[0].strip() == 'Relative'):
+                if (splitdata[0].strip() == 'Relative' and splitdata[6].strip() == 'whole'):
                   if comp == 'e' and dec_method == 'dd':
-                    fe_e = -1.00*float(splitdata[7])
-                    sd_e = float(splitdata[10])
+                    fe_e = -1.00*float(splitdata[9])
                   elif comp == 'v' and dec_method == 'dd':
-                    fe_v = -1.00*float(splitdata[7])
-                    sd_v = float(splitdata[10])
+                    fe_v = -1.00*float(splitdata[9])
                   elif comp == 'e' and dec_method == 'sdr':
-                    fe_es = -1.00*float(splitdata[7])
-                    sd_es = float(splitdata[10])
+                    fe_es = -1.00*float(splitdata[9])
                   elif comp == 'v' and dec_method == 'sdr':
-                    fe_vs = -1.00*float(splitdata[7])
-                    sd_vs = float(splitdata[10])
+                    fe_vs = -1.00*float(splitdata[9])
                   elif comp == 'f':
-                    fe_f = float(splitdata[7])
-                    sd_f = float(splitdata[10])
+                    fe_f = float(splitdata[9])
                   elif comp == 'w':
-                    fe_w = float(splitdata[7])
-                    sd_w = float(splitdata[10])
+                    fe_w = float(splitdata[9])
         elif dec_int == 'ti':
           ### Determine Number of windows
           K = 0
@@ -136,30 +122,242 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
                 lines = list(line for line in lines if line) # Non-blank lines in a list   
                 for j in range(0, len(lines)):
                   splitdata = lines[j].split()
-                  if (splitdata[0].strip() == 'Relative'):
-                    wind_d = float(splitdata[7])
-                    wind_er = float(splitdata[10])
+                  if (splitdata[0].strip() == 'Relative' and splitdata[6].strip() == 'whole'):
+                    wind_d = float(splitdata[9])
+                    wind_er = float(splitdata[12])
             deltagop = deltagop + wind_d*weights[k]   
             deltagop_er = deltagop_er + wind_er*weights[k]   
           if comp == 'e' and dec_method == 'dd':
             fe_e = -1.00*float(deltagop/dlambda)
-            sd_e = float(deltagop_er/dlambda)
           elif comp == 'v' and dec_method == 'dd':
             fe_v = -1.00*float(deltagop/dlambda)
-            sd_v = float(deltagop_er/dlambda)
           elif comp == 'e' and dec_method == 'sdr':
             fe_es = -1.00*float(deltagop/dlambda)
-            sd_es = float(deltagop_er/dlambda)
           elif comp == 'v' and dec_method == 'sdr':
             fe_vs = -1.00*float(deltagop/dlambda)
-            sd_vs = float(deltagop_er/dlambda)
           elif comp == 'f':
             fe_f = float(deltagop/dlambda)
-            sd_f = float(deltagop_er/dlambda)
           elif comp == 'w':
             fe_w = float(deltagop/dlambda)
-            sd_w = float(deltagop_er/dlambda)
       os.chdir('../../') 
+
+    os.chdir('../../') 
+
+    # Get MBAR free energy averages for the blocks
+    os.chdir('fe')
+    os.chdir(pose)
+    blstd_a = []
+    blstd_l = []
+    blstd_t = []
+    blstd_c = []
+    blstd_r = []
+    blstd_e = []
+    blstd_v = []
+    blstd_es = []
+    blstd_vs = []
+    blstd_f = []
+    blstd_w = []
+    blstd_m = []
+    blstd_n = []
+    for k in range(0, blocks):
+      for i in range(0, len(components)):
+        comp = components[i]
+        if comp == 'a' or comp == 'l' or comp == 't' or comp == 'c' or comp == 'r' or comp == 'm' or comp == 'n':
+          os.chdir('rest')
+          with open('./'+comp+'-comp/output.dat', "r") as f_in:
+            lines = (line.rstrip() for line in f_in)
+            lines = list(line for line in lines if 'Relative' in line and 'block' in line)
+            splitdata = lines[k].split()
+            if comp == 'c':
+              fb_c = -1.00*float(splitdata[8])
+              blstd_c.append(fb_c)
+            elif comp == 'a':
+              fb_a = float(splitdata[8])
+              blstd_a.append(fb_a)
+            elif comp == 't':
+              fb_t = float(splitdata[8])
+              blstd_t.append(fb_t)
+            elif comp == 'n':
+              fb_n = -1.00*float(splitdata[8])
+              blstd_n.append(fb_n)
+            elif comp == 'm':
+              fb_m = float(splitdata[8])
+              blstd_m.append(fb_m)
+            elif comp == 'l':
+              fb_l = float(splitdata[8])
+              blstd_l.append(fb_l)
+            elif comp == 'r':
+              fb_r = -1.00*float(splitdata[8])
+              blstd_r.append(fb_r)
+          os.chdir('../')
+        elif comp == 'v' or comp == 'e' or comp == 'f' or comp == 'w':
+          os.chdir(dec_method)
+          if dec_int == 'mbar': 
+            with open('./'+comp+'-comp/output.dat', "r") as f_in:
+              lines = (line.rstrip() for line in f_in)
+              lines = list(line for line in lines if 'Relative' in line and 'block' in line)
+              splitdata = lines[k].split()
+              if comp == 'e' and dec_method == 'dd':
+                fb_e = -1.00*float(splitdata[8])
+                blstd_e.append(fb_e)
+              if comp == 'e' and dec_method == 'sdr':
+                fb_es = -1.00*float(splitdata[8])
+                blstd_es.append(fb_es)
+              elif comp == 'v' and dec_method == 'dd':
+                fb_v = -1.00*float(splitdata[8])
+                blstd_v.append(fb_v)
+              elif comp == 'v' and dec_method == 'sdr':
+                fb_vs = -1.00*float(splitdata[8])
+                blstd_vs.append(fb_vs)
+              if comp == 'f':
+                fb_f = float(splitdata[8])
+                blstd_f.append(fb_f)
+              elif comp == 'w':
+                fb_w = float(splitdata[8])
+                blstd_w.append(fb_w)
+          elif dec_int == 'ti': 
+              ### Determine Number of windows
+              K = 0
+              filename = './'+comp+'-comp/'+comp+'%02.0f/output.dat' % K
+              while os.path.isfile(filename):
+                K = K+1
+                filename = './'+comp+'-comp/'+comp+'%02.0f/output.dat' % K
+              deltagop = 0
+              for j in range(K):
+                filename = './'+comp+'-comp/'+comp+'%02.0f/output.dat' % j
+                wind_d = 0
+                if  os.path.exists(filename):
+                  with open(filename, "r") as f_in:
+                    lines = (line.rstrip() for line in f_in)
+                    lines = list(line for line in lines if 'Relative' in line and 'block' in line)
+                    splitdata = lines[k].split()
+                    wind_d = float(splitdata[8])
+                    deltagop = deltagop + wind_d*weights[j]   
+              if comp == 'e' and dec_method == 'dd':
+                fb_e = -1.00*float(deltagop/dlambda)
+                blstd_e.append(fb_e)
+              elif comp == 'v' and dec_method == 'dd':
+                fb_v = -1.00*float(deltagop/dlambda)
+                blstd_v.append(fb_v)
+              elif comp == 'e' and dec_method == 'sdr':
+                fb_es = -1.00*float(deltagop/dlambda)
+                blstd_es.append(fb_es)
+              elif comp == 'v' and dec_method == 'sdr':
+                fb_vs = -1.00*float(deltagop/dlambda)
+                blstd_vs.append(fb_vs)
+              elif comp == 'f':
+                fb_f = float(deltagop/dlambda)
+                blstd_f.append(fb_f)
+              elif comp == 'w':
+                fb_w = float(deltagop/dlambda)
+                blstd_w.append(fb_w)
+          os.chdir('../')
+
+      fb_bd = fe_bd
+      blck_sdr = fb_a + fb_l + fb_t + fb_es + fb_vs + fb_bd + fb_c + fb_r
+      blck_dd = fb_a + fb_l + fb_t + fb_e + fb_v + fb_w + fb_f + fb_bd + fb_c + fb_r
+      blckm_dd = fb_m + fb_e + fb_v + fb_w + fb_f + fb_bd + fb_n
+      blckm_sdr = fb_m + fb_es + fb_vs + fb_bd + fb_n
+
+
+      # Create Results folder
+      if not os.path.exists('Results'):
+        os.makedirs('Results')
+
+      # Write results for the blocks
+      resfile = open('./Results/Res-b%02d.dat' %(k+1), 'w')
+      if dec_method == 'dd':
+        if fe_t != 0 or fe_c != 0 or fe_r != 0 or fe_a != 0 or fe_l != 0:
+          resfile.write('\n----------------------------------------------\n')
+          resfile.write('All components DD method')
+          resfile.write('\n----------------------------------------------\n\n')
+          resfile.write('%-20s %-10s\n\n' % ('Component', 'Free Energy'))
+          resfile.write('%-20s %8.2f\n' % ('Attach protein CF;', fb_a))
+          resfile.write('%-20s %8.2f\n' % ('Attach ligand CF;', fb_l))
+          resfile.write('%-20s %8.2f\n' % ('Attach ligand TR;', fb_t))
+          resfile.write('%-20s %8.2f\n' % ('Site Elect ('+dec_int.upper()+');', fb_e))
+          resfile.write('%-20s %8.2f\n' % ('Site LJ ('+dec_int.upper()+');', fb_v))
+          resfile.write('%-20s %8.2f\n' % ('Bulk LJ ('+dec_int.upper()+');', fb_w))
+          resfile.write('%-20s %8.2f\n' % ('Bulk Elect ('+dec_int.upper()+');', fb_f))
+          resfile.write('%-20s %8.2f\n' % ('Release ligand TR;',fb_bd))
+          resfile.write('%-20s %8.2f\n' % ('Release ligand CF;', fb_c))
+          resfile.write('%-20s %8.2f\n\n' % ('Release protein CF;', fb_r))
+          resfile.write('%-20s %8.2f\n' % ('Binding free energy;', blck_dd))
+        # Merged results
+        if fe_m != 0 or fe_n != 0:
+          fb_rel = fb_bd + fb_n
+          resfile.write('\n----------------------------------------------\n')
+          resfile.write('Merged components DD method')
+          resfile.write('\n----------------------------------------------\n\n')
+          resfile.write('%-20s %-10s\n\n' % ('Component', 'Free Energy'))
+          resfile.write('%-20s %8.2f\n' % ('Attach all;', fb_m))
+          resfile.write('%-20s %8.2f\n' % ('Site Elect ('+dec_int.upper()+');', fb_e))
+          resfile.write('%-20s %8.2f\n' % ('Site LJ ('+dec_int.upper()+');', fb_v))
+          resfile.write('%-20s %8.2f\n' % ('Bulk LJ ('+dec_int.upper()+');', fb_w))
+          resfile.write('%-20s %8.2f\n' % ('Bulk Elect ('+dec_int.upper()+');', fb_f))
+          resfile.write('%-20s %8.2f\n\n' % ('Release all;', fb_rel))
+          resfile.write('%-20s %8.2f\n' % ('Binding free energy;', blckm_dd))
+      if dec_method == 'sdr':
+        if fe_t != 0 or fe_c != 0 or fe_r != 0 or fe_a != 0 or fe_l != 0:
+          resfile.write('\n----------------------------------------------\n')
+          resfile.write('All components SDR method')
+          resfile.write('\n----------------------------------------------\n\n')
+          resfile.write('%-20s %-10s\n\n' % ('Component', 'Free Energy'))
+          resfile.write('%-20s %8.2f\n' % ('Attach protein CF;', fb_a))
+          resfile.write('%-20s %8.2f\n' % ('Attach ligand CF;', fb_l))
+          resfile.write('%-20s %8.2f\n' % ('Attach ligand TR;', fb_t))
+          resfile.write('%-20s %8.2f\n' % ('Electrostatic ('+dec_int.upper()+');', fb_es))
+          resfile.write('%-20s %8.2f\n' % ('Lennard-Jones ('+dec_int.upper()+');', fb_vs))
+          resfile.write('%-20s %8.2f\n' % ('Release ligand TR;', fb_bd))
+          resfile.write('%-20s %8.2f\n' % ('Release ligand CF;', fb_c))
+          resfile.write('%-20s %8.2f\n\n' % ('Release protein CF;', fb_r))
+          resfile.write('%-20s %8.2f\n' % ('Binding free energy;', blck_sdr))
+        # Merged results
+        if fe_m != 0 or fe_n != 0:
+          fb_rel = fb_bd + fb_n
+          resfile.write('\n----------------------------------------------\n')
+          resfile.write('Merged components SDR method')
+          resfile.write('\n----------------------------------------------\n\n')
+          resfile.write('%-20s %-10s\n\n' % ('Component', 'Free Energy'))
+          resfile.write('%-20s %8.2f\n' % ('Attach all;', fb_m))
+          resfile.write('%-20s %8.2f\n' % ('Electrostatic ('+dec_int.upper()+');', fb_es))
+          resfile.write('%-20s %8.2f\n' % ('Lennard-Jones ('+dec_int.upper()+');', fb_vs))
+          resfile.write('%-20s %8.2f\n\n' % ('Release all;', fb_rel))
+          resfile.write('%-20s %8.2f\n' % ('Binding free energy;', blckm_sdr))
+      resfile.write('\n----------------------------------------------\n\n')
+      resfile.write('Energies in kcal/mol\n')
+      resfile.close()
+
+    # Get sigmas of ther blocks
+
+    for i in range(0, len(components)):
+      comp = components[i]
+      if comp == 'a':
+        sd_a = np.std(blstd_a)
+      if comp == 'l':
+        sd_l = np.std(blstd_l)
+      if comp == 't':
+        sd_t = np.std(blstd_t)
+      if comp == 'c':
+        sd_c = np.std(blstd_c)
+      if comp == 'r':
+        sd_r = np.std(blstd_r)
+      if comp == 'm':
+        sd_m = np.std(blstd_m)
+      if comp == 'n':
+        sd_n = np.std(blstd_n)
+      if comp == 'e' and dec_method == 'dd':
+        sd_e = np.std(blstd_e)
+      if comp == 'v' and dec_method == 'dd':
+        sd_v = np.std(blstd_v)
+      if comp == 'e' and dec_method == 'sdr':
+        sd_es = np.std(blstd_es)
+      if comp == 'v' and dec_method == 'sdr':
+        sd_vs = np.std(blstd_vs)
+      if comp == 'f':
+        sd_f = np.std(blstd_f)
+      if comp == 'w':
+        sd_w = np.std(blstd_w)
 
     # Write final results
     total_dd = fe_a + fe_l + fe_t + fe_e + fe_v + fe_w + fe_f + fe_bd + fe_c + fe_r
@@ -171,69 +369,65 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
     sd_sdr = math.sqrt(sd_a**2 + sd_l**2 + sd_t**2 + sd_es**2 + sd_vs**2 + sd_bd**2 + sd_c**2 + sd_r**2)
     sd_merg_sdr = math.sqrt(sd_m**2 + sd_es**2 + sd_vs**2 + sd_bd**2 + sd_n**2)
 
-    # Create Results folder
-    if not os.path.exists('Results'):
-      os.makedirs('Results')
-
     resfile = open('./Results/Results.dat', 'w')
     if dec_method == 'dd':
       if fe_t != 0 or fe_c != 0 or fe_r != 0 or fe_a != 0 or fe_l != 0:
         resfile.write('\n----------------------------------------------\n')
         resfile.write('All components DD method')
         resfile.write('\n----------------------------------------------\n\n')
-        resfile.write('%-21s %-10s %-4s\n\n' % ('Component', 'Free Energy', '(Error)'))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach protein CF', fe_a, sd_a))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach ligand CF', fe_l, sd_l))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach ligand TR', fe_t, sd_t))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Site Elect ('+dec_int.upper()+')', fe_e, sd_e))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Site LJ ('+dec_int.upper()+')', fe_v, sd_v))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Bulk LJ ('+dec_int.upper()+')', fe_w, sd_w))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Bulk Elect ('+dec_int.upper()+')', fe_f, sd_f))
-        resfile.write('%-20s %8.2f \n' % ('Release ligand TR',fe_bd))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Release ligand CF', fe_c, sd_c))
-        resfile.write('%-20s %8.2f (%3.2f)\n\n' % ('Release protein CF', fe_r, sd_r))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Binding free energy', total_dd, sd_dd))
+        resfile.write('%-20s %-10s %-4s\n\n' % ('Component', 'Free Energy;', 'Sigma'))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Attach protein CF;', fe_a, sd_a))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Attach ligand CF;', fe_l, sd_l))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Attach ligand TR;', fe_t, sd_t))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Site Elect ('+dec_int.upper()+');', fe_e, sd_e))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Site LJ ('+dec_int.upper()+');', fe_v, sd_v))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Bulk LJ ('+dec_int.upper()+');', fe_w, sd_w))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Bulk Elect ('+dec_int.upper()+');', fe_f, sd_f))
+        resfile.write('%-20s %8.2f;    \n' % ('Release ligand TR;',fe_bd))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Release ligand CF;', fe_c, sd_c))
+        resfile.write('%-20s %8.2f;    %3.2f\n\n' % ('Release protein CF;', fe_r, sd_r))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Binding free energy;', total_dd, sd_dd))
       # Merged results
       if fe_m != 0 or fe_n != 0:
         fe_rel = fe_bd + fe_n
         resfile.write('\n----------------------------------------------\n')
         resfile.write('Merged components DD method')
         resfile.write('\n----------------------------------------------\n\n')
-        resfile.write('%-21s %-10s\n\n' % ('Component', 'Free Energy'))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach all', fe_m, sd_m))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Site Elect ('+dec_int.upper()+')', fe_e, sd_e))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Site LJ ('+dec_int.upper()+')', fe_v, sd_v))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Bulk LJ ('+dec_int.upper()+')', fe_w, sd_w))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Bulk Elect ('+dec_int.upper()+')', fe_f, sd_f))
-        resfile.write('%-20s %8.2f (%3.2f)\n\n' % ('Release all', fe_rel, sd_n))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Binding free energy', merged_dd, sd_merg_dd))
+        resfile.write('%-20s %-10s %-4s\n\n' % ('Component', 'Free Energy;', 'Sigma'))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Attach all;', fe_m, sd_m))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Site Elect ('+dec_int.upper()+');', fe_e, sd_e))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Site LJ ('+dec_int.upper()+');', fe_v, sd_v))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Bulk LJ ('+dec_int.upper()+');', fe_w, sd_w))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Bulk Elect ('+dec_int.upper()+');', fe_f, sd_f))
+        resfile.write('%-20s %8.2f;    %3.2f\n\n' % ('Release all;', fe_rel, sd_n))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Binding free energy;', merged_dd, sd_merg_dd))
     if dec_method == 'sdr':
       if fe_t != 0 or fe_c != 0 or fe_r != 0 or fe_a != 0 or fe_l != 0:
         resfile.write('\n----------------------------------------------\n')
         resfile.write('All components SDR method')
         resfile.write('\n----------------------------------------------\n\n')
-        resfile.write('%-21s %-10s %-4s\n\n' % ('Component', 'Free Energy', '(Error)'))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach protein CF', fe_a, sd_a))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach ligand CF', fe_l, sd_l))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach ligand TR', fe_t, sd_t))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Electrostatic ('+dec_int.upper()+')', fe_es, sd_es))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Lennard-Jones ('+dec_int.upper()+')', fe_vs, sd_vs))
-        resfile.write('%-20s %8.2f \n' % ('Release ligand TR',fe_bd))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Release ligand CF', fe_c, sd_c))
-        resfile.write('%-20s %8.2f (%3.2f)\n\n' % ('Release protein CF', fe_r, sd_r))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Binding free energy', total_sdr, sd_sdr))
+        resfile.write('%-20s %-10s %-4s\n\n' % ('Component', 'Free Energy;', 'Sigma'))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Attach protein CF;', fe_a, sd_a))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Attach ligand CF;', fe_l, sd_l))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Attach ligand TR;', fe_t, sd_t))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Electrostatic ('+dec_int.upper()+');', fe_es, sd_es))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Lennard-Jones ('+dec_int.upper()+');', fe_vs, sd_vs))
+        resfile.write('%-20s %8.2f;    \n' % ('Release ligand TR;',fe_bd))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Release ligand CF;', fe_c, sd_c))
+        resfile.write('%-20s %8.2f;    %3.2f\n\n' % ('Release protein CF;', fe_r, sd_r))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Binding free energy;', total_sdr, sd_sdr))
       # Merged results
       if fe_m != 0 or fe_n != 0:
         fe_rel = fe_bd + fe_n
         resfile.write('\n----------------------------------------------\n')
         resfile.write('Merged components SDR method')
         resfile.write('\n----------------------------------------------\n\n')
-        resfile.write('%-21s %-10s\n\n' % ('Component', 'Free Energy'))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach all', fe_m, sd_m))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Electrostatic ('+dec_int.upper()+')', fe_es, sd_es))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Lennard-Jones ('+dec_int.upper()+')', fe_vs, sd_vs))
-        resfile.write('%-20s %8.2f (%3.2f)\n\n' % ('Release all', fe_rel, sd_n))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Binding free energy', merged_sdr, sd_merg_sdr))
+        resfile.write('%-20s %-10s %-4s\n\n' % ('Component', 'Free Energy;', 'Sigma'))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Attach all;', fe_m, sd_m))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Electrostatic ('+dec_int.upper()+');', fe_es, sd_es))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Lennard-Jones ('+dec_int.upper()+');', fe_vs, sd_vs))
+        resfile.write('%-20s %8.2f;    %3.2f\n\n' % ('Release all;', fe_rel, sd_n))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Binding free energy;', merged_sdr, sd_merg_sdr))
     resfile.write('\n----------------------------------------------\n\n')
     resfile.write('Energies in kcal/mol\n\n')
     resfile.write('Total simulation time (based on input file): %6.1f nanoseconds\n\n' % total_time)
@@ -684,59 +878,59 @@ def fe_values(blocks, components, temperature, pose, attach_rest, lambdas, weigh
           resfile.write('\n----------------------------------------------\n')
           resfile.write('All components DD method')
           resfile.write('\n----------------------------------------------\n\n')
-          resfile.write('%-21s %-10s\n\n' % ('Component', 'Free Energy'))
-          resfile.write('%-20s %8.2f\n' % ('Attach protein CF', fb_a))
-          resfile.write('%-20s %8.2f\n' % ('Attach ligand CF', fb_l))
-          resfile.write('%-20s %8.2f\n' % ('Attach ligand TR', fb_t))
-          resfile.write('%-20s %8.2f\n' % ('Site Elect ('+dec_int.upper()+')', fb_e))
-          resfile.write('%-20s %8.2f\n' % ('Site LJ ('+dec_int.upper()+')', fb_v))
-          resfile.write('%-20s %8.2f\n' % ('Bulk LJ ('+dec_int.upper()+')', fb_w))
-          resfile.write('%-20s %8.2f\n' % ('Bulk Elect ('+dec_int.upper()+')', fb_f))
-          resfile.write('%-20s %8.2f\n' % ('Release ligand TR',fb_bd))
-          resfile.write('%-20s %8.2f\n' % ('Release ligand CF', fb_c))
-          resfile.write('%-20s %8.2f\n\n' % ('Release protein CF', fb_r))
-          resfile.write('%-20s %8.2f\n' % ('Binding free energy', blck_dd))
+          resfile.write('%-20s %-10s\n\n' % ('Component', 'Free Energy'))
+          resfile.write('%-20s %8.2f\n' % ('Attach protein CF;', fb_a))
+          resfile.write('%-20s %8.2f\n' % ('Attach ligand CF;', fb_l))
+          resfile.write('%-20s %8.2f\n' % ('Attach ligand TR;', fb_t))
+          resfile.write('%-20s %8.2f\n' % ('Site Elect ('+dec_int.upper()+');', fb_e))
+          resfile.write('%-20s %8.2f\n' % ('Site LJ ('+dec_int.upper()+');', fb_v))
+          resfile.write('%-20s %8.2f\n' % ('Bulk LJ ('+dec_int.upper()+');', fb_w))
+          resfile.write('%-20s %8.2f\n' % ('Bulk Elect ('+dec_int.upper()+');', fb_f))
+          resfile.write('%-20s %8.2f\n' % ('Release ligand TR;',fb_bd))
+          resfile.write('%-20s %8.2f\n' % ('Release ligand CF;', fb_c))
+          resfile.write('%-20s %8.2f\n\n' % ('Release protein CF;', fb_r))
+          resfile.write('%-20s %8.2f\n' % ('Binding free energy;', blck_dd))
         # Merged results
         if fe_m != 0 or fe_n != 0:
           fb_rel = fb_bd + fb_n
           resfile.write('\n----------------------------------------------\n')
           resfile.write('Merged components DD method')
           resfile.write('\n----------------------------------------------\n\n')
-          resfile.write('%-21s %-10s\n\n' % ('Component', 'Free Energy'))
-          resfile.write('%-20s %8.2f\n' % ('Attach all', fb_m))
-          resfile.write('%-20s %8.2f\n' % ('Site Elect ('+dec_int.upper()+')', fb_e))
-          resfile.write('%-20s %8.2f\n' % ('Site LJ ('+dec_int.upper()+')', fb_v))
-          resfile.write('%-20s %8.2f\n' % ('Bulk LJ ('+dec_int.upper()+')', fb_w))
-          resfile.write('%-20s %8.2f\n' % ('Bulk Elect ('+dec_int.upper()+')', fb_f))
-          resfile.write('%-20s %8.2f\n\n' % ('Release all', fb_rel))
-          resfile.write('%-20s %8.2f\n' % ('Binding free energy', blckm_dd))
+          resfile.write('%-20s %-10s\n\n' % ('Component', 'Free Energy'))
+          resfile.write('%-20s %8.2f\n' % ('Attach all;', fb_m))
+          resfile.write('%-20s %8.2f\n' % ('Site Elect ('+dec_int.upper()+');', fb_e))
+          resfile.write('%-20s %8.2f\n' % ('Site LJ ('+dec_int.upper()+');', fb_v))
+          resfile.write('%-20s %8.2f\n' % ('Bulk LJ ('+dec_int.upper()+');', fb_w))
+          resfile.write('%-20s %8.2f\n' % ('Bulk Elect ('+dec_int.upper()+');', fb_f))
+          resfile.write('%-20s %8.2f\n\n' % ('Release all;', fb_rel))
+          resfile.write('%-20s %8.2f\n' % ('Binding free energy;', blckm_dd))
       if dec_method == 'sdr' and os.path.exists('./sdr/data/'):
         if fe_t != 0 or fe_c != 0 or fe_r != 0 or fe_a != 0 or fe_l != 0:
           resfile.write('\n----------------------------------------------\n')
           resfile.write('All components SDR method')
           resfile.write('\n----------------------------------------------\n\n')
-          resfile.write('%-21s %-10s\n\n' % ('Component', 'Free Energy'))
-          resfile.write('%-20s %8.2f\n' % ('Attach protein CF', fb_a))
-          resfile.write('%-20s %8.2f\n' % ('Attach ligand CF', fb_l))
-          resfile.write('%-20s %8.2f\n' % ('Attach ligand TR', fb_t))
-          resfile.write('%-20s %8.2f\n' % ('Electrostatic ('+dec_int.upper()+')', fb_es))
-          resfile.write('%-20s %8.2f\n' % ('Lennard-Jones ('+dec_int.upper()+')', fb_vs))
-          resfile.write('%-20s %8.2f\n' % ('Release ligand TR', fb_bd))
-          resfile.write('%-20s %8.2f\n' % ('Release ligand CF', fb_c))
-          resfile.write('%-20s %8.2f\n\n' % ('Release protein CF', fb_r))
-          resfile.write('%-20s %8.2f\n' % ('Binding free energy', blck_sdr))
+          resfile.write('%-20s %-10s\n\n' % ('Component', 'Free Energy'))
+          resfile.write('%-20s %8.2f\n' % ('Attach protein CF;', fb_a))
+          resfile.write('%-20s %8.2f\n' % ('Attach ligand CF;', fb_l))
+          resfile.write('%-20s %8.2f\n' % ('Attach ligand TR;', fb_t))
+          resfile.write('%-20s %8.2f\n' % ('Electrostatic ('+dec_int.upper()+');', fb_es))
+          resfile.write('%-20s %8.2f\n' % ('Lennard-Jones ('+dec_int.upper()+');', fb_vs))
+          resfile.write('%-20s %8.2f\n' % ('Release ligand TR;', fb_bd))
+          resfile.write('%-20s %8.2f\n' % ('Release ligand CF;', fb_c))
+          resfile.write('%-20s %8.2f\n\n' % ('Release protein CF;', fb_r))
+          resfile.write('%-20s %8.2f\n' % ('Binding free energy;', blck_sdr))
         # Merged results
         if fe_m != 0 or fe_n != 0:
           fb_rel = fb_bd + fb_n
           resfile.write('\n----------------------------------------------\n')
           resfile.write('Merged components SDR method')
           resfile.write('\n----------------------------------------------\n\n')
-          resfile.write('%-21s %-10s\n\n' % ('Component', 'Free Energy'))
-          resfile.write('%-20s %8.2f\n' % ('Attach all', fb_m))
-          resfile.write('%-20s %8.2f\n' % ('Electrostatic ('+dec_int.upper()+')', fb_es))
-          resfile.write('%-20s %8.2f\n' % ('Lennard-Jones ('+dec_int.upper()+')', fb_vs))
-          resfile.write('%-20s %8.2f\n\n' % ('Release all', fb_rel))
-          resfile.write('%-20s %8.2f\n' % ('Binding free energy', blckm_sdr))
+          resfile.write('%-20s %-10s\n\n' % ('Component', 'Free Energy'))
+          resfile.write('%-20s %8.2f\n' % ('Attach all;', fb_m))
+          resfile.write('%-20s %8.2f\n' % ('Electrostatic ('+dec_int.upper()+');', fb_es))
+          resfile.write('%-20s %8.2f\n' % ('Lennard-Jones ('+dec_int.upper()+');', fb_vs))
+          resfile.write('%-20s %8.2f\n\n' % ('Release all;', fb_rel))
+          resfile.write('%-20s %8.2f\n' % ('Binding free energy;', blckm_sdr))
       resfile.write('\n----------------------------------------------\n\n')
       resfile.write('Energies in kcal/mol\n')
       resfile.close()
@@ -757,59 +951,59 @@ def fe_values(blocks, components, temperature, pose, attach_rest, lambdas, weigh
         resfile.write('\n----------------------------------------------\n')
         resfile.write('All components DD method')
         resfile.write('\n----------------------------------------------\n\n')
-        resfile.write('%-21s %-10s %-4s\n\n' % ('Component', 'Free Energy', '(Error)'))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach protein CF', fe_a, sd_a))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach ligand CF', fe_l, sd_l))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach ligand TR', fe_t, sd_t))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Site Elect ('+dec_int.upper()+')', fe_e, sd_e))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Site LJ ('+dec_int.upper()+')', fe_v, sd_v))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Bulk LJ ('+dec_int.upper()+')', fe_w, sd_w))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Bulk Elect ('+dec_int.upper()+')', fe_f, sd_f))
-        resfile.write('%-20s %8.2f \n' % ('Release ligand TR',fe_bd))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Release ligand CF', fe_c, sd_c))
-        resfile.write('%-20s %8.2f (%3.2f)\n\n' % ('Release protein CF', fe_r, sd_r))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Binding free energy', total_dd, sd_dd))
+        resfile.write('%-20s %-10s %-4s\n\n' % ('Component', 'Free Energy;', 'Sigma'))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Attach protein CF;', fe_a, sd_a))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Attach ligand CF;', fe_l, sd_l))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Attach ligand TR;', fe_t, sd_t))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Site Elect ('+dec_int.upper()+');', fe_e, sd_e))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Site LJ ('+dec_int.upper()+');', fe_v, sd_v))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Bulk LJ ('+dec_int.upper()+');', fe_w, sd_w))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Bulk Elect ('+dec_int.upper()+');', fe_f, sd_f))
+        resfile.write('%-20s %8.2f;    \n' % ('Release ligand TR;',fe_bd))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Release ligand CF;', fe_c, sd_c))
+        resfile.write('%-20s %8.2f;    %3.2f\n\n' % ('Release protein CF;', fe_r, sd_r))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Binding free energy;', total_dd, sd_dd))
       # Merged results
       if fe_m != 0 or fe_n != 0:
         fe_rel = fe_bd + fe_n
         resfile.write('\n----------------------------------------------\n')
         resfile.write('Merged components DD method')
         resfile.write('\n----------------------------------------------\n\n')
-        resfile.write('%-21s %-10s\n\n' % ('Component', 'Free Energy'))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach all', fe_m, sd_m))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Site Elect ('+dec_int.upper()+')', fe_e, sd_e))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Site LJ ('+dec_int.upper()+')', fe_v, sd_v))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Bulk LJ ('+dec_int.upper()+')', fe_w, sd_w))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Bulk Elect ('+dec_int.upper()+')', fe_f, sd_f))
-        resfile.write('%-20s %8.2f (%3.2f)\n\n' % ('Release all', fe_rel, sd_n))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Binding free energy', merged_dd, sd_merg_dd))
+        resfile.write('%-20s %-10s %-4s\n\n' % ('Component', 'Free Energy;', 'Sigma'))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Attach all;', fe_m, sd_m))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Site Elect ('+dec_int.upper()+');', fe_e, sd_e))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Site LJ ('+dec_int.upper()+');', fe_v, sd_v))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Bulk LJ ('+dec_int.upper()+');', fe_w, sd_w))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Bulk Elect ('+dec_int.upper()+');', fe_f, sd_f))
+        resfile.write('%-20s %8.2f;    %3.2f\n\n' % ('Release all;', fe_rel, sd_n))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Binding free energy;', merged_dd, sd_merg_dd))
     if dec_method == 'sdr' and os.path.exists('./sdr/data/'):
       if fe_t != 0 or fe_c != 0 or fe_r != 0 or fe_a != 0 or fe_l != 0:
         resfile.write('\n----------------------------------------------\n')
         resfile.write('All components SDR method')
         resfile.write('\n----------------------------------------------\n\n')
-        resfile.write('%-21s %-10s %-4s\n\n' % ('Component', 'Free Energy', '(Error)'))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach protein CF', fe_a, sd_a))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach ligand CF', fe_l, sd_l))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach ligand TR', fe_t, sd_t))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Electrostatic ('+dec_int.upper()+')', fe_es, sd_es))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Lennard-Jones ('+dec_int.upper()+')', fe_vs, sd_vs))
-        resfile.write('%-20s %8.2f \n' % ('Release ligand TR',fe_bd))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Release ligand CF', fe_c, sd_c))
-        resfile.write('%-20s %8.2f (%3.2f)\n\n' % ('Release protein CF', fe_r, sd_r))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Binding free energy', total_sdr, sd_sdr))
+        resfile.write('%-20s %-10s %-4s\n\n' % ('Component', 'Free Energy;', 'Sigma'))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Attach protein CF;', fe_a, sd_a))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Attach ligand CF;', fe_l, sd_l))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Attach ligand TR;', fe_t, sd_t))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Electrostatic ('+dec_int.upper()+');', fe_es, sd_es))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Lennard-Jones ('+dec_int.upper()+');', fe_vs, sd_vs))
+        resfile.write('%-20s %8.2f;    \n' % ('Release ligand TR;',fe_bd))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Release ligand CF;', fe_c, sd_c))
+        resfile.write('%-20s %8.2f;    %3.2f\n\n' % ('Release protein CF;', fe_r, sd_r))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Binding free energy;', total_sdr, sd_sdr))
       # Merged results
       if fe_m != 0 or fe_n != 0:
         fe_rel = fe_bd + fe_n
         resfile.write('\n----------------------------------------------\n')
         resfile.write('Merged components SDR method')
         resfile.write('\n----------------------------------------------\n\n')
-        resfile.write('%-21s %-10s\n\n' % ('Component', 'Free Energy'))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Attach all', fe_m, sd_m))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Electrostatic ('+dec_int.upper()+')', fe_es, sd_es))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Lennard-Jones ('+dec_int.upper()+')', fe_vs, sd_vs))
-        resfile.write('%-20s %8.2f (%3.2f)\n\n' % ('Release all', fe_rel, sd_n))
-        resfile.write('%-20s %8.2f (%3.2f)\n' % ('Binding free energy', merged_sdr, sd_merg_sdr))
+        resfile.write('%-20s %-10s %-4s\n\n' % ('Component', 'Free Energy;', 'Sigma'))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Attach all;', fe_m, sd_m))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Electrostatic ('+dec_int.upper()+');', fe_es, sd_es))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Lennard-Jones ('+dec_int.upper()+');', fe_vs, sd_vs))
+        resfile.write('%-20s %8.2f;    %3.2f\n\n' % ('Release all;', fe_rel, sd_n))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Binding free energy;', merged_sdr, sd_merg_sdr))
     resfile.write('\n----------------------------------------------\n\n')
     resfile.write('Energies in kcal/mol\n\n')
     resfile.write('Total simulation time (based on input file): %6.1f nanoseconds\n\n' % total_time)

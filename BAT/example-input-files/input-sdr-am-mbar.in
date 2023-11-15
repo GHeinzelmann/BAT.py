@@ -28,25 +28,23 @@ solv_shell = 4      # Water molecules around the protein that will be kept in th
 
 # Variables for setting up equilibrium and free energy calculations, also used on analysis       
 
-fe_type = dd-rest  # Type of free energy calculations (rest, dd, sdr, dd-rest, sdr-rest, custom)
+fe_type = express  # Type of free energy calculations (rest, dd, sdr, dd-rest, sdr-rest, custom)
 
-components = [ e v ] # Used with custom option for fe_type. Do not include b component here. 
+components = [ e v ] # Used with custom option for fe_type. Do not include b component here.
 
 release_eq = [ 5.00 2.50 1.00 0.50 0.20 0.10 0.05 0.02 0.00 ]   # Equilibrium gradual release weights
 
-attach_rest = [ 0.00 0.20 0.40 0.80 1.60 2.40 4.00 5.50 8.65 11.80 18.10 24.40 37.00 49.60 74.80 100.00 ]   # Restraints attach/release weights
+attach_rest = [ 0.00 0.10 0.24 0.56 1.33 3.16 7.50 17.78 42.17 100.0 ]   # Short attach/release weights
 
-ti_points = 12
+lambdas = [ 0.0001 0.02 0.04 0.06 0.08 0.10  0.15  0.20  0.25  0.30  0.40  0.50  0.60  0.70 0.75 0.80 0.85 0.90 0.92 0.94 0.96 0.98 0.9999 ] # MBAR
 
-#lambdas = [ 0.0001 0.02 0.04 0.06 0.08 0.10  0.15  0.20  0.25  0.30  0.40  0.50  0.60  0.70 0.75 0.80 0.85 0.90 0.92 0.94 0.96 0.98 0.9999 ] # MBAR
+sdr_dist = 32.00
 
-#sdr_dist = 32.00
-
-#dec_method = dd
+#dec_method = sdr
 
 # Additional variables for analysis 
 
-dec_int = ti # Integration method for double decoupling (MBAR or TI with Gaussian quadrature)
+dec_int = mbar # Integration method for double decoupling (MBAR or TI with Gaussian quadrature)
 
 blocks = 5 # Number of blocks for block data analysis
 
@@ -63,10 +61,10 @@ lig_com_force        =  10.0  # Guest COM spring constant for simultaneous decou
 # Water model, number and box size in the x and y direction
 
 water_model     = TIP3P   # Water model (SPCE, TIP4PEW, TIP3P, TIP3PF or OPC)
-num_waters      = 13000   # Number of waters in the system
-buffer_x        = 15      # Box solvation buffer in the x axis
-buffer_y        = 15      # Box solvation buffer in the y axis 
-#buffer_z        = 18      # Box solvation buffer in the z axis 
+#num_waters      = 13000   # Number of waters in the system
+buffer_x        = 12      # Box solvation buffer in the x axis
+buffer_y        = 12      # Box solvation buffer in the y axis 
+buffer_z        = 12      # Box solvation buffer in the z axis 
 lig_buffer      = 15      # Buffer size for the three axes of the ligand-only box
 
 # Counterions 
@@ -78,39 +76,24 @@ ion_conc = 0.15          # salt concentration for all boxes
 
 # Simulation parameters
 
-hmr             = yes       # Use hydrogen mass repartitioning (yes or no)
+hmr             =  yes       # Use hydrogen mass repartitioning (yes or no)
 
-Temperature	= 298.15    # Temperature of simulation and analysis 
+Temperature	=  298.15    # Temperature of simulation and analysis 
 
-eq_steps1	= 500000    # Number of steps for equilibration gradual release 
-eq_steps2	= 15000000  # Number of steps for equilibration after release
+eq_steps1	=  500000    # Number of steps for equilibration gradual release 
+eq_steps2	=  15000000  # Number of steps for equilibration after release
+ 
+m_steps1	=  100000    # Number of steps per window for component m (equilibrium)
+m_steps2	=  200000    # Number of steps per window for component m (production)     
 
-a_steps1	= 500000    # Number of steps per window for component a (equilibrium)
-a_steps2	= 1000000   # Number of steps per window for component a (production) 
+n_steps1	=  100000    # Number of steps per window for component n (equilibrium)
+n_steps2	=  200000    # Number of steps per window for component n (production)     
 
-l_steps1	= 500000    # Number of steps per window for component l (equilibrium)  
-l_steps2	= 1000000   # Number of steps per window for component l (production)             
+e_steps1	=  200000    # Number of steps per window for component e (equilibrium) 
+e_steps2	=  400000    # Number of steps per window for component e (production)     
 
-t_steps1	= 500000    # Number of steps per window for component t (equilibrium)
-t_steps2	= 1000000   # Number of steps per window for component t (production)     
-
-c_steps1	= 1000000   # Number of steps per window for component c (equilibrium)
-c_steps2	= 2000000   # Number of steps per window for component c (production)     
-
-r_steps1	= 1000000   # Number of steps per window for component r (equilibrium) 
-r_steps2	= 2000000   # Number of steps per window for component r (production)     
-
-e_steps1	= 300000    # Number of steps per window for component e (equilibrium) 
-e_steps2	= 600000    # Number of steps per window for component e (production)     
-
-v_steps1	= 1000000   # Number of steps per window for component v (equilibrium) 
-v_steps2	= 2000000   # Number of steps per window for component v (production)     
-
-w_steps1	= 300000   # Number of steps per window for component w (equilibrium) 
-w_steps2	= 600000   # Number of steps per window for component w (production)     
-
-f_steps1	= 300000    # Number of steps per window for component f (equilibrium) 
-f_steps2	= 600000    # Number of steps per window for component f (production)     
+v_steps1	=  200000    # Number of steps per window for component v (equilibrium) 
+v_steps2	=  400000    # Number of steps per window for component v (production)     
 
 # Conformational restraints on the protein backbone
 
