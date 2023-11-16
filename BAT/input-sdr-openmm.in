@@ -92,8 +92,8 @@ n_itera2	=   400       # Number of iterations for component n (production)
 e_itera1	=   400       # Number of iterations for component e (equilibrium)   
 e_itera2	=   800       # Number of iterations for component e (production) 
 
-v_itera1	=   400       # Number of iterations for component v (equilibrium)   
-v_itera2	=   800       # Number of iterations for component v (production) 
+v_itera1	=   800       # Number of iterations for component v (equilibrium)   
+v_itera2	=   1200       # Number of iterations for component v (production) 
 
 itera_steps     =   500       # Number of steps per iteration (total steps will be the number of iterations multiplied by this number)
 

@@ -92,8 +92,8 @@ n_steps2	=  200000    # Number of steps per window for component n (production)
 e_steps1	=  200000    # Number of steps per window for component e (equilibrium) 
 e_steps2	=  400000    # Number of steps per window for component e (production)     
 
-v_steps1	=  200000    # Number of steps per window for component v (equilibrium) 
-v_steps2	=  400000    # Number of steps per window for component v (production)     
+v_steps1	=  400000    # Number of steps per window for component v (equilibrium) 
+v_steps2	=  600000    # Number of steps per window for component v (production)     
 
 # Conformational restraints on the protein backbone
 
