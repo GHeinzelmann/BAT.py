@@ -92,7 +92,7 @@ For each pose or crystal structure, a folder will be created inside ./fe, and in
 
 ### Analysis
 
-Once all of the simulations are concluded, it is time to process the output files and obtain the binding free energies. Here a few parameters concerning the analysis can be set in the input file, such as using TI or MBAR [9] for double decoupling, number of blocks for block data analysis, and the Gaussian weights if TI is used for double decoupling. Inside the main folder type:
+Once all of the simulations are concluded, it is time to process the output files and obtain the binding free energies. Here we use a few parameters already set in the input file, such as using TI or MBAR [9] for the decoupling/recoupling components, and the number of data blocks used to calculate the uncertainties. Inside the main folder type:
 
 python BAT.py -i input-dd-amber.in -s analysis
 
