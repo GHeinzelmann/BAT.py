@@ -1,7 +1,6 @@
-
 \- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-*COMING SOON: The BAT.py 2.3 version, with the new features*
+*Just released: The BAT.py 2.3 version, with the new features*
 
 *- TI calculations with Gaussian Quadrature (TI-GQ) for OpenMM*
 
@@ -61,7 +60,7 @@ The folder ./BAT/all-poses contains examples of input coordinate files, with a d
 
 # Running a sample calculation with AMBER
 
-The simulations and analysis from this tutorial will be performed inside the ./BAT folder. The simulations are divided in two steps, equilibration and free energy calculation. We will use the BAT.py input file called input-dd.in, which has the needed parameters to perform full double decoupling calculations with restraints to five docked poses. A similar input file called input-dd-long.in, with more free energy windows and longer simulation times, is also included as an example. 
+The simulations and analysis from this tutorial will be performed inside the ./BAT folder. The simulations are divided in two steps, equilibration and free energy calculation. We will use the BAT.py input file called input-dd-amber.in, which has the needed parameters to perform full double decoupling calculations with restraints to five docked poses. Other input files examples using SDR, merged restraints and other options, can be found inside the example-input-files folder. 
 
 Briefly, the *poses\_list* parameter in the BAT input file sets up the calculation for the first 5 poses from Autodock Vina, and the *celpp_receptor* parameter defines the name of the receptor. The file can be modified to perform the calculations in the 5uf0 crystal structure instead, by changing the *calc\_type* option to "crystal", the *celpp\_receptor* option to "5uf0", and the *ligand\_name* option to "89J", which is the ligand residue name in the 5uf0 pdb structure. More details on the various BAT parameters can be found in the user guide, located inside the ./doc folder.
 
@@ -72,13 +71,13 @@ Briefly, the *poses\_list* parameter in the BAT input file sets up the calculati
 
 The equilibration step starts from the docked complex or the crystal structure, gradually releasing restraints applied on the ligand and then performing a final simulation with an unrestrained ligand. The necessary simulation parameters for the ligand are also generated in this stage, using the General Amber Force Field versions 1 and 2 (GAFF or GAFF2) [6], and the AM1-BCC charge model [7,8]. To run this step, inside the program main folder type:
 
-python BAT.py -i input-dd.in -s equil
+python BAT.py -i input-dd-amber.in -s equil
 
 BAT.py is compatible with python 3.8 versions. If you have another version, or you find that this command gives an error, you can use the python version included in the Ambertools20 distribution:
 
-$AMBERHOME/miniconda/bin/python BAT.py -i input-dd.in -s equil
+$AMBERHOME/miniconda/bin/python BAT.py -i input-dd-amber.in -s equil
 
-This command will create an ./equil folder, with one folder inside for each of the docked poses (pose0, pose1, etc.). In order to run the simulations for each pose, you can use the run-local.bash script (to run them locally), or the PBS-run script, which is designed to run in a queue system such as TORQUE. Both of these files might have to be adjusted, depending on your computer or server configuration, which can be done in the templates located in the ./BAT/run\_files folder. The number of simulations and the applied restraints will depend on the *release\_eq* array defined in the input file. 
+This command will create an ./equil folder, with one folder inside for each of the docked poses (pose0, pose1, etc.). In order to run the simulations for each pose, you can use the run-local.bash script (to run them locally), or the provided PBS-run or SLURMM-run scripts, which are designed to run in a queue system such as TORQUE. Both of these files might have to be adjusted, depending on your computer or server configuration, which can be done in the templates located in the ./BAT/run\_files folder. The number of simulations and the applied restraints will depend on the *release\_eq* array defined in the input file. 
 
 
 ## Free energy calculation 
@@ -87,30 +86,30 @@ This command will create an ./equil folder, with one folder inside for each of t
 
 Once the equilibration simulations for all poses are finished, the user will now perform the free energy stage. Here, starting from the final state of the equilibrated system, BAT will reset the ligand anchor atoms and the restraints reference values for use in the free energy calculation. In this example we will use the DD method with restraints to obtain the binding free energies. For charged ligands, one should use the SDR method instead, in order to avoid artifacts arising from the periodicity of the system [1]. Again in the program main folder, type:
 
-python BAT.py -i input-dd.in -s fe
+python BAT.py -i input-dd-amber.in -s fe
 
-For each pose or crystal structure, a folder will be created inside ./fe, and inside there will be two folders, ./rest and ./dd. The restraints (rest) folder contains all the simulations needed for the application/removal of restraints. The ./dd folder contains the coupling/decoupling of the ligand electrostatic/LJ interactions, both in the binding site and in bulk. A script called run-all-dd.bash, inside the ./run_files folder, can be used to run these simulatons quickly using the PBS scripts provided. A similar script can be written to do the same, using your particular running protocol. 
+For each pose or crystal structure, a folder will be created inside ./fe, and inside there will be two folders, ./rest and ./dd. The restraints (rest) folder contains all the simulations needed for the application/removal of restraints. The ./dd folder contains the coupling/decoupling of the ligand electrostatic/LJ interactions, both in the binding site and in bulk. A script called run-all-dd.bash, inside the ./run_files folder, can be used to run these simulatons quickly using the SLURMM scripts provided. A similar script can be written to do the same, using your particular running protocol. 
 
 ### Analysis
 
 Once all of the simulations are concluded, it is time to process the output files and obtain the binding free energies. Here a few parameters concerning the analysis can be set in the input file, such as using TI or MBAR [9] for double decoupling, number of blocks for block data analysis, and the Gaussian weights if TI is used for double decoupling. Inside the main folder type:
 
-python BAT.py -i input-dd.in -s analysis
+python BAT.py -i input-dd-amber.in -s analysis
 
 You should see a ./Results directory inside each ./fe/pose folder, containing all the components and the final calculated binding free energy, located in the Results.dat file. This folder also contains the results for each of the chosen data blocks, which is convenient to check for convergence and fluctuations, and is also used to calculate the uncertainties. This fully automated procedure can be readily applied for any other ligand that binds to the second BRD4 bromodomain, and with minimal adjustments it can be extended to several other proteins.
 
 ### Computational cost
 
-The full ABFE calculation above for a single pose requires a total of 248.4 nanoseconds of simulations, which can be achieved in nearly one day using a single GTX 1070 NVIDIA GPU. This time is significantly reduced when using more modern GPUs, such as the NVIDIA RTX 20 and RTX 30 series. 
+The full ABFE calculation above for a single pose requires a total of 148.0 nanoseconds of simulations, which can be achieved in less than one day using a single GTX 1070 NVIDIA GPU. This time is significantly reduced when using more modern GPUs, such as the NVIDIA RTX 20 and RTX 30 series. 
 
 The free energy simulations from BAT are separated into several independent windows, and the poses affinities are also calculated independently, which allows for trivial parallelization across multiple GPUs. This can reduce the time needed to fully evaluate a ligand to as little as one hour using several GTX 1070 GPUs, and much less that that if using more modern GPUs.
 
 
 ### Using the SDR method and merged restraints
 
-The SDR method is suitable for ligands with net charge, since it keeps the two MD topologies with the same charge during the transformations. To apply SDR, a few parameters have to be changed or added, which is shown in the input-sdr.in file included in this example. This input file also uses the merged components for the restraints, which are explained in detail in the User Guide.
+The SDR method is suitable for ligands with net charge, since it keeps the two MD topologies with the same charge during the transformations. To apply SDR, a few parameters have to be changed or added, which is shown in the example-input-files/input-sdr-amber.in file. This input file also uses the merged components for the restraints, which are explained in detail in the User Guide.
 
-To apply the merged SDR method, all that is needed is to perform the free energy and analysis steps again using the input-sdr.in file. The full DD and merged SDR methods should produce consistent results if the reference state is the same from the equilibrium stage. The computational cost is also similar between the two, with a total of 284 ns of simulations for the latter method.
+To apply the merged SDR method, all that is needed is to perform the free energy and analysis steps again using the input-sdr-amber.in file. The full DD and merged SDR methods should produce consistent results if the reference state is the same from the equilibrium stage. The computational cost is lower for this method, with a total of 100.8 ns of simulations for a single calculation.
 
 The user can also mix and match the separated/merged restraint components and the DD/SDR methods, for example using double decoupling with the merged restraints or the SDR method with the separated restraint components. Another possibility is to merge only the releasing or the attaching restraints, while keeping the others separate. 
 
@@ -127,9 +126,9 @@ Both distributions use the Conda package manager for installation, which can be 
 
 ## Performing the calculations with OpenMM
 
-The OpenMM simulations are fully integrated into the BAT workflow, with the equilibration, free energy and analysis steps performed the same way as explained in the tutorial above. Two input files are provided as examples, input-dd-openmm.in for double decoupling with separated restraints, and input-sdr-openmm.in for the SDR method with merged restraints. More details on the OpenMM-specific BAT input variables can be found in the User Guide.  
+The OpenMM simulations are fully integrated into the BAT workflow, with the equilibration, free energy and analysis steps performed the same way as explained in the tutorial above. Example input files are provided for the OpenMM software as well: input-sdr-openmm.in for the merged SDR method, and example-input-files/input-dd-openmm.in for double decoupling with separated restraints. The simulation time per calculation for each approach is also 100.8 ns and 148 ns, respectively. More details on the OpenMM-specific BAT input variables can be found in the User Guide.  
 
-In order to run the equilibration and free energy simulations in the respective folders, inside them are included a bash script, to perform the simulations in a local machine, as well as a PBS script, to run in a queue system such as TORQUE. Both of these files might have to be adjusted, depending on your computer or server configuration. After concluding the simulations and performing the final analysis step, the results will be written in the same location and in the same format as with the AMBER version.
+In order to run the equilibration and free energy simulations in the respective folders, inside them are included a bash script, to perform the simulations in a local machine, as well as the PBS-run and SLURMM-run scripts. Both of these files might have to be adjusted, depending on your computer or server configuration. After concluding the simulations and performing the final analysis step, the results will be written in the same location and in the same format as with the AMBER version.
 
 The user might want to compare the AMBER and OpenMM free energy results calculated over the same equilibrated poses states. In that case, the equilibration step should be performed using AMBER, and the free energy step can be performed using both AMBER and OpenMM. Performing equilibration with the latter and free energy with the former may cause problems due to incompatibility between input/output files.    
 
