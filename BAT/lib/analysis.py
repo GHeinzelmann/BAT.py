@@ -253,6 +253,12 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
                 blstd_w.append(fb_w)
           os.chdir('../')
 
+      # mevc modification
+      if fb_m != 0 and fb_n == 0 and fb_c != 0:
+        fb_n = fb_c 
+        fb_c = 0 
+        
+
       fb_bd = fe_bd
       blck_sdr = fb_a + fb_l + fb_t + fb_es + fb_vs + fb_bd + fb_c + fb_r
       blck_dd = fb_a + fb_l + fb_t + fb_e + fb_v + fb_w + fb_f + fb_bd + fb_c + fb_r
@@ -267,7 +273,7 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
       # Write results for the blocks
       resfile = open('./Results/Res-b%02d.dat' %(k+1), 'w')
       if dec_method == 'dd':
-        if fe_t != 0 or fe_c != 0 or fe_r != 0 or fe_a != 0 or fe_l != 0:
+        if fb_t != 0 or fb_c != 0 or fb_r != 0 or fb_a != 0 or fb_l != 0:
           resfile.write('\n----------------------------------------------\n')
           resfile.write('All components DD method')
           resfile.write('\n----------------------------------------------\n\n')
@@ -284,7 +290,7 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
           resfile.write('%-20s %8.2f\n\n' % ('Release protein CF;', fb_r))
           resfile.write('%-20s %8.2f\n' % ('Binding free energy;', blck_dd))
         # Merged results
-        if fe_m != 0 or fe_n != 0:
+        if fb_m != 0 or fb_n != 0:
           fb_rel = fb_bd + fb_n
           resfile.write('\n----------------------------------------------\n')
           resfile.write('Merged components DD method')
@@ -298,7 +304,7 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
           resfile.write('%-20s %8.2f\n\n' % ('Release all;', fb_rel))
           resfile.write('%-20s %8.2f\n' % ('Binding free energy;', blckm_dd))
       if dec_method == 'sdr':
-        if fe_t != 0 or fe_c != 0 or fe_r != 0 or fe_a != 0 or fe_l != 0:
+        if fb_t != 0 or fb_c != 0 or fb_r != 0 or fb_a != 0 or fb_l != 0:
           resfile.write('\n----------------------------------------------\n')
           resfile.write('All components SDR method')
           resfile.write('\n----------------------------------------------\n\n')
@@ -313,7 +319,7 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
           resfile.write('%-20s %8.2f\n\n' % ('Release protein CF;', fb_r))
           resfile.write('%-20s %8.2f\n' % ('Binding free energy;', blck_sdr))
         # Merged results
-        if fe_m != 0 or fe_n != 0:
+        if fb_m != 0 or fb_n != 0:
           fb_rel = fb_bd + fb_n
           resfile.write('\n----------------------------------------------\n')
           resfile.write('Merged components SDR method')
@@ -358,6 +364,13 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
         sd_f = np.std(blstd_f)
       if comp == 'w':
         sd_w = np.std(blstd_w)
+
+    # mevc modification
+    if fe_m != 0 and fe_n == 0 and fe_c != 0:
+      fe_n = fe_c 
+      sd_n = sd_c
+      fe_c = 0 
+      sd_c = 0 
 
     # Write final results
     total_dd = fe_a + fe_l + fe_t + fe_e + fe_v + fe_w + fe_f + fe_bd + fe_c + fe_r
