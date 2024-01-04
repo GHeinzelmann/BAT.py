@@ -96,7 +96,7 @@ Once all of the simulations are concluded, it is time to process the output file
 
 python BAT.py -i input-dd-amber.in -s analysis
 
-You should see a ./Results directory inside each ./fe/pose folder, containing all the components and the final calculated binding free energy, located in the Results.dat file. This folder also contains the results for each of the chosen data blocks, which is convenient to check for convergence and fluctuations, and is also used to calculate the uncertainties. This fully automated procedure can be readily applied for any other ligand that binds to the second BRD4 bromodomain, and with minimal adjustments it can be extended to several other proteins.
+You should see a ./Results directory inside each ./fe/pose folder, containing all the components and the final calculated binding free energy, located in the Results.dat file. This folder also contains the results for each of the chosen data blocks, used to calculate the uncertainties, as well as the equilibrated structure of the protein-ligand complex used as the restraints reference state. This fully automated procedure can be readily applied for any other ligand that binds to the second BRD4 bromodomain, and with minimal adjustments it can be extended to several other proteins.
 
 ### Computational cost
 

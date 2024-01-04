@@ -160,6 +160,8 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
     blstd_m = []
     blstd_n = []
     for k in range(0, blocks):
+      # Reset free energy values
+      fb_a = fb_bd = fb_t = fb_m = fb_n = fb_v = fb_e = fb_c = fb_r = fb_l = fb_f = fb_w = fb_es = fb_vs = 0
       for i in range(0, len(components)):
         comp = components[i]
         if comp == 'a' or comp == 'l' or comp == 't' or comp == 'c' or comp == 'r' or comp == 'm' or comp == 'n':
@@ -270,6 +272,9 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
       if not os.path.exists('Results'):
         os.makedirs('Results')
 
+      # Copy complex pdb structure
+      shutil.copy('./build_files/complex.pdb','./Results/')
+       
       # Write results for the blocks
       resfile = open('./Results/Res-b%02d.dat' %(k+1), 'w')
       if dec_method == 'dd':
