@@ -26,7 +26,7 @@ https://github.com/GHeinzelmann/GHOAT.py
 *A tutorial and a detailed user guide are available, as well as necessary parameter and input files for several hosts.*
 
 
-# BAT.py v2.2
+# BAT.py v2.3
 
 The Binding Affinity Tool (BAT.py) is a python tool for fully automated absolute binding free energy (ABFE) calculations using all-atom Molecular Dynamics (MD). Its workflow encompasses the creation of the bound complex, generation of parameters using Antechamber, preparation of the simulation files, and post-processing to retrieve the binding free energy. BAT can set up simulations for the _pmemd.cuda_ software from AMBER, or the OpenMM program combined with OpenMMtools, both capable of performing simulations at a reduced computational cost using graphics processing units (GPUs).
 
