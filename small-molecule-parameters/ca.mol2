@@ -1,0 +1,12 @@
+@<TRIPOS>MOLECULE
+CA
+    1     0     1     0     0
+SMALL
+User Assigned Charge
+ 
+ 
+@<TRIPOS>ATOM
+      1 CA          0.0000    0.0000    0.0000 CA        1 CA        2.000000
+@<TRIPOS>BOND
+@<TRIPOS>SUBSTRUCTURE
+     1 CA          1 TEMP              0 ****  ****    0 ROOT

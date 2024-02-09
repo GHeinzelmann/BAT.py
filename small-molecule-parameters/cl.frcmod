@@ -1,0 +1,6 @@
+Monovalent ion parameters for Ewald and TIP3P water from Joung & Cheatham JPCB (2008)
+MASS
+CL   35.45         1.910               chlorine  (Applequist)
+ 
+NONBON
+   CL      2.513     0.0355910

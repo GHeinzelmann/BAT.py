@@ -1,0 +1,22 @@
+Remark line goes here
+MASS
+
+BOND
+
+ANGLE
+
+DIHE
+
+IMPROPER
+c3-ca-na-cc         1.1          180.0         2.0          Using the default value
+h5-na-cc-nd         1.1          180.0         2.0          Same as X -X -ca-ha, penalty score= 67.5 (use general term))
+ca-ca-ca-nd         1.1          180.0         2.0          Using the default value
+ca-nb-ca-nh         1.1          180.0         2.0          Using the default value
+ca-hn-nh-hn         1.1          180.0         2.0          Same as X -X -na-hn, penalty score= 41.2 (use general term))
+h5-nb-ca-nb         1.1          180.0         2.0          Same as X -X -ca-ha, penalty score= 44.6 (use general term))
+ca-na-ca-nb         1.1          180.0         2.0          Using the default value
+
+NONBON
+
+
+

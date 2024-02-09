@@ -1,0 +1,15 @@
+Remark line goes here
+MASS
+CA   40.08
+
+BOND
+
+ANGLE
+
+DIHE
+
+IMPROPER
+
+NONBON
+CA    1.649  0.10592870    CM set for TIP3P water from Li et al., JCTC, 2013, 9, 2733
+
