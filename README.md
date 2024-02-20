@@ -14,7 +14,7 @@
 
 *- Additional sample systems and input files*
 
-*The release of the 2.3 version will be followed by the publication of the BAT2 manuscript* 
+*The pre-print for the BAT2 manuscript is already available at https://chemrxiv.org/engage/chemrxiv/article-details/65cfb01b66c1381729cf2321* 
 
 \- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
