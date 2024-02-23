@@ -14,7 +14,7 @@
 
 *- Additional sample systems and input files*
 
-*The pre-print for the BAT2 manuscript is already available at https://chemrxiv.org/engage/chemrxiv/article-details/65cfb01b66c1381729cf2321* 
+*The pre-print for the BAT2 manuscript is already available at https://chemrxiv.org/engage/chemrxiv/article-details/65d60b5a66c13817292b07ae* 
 
 \- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
