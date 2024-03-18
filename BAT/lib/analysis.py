@@ -267,10 +267,10 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
         
 
       fb_bd = fe_bd
-      blck_sdr = fb_a + fb_l + fb_t + fb_es + fb_vs + fb_bd + fb_c + fb_r
-      blck_dd = fb_a + fb_l + fb_t + fb_e + fb_v + fb_w + fb_f + fb_bd + fb_c + fb_r
-      blckm_dd = fb_m + fb_e + fb_v + fb_w + fb_f + fb_bd + fb_n
-      blckm_sdr = fb_m + fb_es + fb_vs + fb_bd + fb_n
+      blck_sdr = -1*(fb_a + fb_l + fb_t + fb_es + fb_vs + fb_bd + fb_c + fb_r)
+      blck_dd = -1*(fb_a + fb_l + fb_t + fb_e + fb_v + fb_w + fb_f + fb_bd + fb_c + fb_r)
+      blckm_dd = -1*(fb_m + fb_e + fb_v + fb_w + fb_f + fb_bd + fb_n)
+      blckm_sdr = -1*(fb_m + fb_es + fb_vs + fb_bd + fb_n)
 
       # Write results for the blocks
       resfile = open('./Results/Res-b%02d.dat' %(k+1), 'w')
@@ -375,10 +375,10 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
       sd_c = 0 
 
     # Write final results
-    total_dd = fe_a + fe_l + fe_t + fe_e + fe_v + fe_w + fe_f + fe_bd + fe_c + fe_r
-    merged_dd = fe_m + fe_e + fe_v + fe_w + fe_f + fe_bd + fe_n
-    total_sdr = fe_a + fe_l + fe_t + fe_es + fe_vs + fe_bd + fe_c + fe_r
-    merged_sdr = fe_m + fe_es + fe_vs + fe_bd + fe_n
+    total_dd = -1*(fe_a + fe_l + fe_t + fe_e + fe_v + fe_w + fe_f + fe_bd + fe_c + fe_r)
+    merged_dd = -1*(fe_m + fe_e + fe_v + fe_w + fe_f + fe_bd + fe_n)
+    total_sdr = -1*(fe_a + fe_l + fe_t + fe_es + fe_vs + fe_bd + fe_c + fe_r)
+    merged_sdr = -1*(fe_m + fe_es + fe_vs + fe_bd + fe_n)
     sd_dd = math.sqrt(sd_a**2 + sd_l**2 + sd_t**2 + sd_e**2 + sd_v**2 + sd_w**2 + sd_f**2 + sd_bd**2 + sd_c**2 + sd_r**2)
     sd_merg_dd = math.sqrt(sd_m**2 + sd_e**2 + sd_v**2 + sd_w**2 + sd_f**2 + sd_bd**2 + sd_n**2)
     sd_sdr = math.sqrt(sd_a**2 + sd_l**2 + sd_t**2 + sd_es**2 + sd_vs**2 + sd_bd**2 + sd_c**2 + sd_r**2)
@@ -891,10 +891,10 @@ def fe_values(blocks, components, temperature, pose, attach_rest, lambdas, weigh
         fb_c = 0
 
       fb_bd = fe_bd
-      blck_sdr = fb_a + fb_l + fb_t + fb_es + fb_vs + fb_bd + fb_c + fb_r
-      blck_dd = fb_a + fb_l + fb_t + fb_e + fb_v + fb_w + fb_f + fb_bd + fb_c + fb_r
-      blckm_dd = fb_m + fb_e + fb_v + fb_w + fb_f + fb_bd + fb_n
-      blckm_sdr = fb_m + fb_es + fb_vs + fb_bd + fb_n
+      blck_sdr = -1*(fb_a + fb_l + fb_t + fb_es + fb_vs + fb_bd + fb_c + fb_r)
+      blck_dd = -1*(fb_a + fb_l + fb_t + fb_e + fb_v + fb_w + fb_f + fb_bd + fb_c + fb_r)
+      blckm_dd = -1*(fb_m + fb_e + fb_v + fb_w + fb_f + fb_bd + fb_n)
+      blckm_sdr = -1*(fb_m + fb_es + fb_vs + fb_bd + fb_n)
 
       # Write results for the blocks
       resfile = open('./Results/Res-b%02d.dat' %(k+1), 'w')
@@ -968,10 +968,10 @@ def fe_values(blocks, components, temperature, pose, attach_rest, lambdas, weigh
       sd_c = 0
 
     # Write final results
-    total_dd = fe_a + fe_l + fe_t + fe_e + fe_v + fe_w + fe_f + fe_bd + fe_c + fe_r
-    merged_dd = fe_m + fe_e + fe_v + fe_w + fe_f + fe_bd + fe_n
-    total_sdr = fe_a + fe_l + fe_t + fe_es + fe_vs + fe_bd + fe_c + fe_r
-    merged_sdr = fe_m + fe_es + fe_vs + fe_bd + fe_n
+    total_dd = -1*(fe_a + fe_l + fe_t + fe_e + fe_v + fe_w + fe_f + fe_bd + fe_c + fe_r)
+    merged_dd = -1*(fe_m + fe_e + fe_v + fe_w + fe_f + fe_bd + fe_n)
+    total_sdr = -1*(fe_a + fe_l + fe_t + fe_es + fe_vs + fe_bd + fe_c + fe_r)
+    merged_sdr = -1*(fe_m + fe_es + fe_vs + fe_bd + fe_n)
     sd_dd = math.sqrt(sd_a**2 + sd_l**2 + sd_t**2 + sd_e**2 + sd_v**2 + sd_w**2 + sd_f**2 + sd_bd**2 + sd_c**2 + sd_r**2)
     sd_merg_dd = math.sqrt(sd_m**2 + sd_e**2 + sd_v**2 + sd_w**2 + sd_f**2 + sd_bd**2 + sd_n**2)
     sd_sdr = math.sqrt(sd_a**2 + sd_l**2 + sd_t**2 + sd_es**2 + sd_vs**2 + sd_bd**2 + sd_c**2 + sd_r**2)
