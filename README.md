@@ -56,6 +56,8 @@ export PYTHONPATH=$PYTHONPATH:$AMBERHOME/lib/python3.8/site-packages/pdb4amber-1
 
  <sup>c</sup> Not needed if using OpenMM for the simulations
 
+A quick installation guide for all the dependencies, using the Anaconda package manager, is provided in the Quick-installation-tutorial.pdf file, located inside the ./doc folder. This file also provides a short and command-oriented tutorial for running the BAT program with OpenMM/OpenMMtools. 
+
 The folder ./BAT/all-poses contains examples of input coordinate files, with a docked receptor from the 5uez crystal structure (LMCSS-5uf0\_5uez\_docked.pdb), as well as 9 docked poses for the ligand with the 5uf0 crystal structure (pose0.pdb to pose8.pdb). The docking files were generated and converted to .pdb using Autodock Vina and AutodockTools, following a protocol adapted from the CELPP challenge tutorial (https://docs.google.com/document/d/1iJcPUktbdrRftAA8cuVa32Ri1TPr2XvZVqTccDja2OM). Inside the ./all-poses folder there is also the original crystal structure file for 5uf0, in pdb format. Below we show an example of using these files to calculate the standard binding free energies of the top 5 docked poses and the crystal structure, with all the necessary steps in the calculation. 
 
 # Running a sample calculation with AMBER
