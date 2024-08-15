@@ -1,6 +1,6 @@
 \- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-*Just released: The BAT.py 2.3 version, with the new features*
+*New features in the BAT.py 2.3 version:*
 
 *- TI calculations with Gaussian Quadrature (TI-GQ) for OpenMM*
 
@@ -14,7 +14,7 @@
 
 *- Additional sample systems and input files*
 
-*The pre-print for the BAT2 manuscript is already available at https://chemrxiv.org/engage/chemrxiv/article-details/65d60b5a66c13817292b07ae* 
+*- Inclusion of a quick installation guide for all needed dependencies, with a simplified command-oriented tutorial*
 
 \- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -28,7 +28,7 @@ https://github.com/GHeinzelmann/GHOAT.py
 
 # BAT.py v2.3
 
-The Binding Affinity Tool (BAT.py) is a python tool for fully automated absolute binding free energy (ABFE) calculations using all-atom Molecular Dynamics (MD). Its workflow encompasses the creation of the bound complex, generation of parameters using Antechamber, preparation of the simulation files, and post-processing to retrieve the binding free energy. BAT can set up simulations for the _pmemd.cuda_ software from AMBER, or the OpenMM program combined with OpenMMtools, both capable of performing simulations at a reduced computational cost using graphics processing units (GPUs).
+The Binding Affinity Tool (BAT.py) is a python tool for fully automated absolute binding free energy (ABFE) calculations using all-atom Molecular Dynamics (MD). Its workflow encompasses the creation of the bound complex, generation of parameters using Antechamber, preparation of the simulation files, and post-processing to retrieve the binding free energy [1,2]. BAT can set up simulations for the _pmemd.cuda_ software from AMBER, or the OpenMM program combined with OpenMMtools, both capable of performing simulations at a reduced computational cost using graphics processing units (GPUs).
 
 BAT.py can perform ABFE calculations by two alchemical routes in the presence of restraints, either with the double decoupling (DD) procedure or with the simultaneous decoupling and recoupling (SDR) method, the latter suitable for ligands with net charge. For binding free energy calculations using the attach-pull-release (APR) method, download the 1.0 version of the code at the BATv1.0 branch, or the BAT 1.0 release. In addition to AMBER _pmemd.cuda_ or OpenMM, BAT.py also requires a few additional programs to work properly, which are listed in the next section. 
 
@@ -38,15 +38,15 @@ BAT.py can perform ABFE calculations by two alchemical routes in the presence of
 
 To use BAT.py, download the files from this repository, which already contain an example for ligand binding to the second bromodomain of the BRD4 protein - BRD4(2). In order to perform all the steps from BAT.py, the following programs must be installed and in your path:
 
-VMD (Visual Molecular Dynamics) [2] - https://www.ks.uiuc.edu/Development/Download/download.cgi?PackageName=VMD
+VMD (Visual Molecular Dynamics) [3] - https://www.ks.uiuc.edu/Development/Download/download.cgi?PackageName=VMD
 
-Openbabel 2.4.1 [3] - https://github.com/openbabel/openbabel/releases/tag/openbabel-2-4-1 <sup>a
+Openbabel 2.4.1 [4] - https://github.com/openbabel/openbabel/releases/tag/openbabel-2-4-1 <sup>a
 
-Lovoalign: Protein Structural Alignment  [4] - https://www.ime.unicamp.br/~martinez/lovoalign/home.html
+Lovoalign: Protein Structural Alignment  [5] - https://www.ime.unicamp.br/~martinez/lovoalign/home.html
 
-AmberTools20 or later [5] - http://ambermd.org/AmberTools.php <sup>b
+AmberTools20 or later [6] - http://ambermd.org/AmberTools.php <sup>b
 
-_pmemd.cuda_ software from AMBER (version 20 or later) [5] - http://ambermd.org/GetAmber.php <sup>c
+_pmemd.cuda_ software from AMBER (version 20 or later) [7] - http://ambermd.org/GetAmber.php <sup>c
 
 <sup>a</sup> Had protonation issues when using Openbabel 3, so keeping the 2.4.1 version for now, might change in the future. 
 
@@ -71,7 +71,7 @@ Briefly, the *poses\_list* parameter in the BAT input file sets up the calculati
 
 ## Equilibration
 
-The equilibration step starts from the docked complex or the crystal structure, gradually releasing restraints applied on the ligand and then performing a final simulation with an unrestrained ligand. The necessary simulation parameters for the ligand are also generated in this stage, using the General Amber Force Field versions 1 and 2 (GAFF or GAFF2) [6], and the AM1-BCC charge model [7,8]. To run this step, inside the program main folder type:
+The equilibration step starts from the docked complex or the crystal structure, gradually releasing restraints applied on the ligand and then performing a final simulation with an unrestrained ligand. The necessary simulation parameters for the ligand are also generated in this stage, using the General Amber Force Field versions 1 and 2 (GAFF or GAFF2) [6], and the AM1-BCC charge model [8,9]. To run this step, inside the program main folder type:
 
 python BAT.py -i input-dd-amber.in -s equil
 
@@ -94,7 +94,7 @@ For each pose or crystal structure, a folder will be created inside ./fe, and in
 
 ### Analysis
 
-Once all of the simulations are concluded, it is time to process the output files and obtain the binding free energies. Here we use a few parameters already set in the input file, such as using TI or MBAR [9] for the decoupling/recoupling components, and the number of data blocks used to calculate the uncertainties. Inside the main folder type:
+Once all of the simulations are concluded, it is time to process the output files and obtain the binding free energies. Here we use a few parameters already set in the input file, such as using TI or MBAR [10] for the decoupling/recoupling components, and the number of data blocks used to calculate the uncertainties. Inside the main folder type:
 
 python BAT.py -i input-dd-amber.in -s analysis
 
@@ -109,7 +109,7 @@ The free energy simulations from BAT are separated into several independent wind
 
 ### Using the SDR method and merged restraints
 
-The SDR method is suitable for ligands with net charge, since it keeps the two MD topologies with the same charge during the transformations. To apply SDR, a few parameters have to be changed or added, which is shown in the example-input-files/input-sdr-amber.in file. This input file also uses the merged components for the restraints, which are explained in detail in the User Guide.
+The SDR method is suitable for ligands with net charge, since it keeps the two MD topologies with the same charge during the transformations. To apply SDR, a few parameters have to be changed or added, which is shown in the example-input-files/input-sdr-amber.in file. This input file also uses the merged components for the restraints, which are explained in detail in the User Guide and in Ref [1].
 
 To apply the merged SDR method, all that is needed is to perform the free energy and analysis steps again using the input-sdr-amber.in file. The full DD and merged SDR methods should produce consistent results if the reference state is the same from the equilibrium stage. The computational cost is lower for this method, with a total of 100.8 ns of simulations for a single calculation.
 
@@ -119,11 +119,11 @@ The user can also mix and match the separated/merged restraint components and th
 
 BAT also allows the user to run all simulations using the free OpenMM engine. In this case, instead of the _pmemd.cuda_ software from AMBER, the OpenMM and OpenMMTools versions below should be installed and in your path:
 
-OpenMM 7.7.0 or later [10-14]: http://docs.openmm.org/latest/userguide/application/01_getting_started.html
+OpenMM 7.7.0 or later [11-15]: http://docs.openmm.org/latest/userguide/application/01_getting_started.html
 
-OpenMMTools 0.21.3 or later [15]: https://anaconda.org/conda-forge/openmmtools
+OpenMMTools 0.21.3 or later [16]: https://anaconda.org/conda-forge/openmmtools
 
-Both distributions use the Conda package manager for installation, which can be obtained at https://docs.conda.io/en/latest/ and installed following the instructions in the website. 
+Both distributions use the Conda package manager for installation, which can be obtained at https://www.anaconda.com/download and installed following the instructions in the website. 
 
 
 ## Performing the calculations with OpenMM
@@ -148,12 +148,14 @@ To include a new receptor system, some additional input data is needed. They inc
 
 # More information and BAT.py citations
 
-A paper explaining the whole BAT.py theoretical aspects and calculation procedure is available in Ref [1]. The OpenMM calculations are based on David Huggins work on ABFE calculations, available at Ref [16]. Please cite these two references if using the BAT code. For more information you can contact the author directly:
+The complete BAT.py theoretical background and calculation procedures are available in Refs. [1,2]. The OpenMM calculations are based on David Huggins work on ABFE calculations, available at Ref [17]. Please cite these references if using the BAT code. For more information you can contact the author (me) directly:
 
 Germano Heinzelmann <br/>
 Departamento de Física, Universidade Federal de Santa Catarina <br/>
 Florianópolis - SC  88040-970 Brasil <br/>
 email: germanohei@gmail.com <br/>
+
+I provide free support (to an extent) for academic institutions, particularly students, or in specific cases in which there might be a bug in the code. I dot not provide free support for private companies.
 
 # Acknowledgments
 
@@ -161,37 +163,38 @@ Germano Heinzelmann thanks FAPESC and CNPq for the research grants, also Michael
 
 # References
 
+1. G. Heinzelmann, D. J. Huggins and M. K. Gilson (2024). “BAT2: an Open-Source Tool for Flexible, Automated, and Low Cost Absolute Binding Free Energy Calculations”. Journal of Chemical Theory and Computation, 20, 6518.
 
-1. G. Heinzelmann and M. K. Gilson (2021). “Automation of absolute protein-ligand binding free energy calculations for docking refinement and compound evaluation”. Scientific Reports, 11, 1116.
+2. G. Heinzelmann and M. K. Gilson (2021). “Automation of absolute protein-ligand binding free energy calculations for docking refinement and compound evaluation”. Scientific Reports, 11, 1116.
 
-2. W. Humphrey, A. Dalke and K. Schulten. (1996)  "VMD - Visual Molecular Dynamics", Journal of Molecular Graphics, 14, 33-38.
+3. W. Humphrey, A. Dalke and K. Schulten. (1996)  "VMD - Visual Molecular Dynamics", Journal of Molecular Graphics, 14, 33-38.
 
-3. N. M. O'Boyle, M. Banck, C. A. James, C. Morley, T. Vandermeersch, and G. R. HutchisonEmail. (2011) "Open Babel: An open chemical toolbox." Journal of Cheminformatics, 3, 33.
+4. N. M. O'Boyle, M. Banck, C. A. James, C. Morley, T. Vandermeersch, and G. R. HutchisonEmail. (2011) "Open Babel: An open chemical toolbox." Journal of Cheminformatics, 3, 33.
 
-4. L. Martínez, R. Andreani, and J. M. Martínez (2007) “Convergent algorithms for protein structural alignment.” BMC Bioinformatics 8, 306.
+5. L. Martínez, R. Andreani, and J. M. Martínez (2007) “Convergent algorithms for protein structural alignment.” BMC Bioinformatics 8, 306.
 
-5. D.A. Case, K. Belfon, I.Y. Ben-Shalom, S.R. Brozell, D.S. Cerutti, T.E. Cheatham, III, V.W.D. Cruzeiro, T.A. Darden, R.E. Duke, G. Giambasu, M.K. Gilson, H. Gohlke, A.W. Goetz, R. Harris, S. Izadi, S.A. Izmailov, K. Kasavajhala, A. Kovalenko, R. Krasny, T. Kurtzman, T.S. Lee, S. LeGrand, P. Li, C. Lin, J. Liu, T. Luchko, R. Luo, V. Man, K.M. Merz, Y. Miao, O. Mikhailovskii, G. Monard, H. Nguyen, A. Onufriev, F.Pan, S. Pantano, R. Qi, D.R. Roe, A. Roitberg, C. Sagui, S. Schott-Verdugo, J. Shen, C. Simmerling, N.R.Skrynnikov, J. Smith, J. Swails, R.C. Walker, J. Wang, L. Wilson, R.M. Wolf, X. Wu, Y. Xiong, Y. Xue, D.M. York and P.A. Kollman (2020), AMBER 2020, University of California, San Francisco.
+6. J. Wang, R.M. Wolf, J.W. Caldwell, and P. A. Kollman, D. A. Case (2004) "Development and testing of a general AMBER force field". Journal of Computational Chemistry, 25, 1157-1174. 
 
-6. J. Wang, R.M. Wolf, J.W. Caldwell, and P. A. Kollman, D. A. Case (2004) "Development and testing of a general AMBER force field". Journal of Computational Chemistry, 25, 1157-1174.
+7. D.A. Case, K. Belfon, I.Y. Ben-Shalom, S.R. Brozell, D.S. Cerutti, T.E. Cheatham, III, V.W.D. Cruzeiro, T.A. Darden, R.E. Duke, G. Giambasu, M.K. Gilson, H. Gohlke, A.W. Goetz, R. Harris, S. Izadi, S.A. Izmailov, K. Kasavajhala, A. Kovalenko, R. Krasny, T. Kurtzman, T.S. Lee, S. LeGrand, P. Li, C. Lin, J. Liu, T. Luchko, R. Luo, V. Man, K.M. Merz, Y. Miao, O. Mikhailovskii, G. Monard, H. Nguyen, A. Onufriev, F.Pan, S. Pantano, R. Qi, D.R. Roe, A. Roitberg, C. Sagui, S. Schott-Verdugo, J. Shen, C. Simmerling, N.R.Skrynnikov, J. Smith, J. Swails, R.C. Walker, J. Wang, L. Wilson, R.M. Wolf, X. Wu, Y. Xiong, Y. Xue, D.M. York and P.A. Kollman (2020), AMBER 2020, University of California, San Francisco.
 
-7. A. Jakalian, B. L. Bush, D. B. Jack, and C.I. Bayly (2000) "Fast, efficient generation of high‐quality atomic charges. AM1‐BCC model: I. Method". Journal of Computational Chemistry, 21, 132-146.
+8. A. Jakalian, B. L. Bush, D. B. Jack, and C.I. Bayly (2000) "Fast, efficient generation of high‐quality atomic charges. AM1‐BCC model: I. Method". Journal of Computational Chemistry, 21, 132-146.
 
-8. A. Jakalian, D. B. Jack, and C.I. Bayly (2002) "Fast, efficient generation of high‐quality atomic charges. AM1‐BCC model: II. Parameterization and validation". Journal of Computational Chemistry, 16, 1623-1641.
+9. A. Jakalian, D. B. Jack, and C.I. Bayly (2002) "Fast, efficient generation of high‐quality atomic charges. AM1‐BCC model: II. Parameterization and validation". Journal of Computational Chemistry, 16, 1623-1641.
 
-9. M. R. Shirts and J. Chodera (2008) “Statistically optimal analysis of samples from multiple equilibrium states.” Journal of  Chemical Physics, 129, 129105.
+10. M. R. Shirts and J. Chodera (2008) “Statistically optimal analysis of samples from multiple equilibrium states.” Journal of  Chemical Physics, 129, 129105.
 
-10. M. S. Friedrichs, P. Eastman , V. Vaidyanathan, M. Houston, S. LeGrand, A. L. Beberg, D. L. Ensign, C. M. Bruns, and V. S. Pande (2009). "Accelerating molecular dynamic simulations on graphics processing unit." Journal of Computational Chemistry, 30, 864.
+11. M. S. Friedrichs, P. Eastman , V. Vaidyanathan, M. Houston, S. LeGrand, A. L. Beberg, D. L. Ensign, C. M. Bruns, and V. S. Pande (2009). "Accelerating molecular dynamic simulations on graphics processing unit." Journal of Computational Chemistry, 30, 864.
 
-11. P. Eastman and V. S. Pande (2010). "OpenMM: A hardware-independent framework for molecular simulations." Computing in science and engineering, 12, 34.
+12. P. Eastman and V. S. Pande (2010). "OpenMM: A hardware-independent framework for molecular simulations." Computing in science and engineering, 12, 34.
 
-12. P. Eastman and V. S. Pande (2010). "Efficient nonbonded interactions for molecular dynamics on a graphics processing unit." Journal of Computational Chemistry, 31, 1268.
+13. P. Eastman and V. S. Pande (2010). "Efficient nonbonded interactions for molecular dynamics on a graphics processing unit." Journal of Computational Chemistry, 31, 1268.
 
-13. P. Eastman and V. S. Pande (2010). "Constant constraint matrix approximation: A robust, parallelizable constraint method for molecular simulations." Journal of Chemical Theory and Computation, 6, 434.
+14. P. Eastman and V. S. Pande (2010). "Constant constraint matrix approximation: A robust, parallelizable constraint method for molecular simulations." Journal of Chemical Theory and Computation, 6, 434.
 
-14. P. Eastman, J. Swails, J. D. Chodera, R. T. McGibbon, Y. Zhao, K. A. Beauchamp, L.-P. Wang, A. C. Simmonett, M. P. Harrigan, C. D. Stern, R. P. Wiewiora, B. R. Brooks, and V. S. Pande (2017). “OpenMM 7: Rapid development of high performance algorithms for molecular dynamics.” PLOS Computational Biology, 13, e1005659. 
+15. P. Eastman, J. Swails, J. D. Chodera, R. T. McGibbon, Y. Zhao, K. A. Beauchamp, L.-P. Wang, A. C. Simmonett, M. P. Harrigan, C. D. Stern, R. P. Wiewiora, B. R. Brooks, and V. S. Pande (2017). “OpenMM 7: Rapid development of high performance algorithms for molecular dynamics.” PLOS Computational Biology, 13, e1005659. 
 
-15. J. D. Chodera and M. R. Shirts (2011). "Replica exchange and expanded ensemble simulations as Gibbs multistate: Simple improvements for enhanced mixing." Journal of Chemical Physics, 135, 194110.
+16. J. D. Chodera and M. R. Shirts (2011). "Replica exchange and expanded ensemble simulations as Gibbs multistate: Simple improvements for enhanced mixing." Journal of Chemical Physics, 135, 194110.
 
-16. D. J. Huggins (2022) "Comparing the Performance of Different AMBER Protein Forcefields, Partial Charge Assignments, and Water Models for Absolute Binding Free Energy Calculations." Journal of Chemical Theory and Computation, 18, 2616. 
+17. D. J. Huggins (2022) "Comparing the Performance of Different AMBER Protein Forcefields, Partial Charge Assignments, and Water Models for Absolute Binding Free Energy Calculations." Journal of Chemical Theory and Computation, 18, 2616. 
 
 
