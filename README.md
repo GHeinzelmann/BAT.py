@@ -1,20 +1,6 @@
 \- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-*New features in the BAT.py 2.3 version:*
-
-*- TI calculations with Gaussian Quadrature (TI-GQ) for OpenMM*
-
-*- Automatic determination of TI-GQ lambdas and weights using only the number of points as as input*
-
-*- Choice of multiple restrained protein backbone sections*
-
-*- Output of total simulation time of each calculation*
-
-*- Automatic adjustment of solvation buffers when using the solv_shell option*
-
-*- Additional sample systems and input files*
-
-*- Inclusion of a quick installation guide for all needed dependencies, with a simplified command-oriented tutorial*
+*COMING SOON: Relative binding free energy calculations (RBFE) implemented into the BAT workflow!*
 
 \- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
