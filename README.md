@@ -120,7 +120,7 @@ In order to run the equilibration and free energy simulations in the respective 
 
 The user might want to compare the AMBER and OpenMM free energy results calculated over the same equilibrated poses states. In that case, the equilibration step should be performed using AMBER, and the free energy step can be performed using both AMBER and OpenMM. Performing equilibration with the latter and free energy with the former may cause problems due to incompatibility between input/output files.    
 
-## Reducing simulation time
+# Reducing simulation time
 
 Ref [1] shows how the simulation times of ABFE calculations can be drastically reduced, to as little as 20 ns per calculation, and still produce accurate results. The files needed to reproduce the paper results should have been published with the paper, which did not happen, and I am currently trying to rectify that. For now, here is a link where they can be accessed: 
 
