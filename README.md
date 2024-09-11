@@ -26,21 +26,16 @@ To use BAT.py, download the files from this repository, which already contain an
 
 VMD (Visual Molecular Dynamics) [3] - https://www.ks.uiuc.edu/Development/Download/download.cgi?PackageName=VMD
 
-Openbabel 2.4.1 [4] - https://github.com/openbabel/openbabel/releases/tag/openbabel-2-4-1 <sup>a
+Openbabel 2.4.1 [4] - https://github.com/openbabel/openbabel/releases/tag/openbabel-2-4-1 
 
 Lovoalign: Protein Structural Alignment  [5] - https://www.ime.unicamp.br/~martinez/lovoalign/home.html
 
-AmberTools20 or later [6] - http://ambermd.org/AmberTools.php <sup>b
+AmberTools20 or later [6] - http://ambermd.org/AmberTools.php 
 
-_pmemd.cuda_ software from AMBER (version 20 or later) [7] - http://ambermd.org/GetAmber.php <sup>c
+_pmemd.cuda_ software from AMBER (version 20 or later) [7] - http://ambermd.org/GetAmber.php <sup>a
 
-<sup>a</sup> Had protonation issues when using Openbabel 3, so keeping the 2.4.1 version for now, might change in the future. 
 
-<sup>b</sup> If pdb4amber from Ambertools does not work, add the line below to the end of your amber.sh file: 
-
-export PYTHONPATH=$PYTHONPATH:$AMBERHOME/lib/python3.8/site-packages/pdb4amber-1.7.dev0-py3.8.egg/
-
- <sup>c</sup> Not needed if using OpenMM for the simulations
+ <sup>a</sup> Not needed if using OpenMM for the simulations
 
 A quick installation guide for all the dependencies, using the Anaconda package manager, is provided in the Quick-installation-tutorial.pdf file, located inside the ./doc folder. This file also provides a short and command-oriented tutorial for running the BAT program with OpenMM/OpenMMtools. 
 
@@ -86,47 +81,36 @@ python BAT.py -i input-dd-amber.in -s analysis
 
 You should see a ./Results directory inside each ./fe/pose folder, containing all the components and the final calculated binding free energy, located in the Results.dat file. This folder also contains the results for each of the chosen data blocks, used to calculate the uncertainties, as well as the equilibrated structure of the protein-ligand complex used as the restraints reference state. This fully automated procedure can be readily applied for any other ligand that binds to the second BRD4 bromodomain, and with minimal adjustments it can be extended to several other proteins.
 
-### Computational cost
-
-The full ABFE calculation above for a single pose requires a total of 148.0 nanoseconds of simulations, which can be achieved in less than one day using a single GTX 1070 NVIDIA GPU. This time is significantly reduced when using more modern GPUs, such as the NVIDIA RTX 20 and RTX 30 series. 
-
-The free energy simulations from BAT are separated into several independent windows, and the poses affinities are also calculated independently, which allows for trivial parallelization across multiple GPUs. This can reduce the time needed to fully evaluate a ligand to as little as one hour using several GTX 1070 GPUs, and much less that that if using more modern GPUs.
-
 
 ### Using the SDR method and merged restraints
 
 The SDR method is suitable for ligands with net charge, since it keeps the two MD topologies with the same charge during the transformations. To apply SDR, a few parameters have to be changed or added, which is shown in the example-input-files/input-sdr-amber.in file. This input file also uses the merged components for the restraints, which are explained in detail in the User Guide and in Ref [1].
 
-To apply the merged SDR method, all that is needed is to perform the free energy and analysis steps again using the input-sdr-amber.in file. The full DD and merged SDR methods should produce consistent results if the reference state is the same from the equilibrium stage. The computational cost is lower for this method, with a total of 100.8 ns of simulations for a single calculation.
+To apply the merged SDR method, all that is needed is to perform the free energy and analysis steps again using the input-sdr-amber.in file. The full DD and merged SDR methods should produce consistent results if the reference state is the same from the equilibrium stage. 
 
 The user can also mix and match the separated/merged restraint components and the DD/SDR methods, for example using double decoupling with the merged restraints or the SDR method with the separated restraint components. Another possibility is to merge only the releasing or the attaching restraints, while keeping the others separate. 
 
-# Using BAT with the OpenMM software 
 
-BAT also allows the user to run all simulations using the free OpenMM engine. In this case, instead of the _pmemd.cuda_ software from AMBER, the OpenMM and OpenMMTools versions below should be installed and in your path:
+### Computational cost
 
-OpenMM 7.7.0 or later [11-15]: http://docs.openmm.org/latest/userguide/application/01_getting_started.html
+The full ABFE calculation for a single pose requires a total of 148.0 nanoseconds of simulations for the DD method, and 100.8 ns for the merged SDR method, which can be achieved in less than one day using a single GTX 1070 NVIDIA GPU. This time is significantly reduced when using more modern GPUs, such as the NVIDIA RTX 20 and RTX 30 series. Furthermore, the free energy simulations from BAT are separated into several independent windows, which allows for trivial parallelization across multiple GPUs.
 
-OpenMMTools 0.21.3 or later [16]: https://anaconda.org/conda-forge/openmmtools
+Ref [1] shows how the simulation times of ABFE calculations using BAT can be reduced even more, to as little as 20 ns per calculation, and still produce accurate results. The files needed to reproduce the paper results should have been published with the paper, which did not happen, and I am currently trying to rectify that. For now, here is a link where they can be accessed: 
 
-Both distributions use the Conda package manager for installation, which can be obtained at https://www.anaconda.com/download and installed following the instructions in the website. 
+https://chemrxiv.org/engage/api-gateway/chemrxiv/assets/orp/resource/item/65d60b5a66c13817292b07c2/original/input-files.zip 
+
+The README file included also explains how to use these input files with the latest BAT2 distribution.
 
 
-## Performing the calculations with OpenMM
+# Performing the calculations with OpenMM
+
+BAT also allows the user to run all simulations using the free OpenMM engine [11-15] with OpenMMTools [16]. In this case, instead of the _pmemd.cuda_ software from AMBER, OpenMM 7.7.0 or later and OpenMMTools 0.21.3 or later should be installed and in your path. See the Quick-installation-tutorial.pdf file, located inside the ./doc folder, for instructions on how to install these two programs.
 
 The OpenMM simulations are fully integrated into the BAT workflow, with the equilibration, free energy and analysis steps performed the same way as explained in the tutorial above. Example input files are provided for the OpenMM software as well: input-sdr-openmm.in for the merged SDR method, and example-input-files/input-dd-openmm.in for double decoupling with separated restraints. The simulation time per calculation for each approach is also 100.8 ns and 148 ns, respectively. More details on the OpenMM-specific BAT input variables can be found in the User Guide.  
 
 In order to run the equilibration and free energy simulations in the respective folders, inside them are included a bash script, to perform the simulations in a local machine, as well as the PBS-run and SLURMM-run scripts. Both of these files might have to be adjusted, depending on your computer or server configuration. After concluding the simulations and performing the final analysis step, the results will be written in the same location and in the same format as with the AMBER version.
 
 The user might want to compare the AMBER and OpenMM free energy results calculated over the same equilibrated poses states. In that case, the equilibration step should be performed using AMBER, and the free energy step can be performed using both AMBER and OpenMM. Performing equilibration with the latter and free energy with the former may cause problems due to incompatibility between input/output files.    
-
-# Reducing simulation time
-
-Ref [1] shows how the simulation times of ABFE calculations can be drastically reduced, to as little as 20 ns per calculation, and still produce accurate results. The files needed to reproduce the paper results should have been published with the paper, which did not happen, and I am currently trying to rectify that. For now, here is a link where they can be accessed: 
-
-https://chemrxiv.org/engage/api-gateway/chemrxiv/assets/orp/resource/item/65d60b5a66c13817292b07c2/original/input-files.zip 
-
-The README file included also explains how to use these input files with the latest BAT2 distribution.
 
 
 # Extending it to other systems
