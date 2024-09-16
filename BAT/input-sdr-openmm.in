@@ -10,10 +10,6 @@ calc_type = dock                                # docked or crystal structure
 celpp_receptor = LMCSS-5uf0_5uez              # Choose CELPP receptor in upper case or pdb code in lower case
 poses_list = [0,1,2,3,4]                        # List of poses for docked calculations, called pose0.pdb, pose1.pdb, pose2.pdb, etc. 
 
-# Ligand residue name
-
-ligand_name     = LIG   # Ligand name in the docked poses or crystal structure 
-
 # Protein anchors, using original protein sequence 
 
 P1 = :425@CA          

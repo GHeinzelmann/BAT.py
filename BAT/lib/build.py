@@ -34,6 +34,9 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
     if calc_type == 'dock':
       shutil.copy('../../all-poses/%s_docked.pdb' %(celp_st), './rec_file.pdb')
       shutil.copy('../../all-poses/%s.pdb' %(pose), './')
+    elif calc_type == 'rank':
+      shutil.copy('../../all-poses/%s.pdb' %(celp_st), './rec_file.pdb')
+      shutil.copy('../../all-poses/%s.pdb' %(pose), './')
     elif calc_type == 'crystal':    
       shutil.copy('../../all-poses/%s.pdb' %(pose), './')
       # Replace names and run initial VMD script
@@ -143,12 +146,12 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
             elif '4-' in line:
               ligand_charge += -4
       print('The net charge of the ligand is %d' %ligand_charge)
-      if calc_type == 'dock':
+      if calc_type == 'dock' or calc_type == 'rank':
         shutil.copy('./'+pose+'.pdb', './'+mol.lower()+'-h.pdb')
       elif calc_type == 'crystal':
         shutil.copy('./'+mol.lower()+'.pdb', './'+mol.lower()+'-h.pdb')
     else:
-      if calc_type == 'dock':
+      if calc_type == 'dock' or calc_type == 'rank':
         sp.call('obabel -i pdb '+pose+'.pdb -o pdb -O '+mol.lower()+'.pdb -d', shell=True)                            # Remove all hydrogens from the ligand
       elif calc_type == 'crystal':
         sp.call('obabel -i pdb '+mol.lower()+'.pdb -o pdb -O '+mol.lower()+'.pdb -d', shell=True)                     # Remove all hydrogens from crystal ligand
@@ -412,7 +415,7 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
     return 'all'
 
 
-def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ion_def, other_mol, solv_shell):
+def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, sdr_dist, dec_method, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ion_def, other_mol, solv_shell):
 
 
     if comp == 'n':
@@ -421,11 +424,13 @@ def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, nt
     if comp == 'a' or comp == 'l' or comp == 't' or comp == 'm' or comp == 'c' or comp == 'r':
       dec_method = 'dd'
 
-
+    if comp == 'x':
+      dec_method = 'exchange'
+ 
     # Get files or finding new anchors and building some systems
 
-    if (not os.path.exists('../build_files')) or (dec_method == 'sdr' and win == 0):
-      if dec_method == 'sdr' and os.path.exists('../build_files'):
+    if (not os.path.exists('../build_files')) or (dec_method == 'sdr' and win == 0) or (dec_method == 'exchange' and win == 0):
+      if (dec_method == 'sdr' or dec_method == 'exchange') and os.path.exists('../build_files'):
         shutil.rmtree('../build_files')    
       try:
         shutil.copytree('../../../build_files', '../build_files')
@@ -551,10 +556,136 @@ def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, nt
       shutil.copy('../../../equil/ff/dum.mol2', '../ff/')
       shutil.copy('../../../equil/ff/dum.frcmod', '../ff/')
 
-      if comp == 'v' or comp == 'e' or comp == 'w' or comp == 'f':
-        os.chdir('../'+dec_method+'/')
-      else:
+      if (comp == 'v' or comp == 'e' or comp == 'w' or comp == 'f'):
+        if dec_method == 'dd':
+          os.chdir('../dd/')
+        if dec_method == 'sdr' or dec_method == 'exchange':
+          os.chdir('../sdr/')
+      elif comp != 'x':
         os.chdir('../rest/')
+
+    # Create reference for relative calculations
+    if comp == 'x':
+
+        # Build reference ligand from last state of equilibrium simulations
+
+        if not os.path.exists('../exchange_files'):
+          shutil.copytree('../../../build_files', '../exchange_files')
+        os.chdir('../exchange_files')
+        shutil.copy('../../../equil/'+poser+'/md%02d.rst7' %fwin, './')
+        for file in glob.glob('../../../equil/%s/full*.prmtop' %poser.lower()):
+          shutil.copy(file, './')
+        for file in glob.glob('../../../equil/%s/vac*' %poser.lower()):
+          shutil.copy(file, './')
+        sp.call('cpptraj -p full.prmtop -y md%02d.rst7 -x rec_file.pdb' %fwin, shell=True)
+
+        # Split initial receptor file
+        with open("split-ini.tcl", "rt") as fin:
+          with open("split.tcl", "wt") as fout:
+            if other_mol:
+              other_mol_vmd = " ".join(other_mol)
+            else:
+              other_mol_vmd = 'XXX'
+            for line in fin:
+              fout.write(line.replace('SHLL','%4.2f' %solv_shell).replace('OTHRS', str(other_mol_vmd)).replace('mmm', molr.lower()).replace('MMM', molr.upper()))
+        sp.call('vmd -dispdev text -e split.tcl', shell=True)
+
+        # Remove possible remaining molecules 
+        if not other_mol:
+          open('others.pdb', 'w').close()
+  
+        # Create raw complex and clean it
+        filenames = ['dummy.pdb', 'protein.pdb', '%s.pdb' %molr.lower(), 'others.pdb', 'crystalwat.pdb']
+        with open('./complex-merge.pdb', 'w') as outfile:
+            for fname in filenames:
+                with open(fname) as infile:
+                    for line in infile:
+                        outfile.write(line)
+        with open('complex-merge.pdb') as oldfile, open('complex.pdb', 'w') as newfile:
+            for line in oldfile:
+                if not 'CRYST1' in line and not 'CONECT' in line and not 'END' in line:
+                    newfile.write(line)
+
+        # Read protein anchors and size from equilibrium
+        with open('../../../equil/'+poser+'/equil-%s.pdb' % molr.lower(), 'r') as f:
+          data = f.readline().split()
+          P1 = data[2].strip()
+          P2 = data[3].strip()
+          P3 = data[4].strip()
+          first_res = data[8].strip()
+          recep_last = data[9].strip()
+
+        # Get protein first anchor residue number and protein last residue number from equil simulations
+        p1_resid = P1.split('@')[0][1:]
+        p1_atom = P1.split('@')[1]
+        rec_res = int(recep_last)+1
+        p1_vmd = p1_resid
+  
+
+        # Replace names in initial files and VMD scripts
+        with open("prep-ini.tcl", "rt") as fin:
+          with open("prep.tcl", "wt") as fout:
+            for line in fin:
+              fout.write(line.replace('MMM', molr).replace('mmm', molr.lower()).replace('NN', p1_atom).replace('P1A', p1_vmd).replace('FIRST','2').replace('LAST',str(rec_res)).replace('STAGE','fe').replace('XDIS','%4.2f' %l1_x).replace('YDIS','%4.2f' %l1_y).replace('ZDIS','%4.2f' %l1_z).replace('RANG','%4.2f' %l1_range).replace('DMAX','%4.2f' %max_adis).replace('DMIN','%4.2f' %min_adis).replace('SDRD','%4.2f' %sdr_dist).replace('OTHRS', str(other_mol_vmd)))
+
+
+        # Align to reference structure using lovoalign
+        sp.call('lovoalign -p1 complex.pdb -p2 reference.pdb -o aligned.pdb', shell=True)
+
+        # Put in AMBER format and find ligand anchor atoms
+        with open('aligned.pdb', 'r') as oldfile, open('aligned-clean.pdb', 'w') as newfile:
+          for line in oldfile:
+              splitdata = line.split()
+              if len(splitdata) > 3:
+                  newfile.write(line)
+        sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y', shell=True)
+        sp.call('vmd -dispdev text -e prep.tcl', shell=True)
+
+        # Check size of anchor file 
+        anchor_file = 'anchors.txt'
+        if os.stat(anchor_file).st_size == 0:
+          os.chdir('../')
+          return 'anch1'
+        f = open(anchor_file, 'r')
+        for line in f:
+          splitdata = line.split()
+          if len(splitdata) < 3:
+            os.rename('./anchors.txt', 'anchors-'+poser+'.txt')
+            os.chdir('../')
+            return 'anch2'
+        os.rename('./anchors.txt', 'anchors-'+poser+'.txt')
+
+        # Read ligand anchors obtained from VMD
+        lig_resid = str(int(recep_last) + 2)
+        anchor_file = 'anchors-'+poser+'.txt'
+        f = open(anchor_file, 'r')
+        for line in f:
+          splitdata = line.split()
+          L1 = ":"+lig_resid+"@"+splitdata[0]
+          L2 = ":"+lig_resid+"@"+splitdata[1]
+          L3 = ":"+lig_resid+"@"+splitdata[2]
+
+
+        # Write anchors and last protein residue to original pdb file
+        with open('fe-%s.pdb' %molr.lower(), 'r') as fin:
+            data = fin.read().splitlines(True)
+        with open('fe-%s.pdb' %molr.lower(), 'w') as fout:
+            fout.write('%-8s  %6s  %6s  %6s  %6s  %6s  %6s  %6s  %4s\n' %('REMARK A', P1, P2, P3, L1, L2, L3, first_res, recep_last))
+            fout.writelines(data[1:])
+
+        # Get parameters from equilibrium
+        if not os.path.exists('../ff'):
+          os.makedirs('../ff')
+        for file in glob.glob('../../../equil/ff/*.mol2'):
+          shutil.copy(file, '../ff/')
+        for file in glob.glob('../../../equil/ff/*.frcmod'):
+          shutil.copy(file, '../ff/')
+        shutil.copy('../../../equil/ff/%s.mol2' %(molr.lower()), '../ff/')
+        shutil.copy('../../../equil/ff/%s.frcmod' %(molr.lower()), '../ff/')
+        shutil.copy('../../../equil/ff/dum.mol2', '../ff/')
+        shutil.copy('../../../equil/ff/dum.frcmod', '../ff/')
+
+        os.chdir('../sdr/')
 
     # Copy and replace simulation files for the first window
     if int(win) == 0:
@@ -620,6 +751,8 @@ def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, nt
         if os.path.exists('../'+i+'/full.hmr.prmtop'):
           altm = i
           break
+
+
     if int(win) == 0 and altm == 'None':
       # Build new system
       for file in glob.glob('../../build_files/vac_ligand*'):
@@ -680,7 +813,7 @@ def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, nt
       resname_lig = mol
 
       # Read coordinates for dummy atoms
-      if dec_method == 'sdr':
+      if dec_method == 'sdr' or dec_method == 'exchange':
         for i in range(1, 3):
           shutil.copy('../../build_files/dum'+str(i)+'.pdb', './')
           with open('dum'+str(i)+'.pdb') as dum_in:
@@ -751,6 +884,41 @@ def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, nt
       lig_resid = recep_last + dum_atom
       oth_tmp = 'None'
  
+
+      # Get coordinates from reference ligand
+      if comp == 'x': 
+        shutil.copy('../../exchange_files/%s.pdb' %molr.lower(), './')
+        shutil.copy('../../exchange_files/anchors-'+poser+'.txt', './')
+        shutil.copy('../../exchange_files/vac_ligand.pdb', './vac_reference.pdb')
+        shutil.copy('../../exchange_files/vac_ligand.prmtop', './vac_reference.prmtop')
+        shutil.copy('../../exchange_files/vac_ligand.inpcrd', './vac_reference.inpcrd')
+        shutil.copy('../../exchange_files/fe-%s.pdb' %molr.lower(), './build-ref.pdb')
+
+        ref_lig_coords = []
+        ref_lig_atomlist = []
+        ref_lig_rsnmlist = []
+        ref_lig_rsidlist = []
+        ref_lig_chainlist = []
+        ref_lig_atom = 0
+        ref_resid_lig = 0
+        resname_lig = molr
+
+        # Read coordinates from reference system
+        with open('build-ref.pdb') as f_in:
+          lines = (line.rstrip() for line in f_in)
+          lines = list(line for line in lines if line) # Non-blank lines in a list   
+
+        # Count atoms of the system
+        for i in range(0, len(lines)):
+          if (lines[i][0:6].strip() == 'ATOM') or (lines[i][0:6].strip() == 'HETATM'):
+              if lines[i][17:20].strip() == molr:
+                 ref_lig_coords.append((float(lines[i][30:38].strip()), float(lines[i][38:46].strip()), float(lines[i][46:54].strip())))
+                 ref_lig_atomlist.append(lines[i][12:16].strip())
+                 ref_lig_rsnmlist.append(lines[i][17:20].strip())
+                 ref_lig_rsidlist.append(float(lines[i][22:26].strip()) + dum_atom - 1)
+                 ref_lig_chainlist.append(lines[i][21].strip())
+                 ref_lig_atom += 1
+
       # Write the new pdb file
 
       build_file = open('build.pdb', 'w')
@@ -797,7 +965,7 @@ def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, nt
             build_file.write('%6.2f%6.2f\n'%(0, 0))
         build_file.write('TER\n')
 
-        if dec_method == 'sdr':
+        if dec_method == 'sdr' or dec_method == 'exchange':
           for i in range(0, lig_atom):
               build_file.write('%-4s  %5s %-4s %3s  %4.0f    '%('ATOM', i+1, lig_atomlist[i],mol, float(lig_resid+2)))
               build_file.write('%8.3f%8.3f%8.3f'%(float(lig_coords[i][0]), float(lig_coords[i][1]),float(lig_coords[i][2]+sdr_dist)))
@@ -811,7 +979,7 @@ def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, nt
               build_file.write('%6.2f%6.2f\n'%(0, 0))
           build_file.write('TER\n')
         print('Creating new system for decharging...')
-      if (comp == 'v' and dec_method == 'sdr'):
+      if comp == 'v' and (dec_method == 'sdr' or dec_method == 'exchange'):
         for i in range(0, lig_atom):
             build_file.write('%-4s  %5s %-4s %3s  %4.0f    '%('ATOM', i+1, lig_atomlist[i],mol, float(lig_resid + 1)))
             build_file.write('%8.3f%8.3f%8.3f'%(float(lig_coords[i][0]), float(lig_coords[i][1]),float(lig_coords[i][2]+sdr_dist)))
@@ -819,6 +987,28 @@ def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, nt
             build_file.write('%6.2f%6.2f\n'%(0, 0))
         build_file.write('TER\n')
         print('Creating new system for vdw decoupling...')
+
+      # Other ligands for relative calculations
+      if (comp == 'x'):
+        for i in range(0, ref_lig_atom):
+            build_file.write('%-4s  %5s %-4s %3s  %4.0f    '%('ATOM', i+1, ref_lig_atomlist[i],molr, float(lig_resid + 1)))
+            build_file.write('%8.3f%8.3f%8.3f'%(float(ref_lig_coords[i][0]), float(ref_lig_coords[i][1]),float(ref_lig_coords[i][2]+sdr_dist)))
+
+            build_file.write('%6.2f%6.2f\n'%(0, 0))
+        build_file.write('TER\n')
+        for i in range(0, ref_lig_atom):
+            build_file.write('%-4s  %5s %-4s %3s  %4.0f    '%('ATOM', i+1, ref_lig_atomlist[i],molr, float(lig_resid + 2)))
+            build_file.write('%8.3f%8.3f%8.3f'%(float(ref_lig_coords[i][0]), float(ref_lig_coords[i][1]),float(ref_lig_coords[i][2])))
+
+            build_file.write('%6.2f%6.2f\n'%(0, 0))
+        build_file.write('TER\n')
+        for i in range(0, lig_atom):
+           build_file.write('%-4s  %5s %-4s %3s  %4.0f    '%('ATOM', i+1, lig_atomlist[i],mol, float(lig_resid+3)))
+           build_file.write('%8.3f%8.3f%8.3f'%(float(lig_coords[i][0]), float(lig_coords[i][1]),float(lig_coords[i][2]+sdr_dist)))
+
+           build_file.write('%6.2f%6.2f\n'%(0, 0))
+        build_file.write('TER\n')
+        print('Creating new system for vdw ligand exchange...')
 
       # Positions of the other atoms
       for i in range(0, oth_atom):
@@ -891,14 +1081,14 @@ def build_dec(fwin, hmr, mol, pose, comp, win, water_model, ntpr, ntwr, ntwe, nt
     
     return 'all'
 
-def create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, buffer_z, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, dec_method, other_mol, solv_shell):
+def create_box(comp, hmr, pose, mol, molr, num_waters, water_model, ion_def, neut, buffer_x, buffer_y, buffer_z, stage, ntpr, ntwr, ntwe, ntwx, cut, gamma_ln, barostat, receptor_ff, ligand_ff, dt, dec_method, other_mol, solv_shell):
     
     # Adjust buffers to solvation shell
     if stage == 'fe' and solv_shell != 0:
       buffer_x = buffer_x - solv_shell
       buffer_y = buffer_y - solv_shell
       if buffer_z != 0:
-        if ((dec_method == 'sdr') and (comp == 'e' or comp == 'v')) or comp == 'n':
+        if ((dec_method == 'sdr') and (comp == 'e' or comp == 'v')) or comp == 'n' or comp == 'x':
           buffer_z = buffer_z - (solv_shell/2)
         else: 
           buffer_z = buffer_z - solv_shell
@@ -942,6 +1132,10 @@ def create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buf
       tleap_vac.write('%s = loadmol2 %s.mol2\n'%(other_mol[i].upper(), other_mol[i].lower()))
     tleap_vac.write('loadamberparams %s.frcmod\n'%(mol.lower()))
     tleap_vac.write('%s = loadmol2 %s.mol2\n\n'%(mol.upper(), mol.lower()))
+    if comp == 'x':
+      tleap_vac.write('loadamberparams %s.frcmod\n'%(molr.lower()))
+    if comp == 'x':
+      tleap_vac.write('%s = loadmol2 %s.mol2\n\n'%(molr.upper(), molr.lower()))
     tleap_vac.write('# Load the water parameters\n')        
     if water_model.lower() != 'tip3pf':
       tleap_vac.write('source leaprc.water.%s\n\n'%(water_model.lower()))
@@ -1000,7 +1194,7 @@ def create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buf
     f.close()
      
     # Adjust ions for LJ and electrostatic Calculations (avoid neutralizing plasma)
-    if comp == 'v' and dec_method == 'sdr':
+    if (comp == 'v' and dec_method == 'sdr') or comp == 'x':
       charge_neut = neu_cat - neu_ani - 2*lig_cat + 2*lig_ani
       neu_cat = 0
       neu_ani = 0
@@ -1035,7 +1229,7 @@ def create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buf
 
       # Create the first box guess to get the initial number of waters and cross sectional area
       buff = 50.0  
-      scripts.write_tleap(mol, water_model, water_box, buff, buffer_x, buffer_y, other_mol)
+      scripts.write_tleap(mol, molr, comp, water_model, water_box, buff, buffer_x, buffer_y, other_mol)
       num_added = scripts.check_tleap()
       cross_area = scripts.cross_sectional_area()
 
@@ -1048,7 +1242,7 @@ def create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buf
         print ('Not enough water molecules to fill the system in the z direction, please increase the number of water molecules')
         sys.exit(1)
       # Get box volume and number of added ions
-      scripts.write_tleap(mol, water_model, water_box, buff, buffer_x, buffer_y, other_mol)
+      scripts.write_tleap(mol, molr, comp, water_model, water_box, buff, buffer_x, buffer_y, other_mol)
       box_volume = scripts.box_volume()
       print(box_volume)
       num_cations = round(ion_def[2]*6.02e23*box_volume*1e-27) # box volume already takes into account system shrinking during equilibration
@@ -1100,7 +1294,7 @@ def create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buf
           if num_added > target_num and (num_added - target_num) < rem_limit:
               difference = num_added - target_num
               tleap_remove = [target_num + 1 + i for i in range(difference)]
-              scripts.write_tleap(mol, water_model, water_box, buff, buffer_x, buffer_y, other_mol, tleap_remove)
+              scripts.write_tleap(mol, molr, comp, water_model, water_box, buff, buffer_x, buffer_y, other_mol, tleap_remove)
               scripts.check_tleap()
               break
           # Set new buffer size based on chosen water density
@@ -1113,7 +1307,7 @@ def create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buf
           # Set relaxation factor  
           factor = ind * factor
           # Get number of waters
-          scripts.write_tleap(mol, water_model, water_box, buff, buffer_x, buffer_y, other_mol)
+          scripts.write_tleap(mol, molr, comp, water_model, water_box, buff, buffer_x, buffer_y, other_mol)
           num_added = scripts.check_tleap()       
       print(str(count)+' iterations for fixed water number')   
     # Fixed z buffer 
@@ -1121,7 +1315,7 @@ def create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buf
       buff = buffer_z
       tleap_remove = None
       # Get box volume and number of added ions
-      scripts.write_tleap(mol, water_model, water_box, buff, buffer_x, buffer_y, other_mol)
+      scripts.write_tleap(mol, molr, comp, water_model, water_box, buff, buffer_x, buffer_y, other_mol)
       box_volume = scripts.box_volume()
       print(box_volume)
       num_cations = round(ion_def[2]*6.02e23*box_volume*1e-27) # # box volume already takes into account system shrinking during equilibration
@@ -1144,6 +1338,10 @@ def create_box(comp, hmr, pose, mol, num_waters, water_model, ion_def, neut, buf
       tleap_solvate.write('%s = loadmol2 %s.mol2\n'%(other_mol[i].upper(), other_mol[i].lower()))
     tleap_solvate.write('loadamberparams %s.frcmod\n'%(mol.lower()))
     tleap_solvate.write('%s = loadmol2 %s.mol2\n\n'%(mol.upper(), mol.lower()))
+    if comp == 'x':
+      tleap_solvate.write('loadamberparams %s.frcmod\n'%(molr.lower()))
+    if comp == 'x':
+      tleap_solvate.write('%s = loadmol2 %s.mol2\n\n'%(molr.upper(), molr.lower()))
     tleap_solvate.write('# Load the water and jc ion parameters\n')        
     if water_model.lower() != 'tip3pf':
       tleap_solvate.write('source leaprc.water.%s\n\n'%(water_model.lower()))

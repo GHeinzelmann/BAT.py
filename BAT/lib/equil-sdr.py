@@ -217,7 +217,7 @@ with open('full.pdb') as f_in:
 # Create decoupling list
 for i in range(0, len(lines)):
     if (lines[i][0:6].strip() == 'ATOM') or (lines[i][0:6].strip() == 'HETATM'):
-      if lines[i][17:20].strip() == 'LIG':
+      if lines[i][17:20].strip() == 'LIG' or lines[i][17:20].strip() == 'LREF':
         atoms_list.append(lines[i][6:11].strip())
 
 for i in range(0, len(atoms_list)):
@@ -382,7 +382,25 @@ if dum_atom > 1:
   comforce.addBond(bondGroups, bondParameters)
   print('comforce.addBond('+str(com_atoms[1])+', '+str(bondParameters[0])+', '+str(bondParameters[1])+', '+str(bondParameters[2])+', '+str(bondParameters[3])+')')
   print('')
- 
+
+if comp == 'x':
+
+  bondGroups = []
+  bondParameters = []
+
+  # Add second bulk ligand COM restraints
+  print('Second bulk ligand COM restraints:')
+  print('')
+  comforce.addGroup(com_atoms[2])
+  bondGroups.append(2)
+  bondParameters.append(float(fcn_com[2])*unit_definitions.kilocalorie_per_mole/unit_definitions.angstroms**2)
+  bondParameters.append(float(xb)*unit_definitions.angstroms)
+  bondParameters.append(float(yb)*unit_definitions.angstroms)
+  bondParameters.append(float(zb)*unit_definitions.angstroms)
+  comforce.addBond(bondGroups, bondParameters)
+  print('comforce.addBond('+str(com_atoms[2])+', '+str(bondParameters[0])+', '+str(bondParameters[1])+', '+str(bondParameters[2])+', '+str(bondParameters[3])+')')
+  print('')
+
 system.addForce(harmonicforce) # after
 system.addForce(angleforce) # after
 system.addForce(torsionforce) # after 
@@ -456,7 +474,7 @@ if comp == 'e' or comp == 'f':
   simulation.context.setParameter('lambda_sterics_A', 1.0)
   simulation.context.setParameter('lambda_sterics_B', 1.0)
   simulation.context.setParameter('lambda_restraints', 1.0)
-elif comp == 'v' or comp == 'w':
+elif comp == 'v' or comp == 'w' or comp == 'x':
   simulation.context.setParameter('lambda_electrostatics_A', 0.0)
   simulation.context.setParameter('lambda_electrostatics_B', 0.0)
   simulation.context.setParameter('lambda_sterics_A', lambdas)
