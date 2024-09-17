@@ -25,9 +25,9 @@ solv_shell = 4      # Water molecules around the protein that will be kept in th
 
 # Variables for setting up equilibrium and free energy calculations, also used on analysis       
 
-fe_type = relative  # Type of free energy calculations (rest, dd, sdr, dd-rest, sdr-rest, relative, custom)
+fe_type = express  # Type of free energy calculations (rest, dd, sdr, dd-rest, sdr-rest, relative, custom)
 
-components = [ a l t c m ] # Used with custom option for fe_type. Do not include b component here. 
+components = [ m ] # Used with custom option for fe_type. Do not include b component here. 
 
 release_eq = [ 10.0 2.5 0.5 0.0 ]   # Equilibrium gradual release weights
 
@@ -37,7 +37,7 @@ attach_rest = [ 0.00 0.10 0.24 0.56 1.33 3.16 7.50 17.78 42.17 100.0 ]   # Short
 
 sdr_dist = 32.00
 
-#dec_method = exchange
+dec_method = sdr
 
 dec_int = ti                                  # Integration method for double decoupling (MBAR or TI with Gaussian quadrature)
 
@@ -78,7 +78,7 @@ hmr             = yes       # Use hydrogen mass repartitioning (yes or no)
 Temperature	=   298.15    # Temperature of simulation and analysis 
 
 eq_steps1	=   100000    # Number of steps for equilibration gradual release 
-eq_steps2	=   1000000  # Number of steps for equilibration after release
+eq_steps2	=   1000000   # Number of steps for equilibration after release
 
 m_itera1	=   200       # Number of iterations for component m (equilibrium)   
 m_itera2	=   400       # Number of iterations for component m (production) 
@@ -89,8 +89,8 @@ n_itera2	=   400       # Number of iterations for component n (production)
 e_itera1	=   400       # Number of iterations for component e (equilibrium)   
 e_itera2	=   800       # Number of iterations for component e (production) 
 
-x_itera1	=   4000       # Number of iterations for component v (equilibrium)   
-x_itera2	=   1200       # Number of iterations for component v (production) 
+v_itera1	=   800       # Number of iterations for component v (equilibrium)   
+v_itera2	=   1200       # Number of iterations for component v (production) 
 
 itera_steps     =   500       # Number of steps per iteration (total steps will be the number of iterations multiplied by this number)
 

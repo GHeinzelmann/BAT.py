@@ -78,8 +78,8 @@ hmr             =  yes       # Use hydrogen mass repartitioning (yes or no)
 
 Temperature	=  298.15    # Temperature of simulation and analysis 
 
-eq_steps1	=  500000    # Number of steps for equilibration gradual release 
-eq_steps2	=  15000000  # Number of steps for equilibration after release
+eq_steps1	=  100000    # Number of steps for equilibration gradual release 
+eq_steps2	=  1000000   # Number of steps for equilibration after release
 
 a_steps1	=  100000    # Number of steps per window for component a (equilibrium)
 a_steps2	=  200000    # Number of steps per window for component a (production) 

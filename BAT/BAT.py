@@ -77,6 +77,8 @@ f_itera1 = 0
 f_itera2 = 0
 w_itera1 = 0
 w_itera2 = 0
+x_itera1 = 0
+x_itera2 = 0
 
 sdr_dist = 0
 rng = 0
@@ -271,6 +273,10 @@ for i in range(0, len(lines)):
             H2 = lines[i][1]
         elif lines[i][0] == 'p3':
             H3 = lines[i][1]
+        elif lines[i][0] == 'ligand_name':
+            newline = lines[i][1].strip('\'\"-,.:;#()][').split(',')
+            for j in range(0, len(newline)):
+                mols.append(newline[j])
         elif lines[i][0] == 'fe_type':
             if lines[i][1].lower() == 'rest':
                 fe_type = lines[i][1].lower()
@@ -548,15 +554,18 @@ elif calc_type == 'crystal':
   poses_def = [celp_st]
 
 # Obtain all ligand names
-for i in range(0, len(poses_def)):
-  with open('./all-poses/%s.pdb' %poses_def[i].lower()) as f_in:
-    lines = (line.rstrip() for line in f_in)
-    lines = list(line for line in lines if line) # Non-blank lines in a list   
-    for j in range(0, len(lines)):
-      if (lines[j][0:6].strip() == 'ATOM') or (lines[j][0:6].strip() == 'HETATM'):  
-        lig_name = (lines[j][17:20].strip())
-        mols.append(lig_name)
-        break 
+if calc_type != 'crystal':
+  mols = []
+  for i in range(0, len(poses_def)):
+    with open('./all-poses/%s.pdb' %poses_def[i].lower()) as f_in:
+      lines = (line.rstrip() for line in f_in)
+      lines = list(line for line in lines if line) # Non-blank lines in a list   
+      for j in range(0, len(lines)):
+        if (lines[j][0:6].strip() == 'ATOM') or (lines[j][0:6].strip() == 'HETATM'):  
+          lig_name = (lines[j][17:20].strip())
+          mols.append(lig_name)
+          break 
+
 
 print(mols)
 

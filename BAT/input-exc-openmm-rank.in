@@ -6,13 +6,10 @@
 
 # Calculation definitions
 
-calc_type = crystal                                # docked or crystal structure
-celpp_receptor = 5uf0                        # Choose CELPP receptor in upper case or pdb code in lower case
-poses_list = [0,1,2,3,4]                        # List of poses for docked calculations, called pose0.pdb, pose1.pdb, pose2.pdb, etc. 
-
-# Ligand residue name
-
-ligand_name     = 89J   # Ligand name in the docked poses or crystal structure 
+calc_type = rank                                                  # dock (compare poses), rank (compare ligands) or crystal (single complex)
+celpp_receptor = receptor-5uf0                                    # Choose CELPP receptor in upper case or pdb code in lower case
+ligand_list = [lig-5uf0,lig-5uez,lig-5uew,lig-5ueu,lig-5uey]      # List of different ligands for ranking calculations, without the pdb extension
+#poses_list = [0,1,2,3,4]                                         # List of poses for docked calculations, called pose0.pdb, pose1.pdb, pose2.pdb, etc. 
 
 # Protein anchors, using original protein sequence 
 
@@ -28,11 +25,11 @@ solv_shell = 4      # Water molecules around the protein that will be kept in th
 
 # Variables for setting up equilibrium and free energy calculations, also used on analysis       
 
-fe_type = express  # Type of free energy calculations (rest, dd, sdr, dd-rest, sdr-rest, custom)
+fe_type = relative  # Type of free energy calculations (rest, dd, sdr, dd-rest, sdr-rest, relative, custom)
 
-components = [ e v ] # Used with custom option for fe_type. Do not include b component here. 
+components = [ m ] # Used with custom option for fe_type. Do not include b component here. 
 
-release_eq = [ 5.00 2.50 1.00 0.50 0.20 0.10 0.05 0.02 0.00 ]   # Equilibrium gradual release weights
+release_eq = [ 10.0 2.5 0.5 0.0 ]   # Equilibrium gradual release weights
 
 attach_rest = [ 0.00 0.10 0.24 0.56 1.33 3.16 7.50 17.78 42.17 100.0 ]   # Short attach/release weights
 
@@ -40,7 +37,7 @@ attach_rest = [ 0.00 0.10 0.24 0.56 1.33 3.16 7.50 17.78 42.17 100.0 ]   # Short
 
 sdr_dist = 32.00
 
-dec_method = sdr
+#dec_method = exchange
 
 dec_int = ti                                  # Integration method for double decoupling (MBAR or TI with Gaussian quadrature)
 
@@ -92,8 +89,8 @@ n_itera2	=   400       # Number of iterations for component n (production)
 e_itera1	=   400       # Number of iterations for component e (equilibrium)   
 e_itera2	=   800       # Number of iterations for component e (production) 
 
-v_itera1	=   800       # Number of iterations for component v (equilibrium)   
-v_itera2	=   1200       # Number of iterations for component v (production) 
+x_itera1	=   4000       # Number of iterations for component v (equilibrium)   
+x_itera2	=   1200       # Number of iterations for component v (production) 
 
 itera_steps     =   500       # Number of steps per iteration (total steps will be the number of iterations multiplied by this number)
 
