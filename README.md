@@ -95,11 +95,11 @@ The user can also mix and match the separated/merged restraint components and th
 
 The full ABFE calculation for a single pose requires a total of 148.0 nanoseconds of simulations for the DD method, and 100.8 ns for the merged SDR method, which can be achieved in less than one day using a single GTX 1070 NVIDIA GPU. This time is significantly reduced when using more modern GPUs, such as the NVIDIA RTX 20 and RTX 30 series. Furthermore, the free energy simulations from BAT are separated into several independent windows, which allows for trivial parallelization across multiple GPUs.
 
-Ref [1] shows how the simulation times of ABFE calculations using BAT can be reduced even more, to as little as 20 ns per calculation, and still produce accurate results. The files needed to reproduce the paper results should have been published with the paper, which did not happen, and I am currently trying to rectify that. For now, here is a link where they can be accessed: 
+Ref [1] shows how the simulation times of ABFE calculations using BAT can be reduced even more, to as little as 20 ns per calculation, and still produce accurate results. The files needed to reproduce the paper results were to published with the original paper, but were made available in a subsequent correction:
 
-https://chemrxiv.org/engage/api-gateway/chemrxiv/assets/orp/resource/item/65d60b5a66c13817292b07c2/original/input-files.zip 
+https://pubs.acs.org/doi/10.1021/acs.jctc.4c01153
 
-The README file included also explains how to use these input files with the latest BAT2 distribution.
+The user should download the input-files.zip file from the link above. The README file included explains how to use these input files with the latest BAT2 distribution.
 
 
 # Performing the calculations with OpenMM
