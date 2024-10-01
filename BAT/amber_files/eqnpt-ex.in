@@ -1,0 +1,45 @@
+*******************************************************
+*****************************       eqnpt.in
+*******************************************************
+Equilibrate, NPT.
+ &cntrl
+  imin = 0,
+  ntx = 5,
+  irest = 1,
+  ntpr = 500,
+  ntwr = 500,
+  ntwx = 500,
+  ioutfm = 1,
+  iwrap = 1,
+  ntf = 1,
+  ntc = 2,
+  cut = _cutoff_,
+  ntt = 3,
+  temp0 = _temperature_,
+  gamma_ln = _gamma_ln_,
+  ig = -1,
+  ntp = 1,
+  barostat = _barostat_,
+  nstlim = 3500,
+  dt = _step_,
+  nmropt = 1,
+  pencut = -1,
+  ntr = 1,
+  restraint_wt = 50.0,
+  restraintmask = ':1-2',
+  icfe = 1, clambda = lbd_val, scalpha = 0.5, scbeta = 12.0,
+  timask1 = ':mk1,mk2', timask2 = ':mk3,mk4',
+  ifsc=1, scmask1=':mk1,mk2', scmask2=':mk3,mk4', crgmask = ':mk1,mk2,mk3,mk4',
+  gti_chg_keep = 0,
+  gti_add_sc = 1,
+  infe = 1,
+ /
+ &pmd
+ output_file = 'cmass.txt'
+ output_freq = 1000
+ cv_file = 'cv.in'
+ /
+ &wt type = 'END', /
+DISANG=disang.rest
+LISTOUT=POUT
+

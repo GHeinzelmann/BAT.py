@@ -565,7 +565,7 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
         os.chdir('../rest/')
 
     # Create reference for relative calculations
-    if comp == 'x':
+    if comp == 'x' and win == 0:
 
         # Build reference ligand from last state of equilibrium simulations
 

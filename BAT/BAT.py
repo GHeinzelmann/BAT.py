@@ -975,7 +975,7 @@ elif stage == 'analysis':
   if software == 'openmm':
     for i in range(0, len(poses_def)):
       pose = poses_def[i]
-      analysis.fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lambdas, dic_itera1, dic_itera2, itera_steps, dt, dlambda, dec_int, weights, blocks)
+      analysis.fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lambdas, dic_itera1, dic_itera2, itera_steps, dt, dlambda, dec_int, weights, blocks, ti_points)
       os.chdir('../../')
   else: 
   # Free energy analysis for AMBER20

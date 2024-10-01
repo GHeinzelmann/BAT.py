@@ -1268,7 +1268,7 @@ def dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2,
 
     if (comp == 'e'):
       # Create simulation files for charge decoupling
-      if (dec_method == 'sdr'): 
+      if (dec_method == 'sdr') or (dec_method == 'exchange'): 
         # Simulation files for simultaneous decoupling
         with open('./vac.pdb') as myfile:
           data = myfile.readlines()
@@ -1351,6 +1351,63 @@ def dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2,
           with open("./heat.in", "wt") as fout:
             for line in fin: 
               fout.write(line.replace('_temperature_', str(temperature)).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)).replace('mk2',str(mk2)))
+
+      # Create running scripts for local and server
+      with open('../run_files/local-dd.bash', "rt") as fin:
+        with open("./run-local.bash", "wt") as fout:
+          for line in fin:
+            fout.write(line)
+      with open('../run_files/PBS-Am', "rt") as fin:
+        with open("./PBS-run", "wt") as fout:
+          for line in fin:
+            fout.write(line.replace('STAGE', pose).replace('POSE', '%s%02d' %(comp, int(win))))
+      with open('../run_files/SLURMM-Am', "rt") as fin:
+        with open("./SLURMM-run", "wt") as fout:
+          for line in fin:
+            fout.write(line.replace('STAGE', pose).replace('POSE', '%s%02d' %(comp, int(win))))
+
+    if (comp == 'x'):
+      # Create simulation files for vdw exchange
+      with open('./vac.pdb') as myfile:
+        data = myfile.readlines()
+        mk4 = int(last_lig)
+        mk3 = int(mk4 - 1)
+        mk2 = int(mk4 - 2)
+        mk1 = int(mk4 - 3)
+      for i in range(0, num_sim+1):
+        with open('../amber_files/mdin-ex', "rt") as fin:
+          with open("./mdin-%02d" %int(i), "wt") as fout:
+            if i == 1 or i == 0:
+              for line in fin:
+                fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(round(steps1/2))).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)).replace('mk2',str(mk2)).replace('mk3',str(mk3)).replace('mk4',str(mk4)))
+            else:
+              for line in fin:
+                fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(steps2)).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)).replace('mk2',str(mk2)).replace('mk3',str(mk3)).replace('mk4',str(mk4)))
+        mdin = open("./mdin-%02d" %int(i), 'a')
+        mdin.write('  mbar_states = %02d\n' %len(lambdas))
+        mdin.write('  mbar_lambda = ')
+        for i in range(0, len(lambdas)):
+          mdin.write(' %6.5f,' %(lambdas[i]))
+        mdin.write('\n')
+        mdin.write('  infe = 1,\n')
+        mdin.write(' /\n')
+        mdin.write(' &pmd \n')
+        mdin.write(' output_file = \'cmass.txt\' \n')
+        mdin.write(' output_freq = %02d \n' % int(ntwx))
+        mdin.write(' cv_file = \'cv.in\' \n')
+        mdin.write(' /\n')
+        mdin.write(' &wt type = \'END\' , /\n')
+        mdin.write('DISANG=disang.rest\n')
+        mdin.write('LISTOUT=POUT\n')
+
+      with open("../amber_files/eqnpt-ex.in", "rt") as fin:
+        with open("./eqnpt.in", "wt") as fout:
+          for line in fin: 
+            fout.write(line.replace('_temperature_', str(temperature)).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)).replace('mk2',str(mk2)).replace('mk3',str(mk3)).replace('mk4',str(mk4)))
+      with open("../amber_files/heat-ex.in", "rt") as fin:
+        with open("./heat.in", "wt") as fout:
+          for line in fin: 
+            fout.write(line.replace('_temperature_', str(temperature)).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)).replace('mk2',str(mk2)).replace('mk3',str(mk3)).replace('mk4',str(mk4)))
 
       # Create running scripts for local and server
       with open('../run_files/local-dd.bash', "rt") as fin:

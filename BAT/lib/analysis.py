@@ -12,7 +12,7 @@ from lib.pymbar import MBAR # multistate Bennett acceptance ratio
 from lib.pymbar import timeseries # timeseries analysis
 from pathlib import Path
 
-def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lambdas, dic_itera1, dic_itera2, itera_steps, dt, dlambda, dec_int, weights, blocks):
+def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lambdas, dic_itera1, dic_itera2, itera_steps, dt, dlambda, dec_int, weights, blocks, ti_points):
 
     # Total simulation time
     total_time = 0
@@ -120,6 +120,10 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
           while os.path.isfile(filename):
             K = K+1
             filename = './'+comp+'%02.0f/output.dat' % K
+#          print(K)
+          if K != ti_points:
+            print('Error: Missing simulation data for TI-GQ for the '+comp+' component of the '+pose+' calculation')
+            sys.exit(1)
           deltagop = 0
           deltagop_er = 0
           for k in range(K):
@@ -367,7 +371,7 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
           resfile.write('%-20s %8.2f\n\n' % ('Release protein CF;', fb_r))
           resfile.write('%-20s %8.2f\n' % ('Relative free energy;', blck_exc))
         # Merged results
-        if fb_m != 0 or fb_n != 0 or fb_x != 0:
+        if fb_m != 0 or fb_n != 0:
           fb_rel = fb_bd + fb_n
           resfile.write('\n----------------------------------------------\n')
           resfile.write('Merged components SDR method')
@@ -511,7 +515,7 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
         resfile.write('%-20s %8.2f;    %3.2f\n\n' % ('Release protein CF;', fe_r, sd_r))
         resfile.write('%-20s %8.2f;    %3.2f\n' % ('Relative free energy;', total_exc, sd_exc))
       # Merged results
-      if fe_m != 0 or fe_n != 0 or fe_x != 0:
+      if fe_m != 0 or fe_n != 0:
         fe_rel = fe_bd + fe_n
         resfile.write('\n----------------------------------------------\n')
         resfile.write('Merged components SDR method')
@@ -524,11 +528,13 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
         resfile.write('%-20s %8.2f;    %3.2f\n' % ('Relative free energy;', merged_exc, sd_merg_exc))
     resfile.write('\n----------------------------------------------\n\n')
     resfile.write('Energies in kcal/mol\n\n')
+    cit = 'on'
     resfile.write('Total simulation time (based on input file): %6.1f nanoseconds\n\n' % total_time)
-    resfile.write('Please cite:\n\n')
-    resfile.write('G. Heinzelmann, D. J. Huggins and M. K. Gilson (2024). “BAT2: an Open-Source Tool for Flexible, Automated, and Low Cost Absolute Binding Free Energy Calculations”. Journal of Chemical Theory and Computation, 20, 6518.\n\n')
-    resfile.write('G. Heinzelmann and M. K. Gilson (2021). “Automation of absolute protein-ligand binding free energy calculations for docking refinement and compound evaluation”. Scientific Reports, 11, 1116.\n\n')
-    resfile.write('D. J. Huggins (2022) "Comparing the Performance of Different AMBER Protein Forcefields, Partial Charge Assignments, and Water Models for Absolute Binding Free Energy Calculations." Journal of Chemical Theory and Computation, 18, 2616.\n\n')
+    if cit == 'on':
+      resfile.write('Please cite:\n\n')
+      resfile.write('G. Heinzelmann, D. J. Huggins and M. K. Gilson (2024). “BAT2: an Open-Source Tool for Flexible, Automated, and Low Cost Absolute Binding Free Energy Calculations”. Journal of Chemical Theory and Computation, 20, 6518.\n\n')
+      resfile.write('G. Heinzelmann and M. K. Gilson (2021). “Automation of absolute protein-ligand binding free energy calculations for docking refinement and compound evaluation”. Scientific Reports, 11, 1116.\n\n')
+      resfile.write('D. J. Huggins (2022) "Comparing the Performance of Different AMBER Protein Forcefields, Partial Charge Assignments, and Water Models for Absolute Binding Free Energy Calculations." Journal of Chemical Theory and Computation, 18, 2616.\n\n')
     resfile.close()
 
 
@@ -545,9 +551,9 @@ def fe_values(blocks, components, temperature, pose, attach_rest, lambdas, weigh
          
 
     # Set initial values to zero
-    fe_a = fe_bd = fe_t = fe_m = fe_n = fe_v = fe_e = fe_c = fe_r = fe_l = fe_f = fe_w = fe_vs = fe_es = 0
-    fb_a = fb_bd = fb_t = fb_m = fb_n = fb_v = fb_e = fb_c = fb_r = fb_l = fb_f = fb_w = fb_es = fb_vs = 0
-    sd_a = sd_bd = sd_t = sd_m = sd_n = sd_v = sd_e = sd_c = sd_r = sd_l = sd_f = sd_w = sd_vs = sd_es = 0
+    fe_a = fe_bd = fe_t = fe_m = fe_n = fe_v = fe_e = fe_c = fe_r = fe_l = fe_f = fe_w = fe_vs = fe_es = fe_x = 0
+    fb_a = fb_bd = fb_t = fb_m = fb_n = fb_v = fb_e = fb_c = fb_r = fb_l = fb_f = fb_w = fb_es = fb_vs = fb_x = 0
+    sd_a = sd_bd = sd_t = sd_m = sd_n = sd_v = sd_e = sd_c = sd_r = sd_l = sd_f = sd_w = sd_vs = sd_es = sd_x = 0
 
     # Acquire simulation data
     os.chdir('fe')
@@ -593,8 +599,11 @@ def fe_values(blocks, components, temperature, pose, attach_rest, lambdas, weigh
               fout.write(data[t])
             fout.close()
           os.chdir('../')
-      elif comp == 'e' or comp == 'v' or comp == 'f' or comp == 'w':
-        os.chdir(dec_method)
+      elif comp == 'e' or comp == 'v' or comp == 'f' or comp == 'w' or comp == 'x':
+        if dec_method == 'dd':
+          os.chdir(dec_method)
+        if dec_method == 'sdr' or dec_method == 'exchange':
+          os.chdir('sdr')
         if dec_int == 'ti':
           # Get dvdl values from output file
           for j in range(0, len(lambdas)):
@@ -733,8 +742,11 @@ def fe_values(blocks, components, temperature, pose, attach_rest, lambdas, weigh
           elif comp == 'r':
             fe_r = -1.00*float(splitdata[1])
         os.chdir('../')
-      elif comp == 'v' or comp == 'e' or comp == 'f' or comp == 'w':
-        os.chdir(dec_method)
+      elif comp == 'v' or comp == 'e' or comp == 'f' or comp == 'w' or comp == 'x':
+        if dec_method == 'dd':
+          os.chdir(dec_method)
+        if dec_method == 'sdr' or dec_method == 'exchange':
+          os.chdir('sdr')
         with open('./data/'+dec_int+'-'+comp+'-all.dat', "r") as f_in:
           lines = (line.rstrip() for line in f_in)
           lines = list(line for line in lines if line)
@@ -742,16 +754,18 @@ def fe_values(blocks, components, temperature, pose, attach_rest, lambdas, weigh
           splitdata = data.split()
           if comp == 'e' and dec_method == 'dd':
             fe_e = float(splitdata[1])
-          if comp == 'e' and dec_method == 'sdr':
+          elif comp == 'e' and (dec_method == 'sdr' or dec_method == 'exchange'):
             fe_es = float(splitdata[1])
           elif comp == 'v' and dec_method == 'dd':
             fe_v = float(splitdata[1])
           elif comp == 'v' and dec_method == 'sdr':
             fe_vs = float(splitdata[1])
-          if comp == 'w':
+          elif comp == 'w':
             fe_w = -1.00*float(splitdata[1])
           elif comp == 'f':
             fe_f = -1.00*float(splitdata[1])
+          elif comp == 'x':
+            fe_x = float(splitdata[1])
         os.chdir('../')
 
 
@@ -783,8 +797,11 @@ def fe_values(blocks, components, temperature, pose, attach_rest, lambdas, weigh
           elif comp == 'r':
             sd_r = np.std(b_data)
         os.chdir('../')
-      elif comp == 'e' or comp == 'v' or comp == 'f' or comp == 'w': 
-        os.chdir(dec_method)
+      elif comp == 'e' or comp == 'v' or comp == 'f' or comp == 'w' or comp == 'x': 
+        if dec_method == 'dd':
+          os.chdir(dec_method)
+        if dec_method == 'sdr' or dec_method == 'exchange':
+          os.chdir('sdr')
         if dec_int == 'mbar':
           if comp == 'e' and dec_method == 'dd':
             b_data = [] 
@@ -796,7 +813,7 @@ def fe_values(blocks, components, temperature, pose, attach_rest, lambdas, weigh
                 splitdata = data.split()
                 b_data.append(float(splitdata[1]))
             sd_e = np.std(b_data)
-          if comp == 'e' and dec_method == 'sdr':
+          if comp == 'e' and (dec_method == 'sdr' or dec_method == 'exchange'):
             b_data = [] 
             for k in range(0, blocks):
               with open('./data/mbar-'+comp+'-b%02d.dat' %(k+1), "r") as f_in:
@@ -846,6 +863,16 @@ def fe_values(blocks, components, temperature, pose, attach_rest, lambdas, weigh
                 splitdata = data.split()
                 b_data.append(float(splitdata[1]))
             sd_w = np.std(b_data)
+          if comp == 'x':
+            b_data = [] 
+            for k in range(0, blocks):
+              with open('./data/mbar-'+comp+'-b%02d.dat' %(k+1), "r") as f_in:
+                lines = (line.rstrip() for line in f_in)
+                lines = list(line for line in lines if line)
+                data = lines[-1]
+                splitdata = data.split()
+                b_data.append(float(splitdata[1]))
+            sd_x = np.std(b_data)
         elif dec_int == 'ti':
           if comp == 'e' and dec_method == 'dd':
             b_data = [] 
@@ -857,7 +884,7 @@ def fe_values(blocks, components, temperature, pose, attach_rest, lambdas, weigh
                 splitdata = data.split()
                 b_data.append(float(splitdata[1]))
             sd_e = np.std(b_data)
-          if comp == 'e' and dec_method == 'sdr':
+          if comp == 'e' and (dec_method == 'sdr' or dec_method == 'exchange'):
             b_data = [] 
             for k in range(0, blocks):
               with open('./data/ti-'+comp+'-b%02d.dat' %(k+1), "r") as f_in:
@@ -907,6 +934,16 @@ def fe_values(blocks, components, temperature, pose, attach_rest, lambdas, weigh
                 splitdata = data.split()
                 b_data.append(float(splitdata[1]))
             sd_w = np.std(b_data)
+          if comp == 'x':
+            b_data = [] 
+            for k in range(0, blocks):
+              with open('./data/ti-'+comp+'-b%02d.dat' %(k+1), "r") as f_in:
+                lines = (line.rstrip() for line in f_in)
+                lines = list(line for line in lines if line)
+                data = lines[-1]
+                splitdata = data.split()
+                b_data.append(float(splitdata[1]))
+            sd_x = np.std(b_data)
         os.chdir('../')
 
     # Create Results folder
@@ -944,8 +981,11 @@ def fe_values(blocks, components, temperature, pose, attach_rest, lambdas, weigh
             elif comp == 'r':
               fb_r = -1.00*float(splitdata[1])
           os.chdir('../')
-        elif comp == 'v' or comp == 'e' or comp == 'f' or comp == 'w':
-          os.chdir(dec_method)
+        elif comp == 'v' or comp == 'e' or comp == 'f' or comp == 'w' or comp =='x':
+          if dec_method == 'dd':
+            os.chdir(dec_method)
+          if dec_method == 'sdr' or dec_method == 'exchange':
+            os.chdir('sdr')
           with open('./data/'+dec_int+'-'+comp+'-b%02d.dat' %(k+1), "r") as f_in:
             lines = (line.rstrip() for line in f_in)
             lines = list(line for line in lines if line)
@@ -953,16 +993,18 @@ def fe_values(blocks, components, temperature, pose, attach_rest, lambdas, weigh
             splitdata = data.split()
             if comp == 'e' and dec_method == 'dd':
               fb_e = float(splitdata[1])
-            if comp == 'e' and dec_method == 'sdr':
+            elif comp == 'e' and (dec_method == 'sdr' or dec_method == 'exchange'):
               fb_es = float(splitdata[1])
             elif comp == 'v' and dec_method == 'dd':
               fb_v = float(splitdata[1])
             elif comp == 'v' and dec_method == 'sdr':
               fb_vs = float(splitdata[1])
-            if comp == 'f':
+            elif comp == 'f':
               fb_f = -1.00*float(splitdata[1])
             elif comp == 'w':
               fb_w = -1.00*float(splitdata[1])
+            elif comp == 'x':
+              fb_x = float(splitdata[1])
           os.chdir('../')
 
       # mevc modification
@@ -972,9 +1014,11 @@ def fe_values(blocks, components, temperature, pose, attach_rest, lambdas, weigh
 
       fb_bd = fe_bd
       blck_sdr = -1*(fb_a + fb_l + fb_t + fb_es + fb_vs + fb_bd + fb_c + fb_r)
+      blck_exc = -1*(fb_a + fb_l + fb_t + fb_es + fb_x + fb_bd + fb_c + fb_r)
       blck_dd = -1*(fb_a + fb_l + fb_t + fb_e + fb_v + fb_w + fb_f + fb_bd + fb_c + fb_r)
       blckm_dd = -1*(fb_m + fb_e + fb_v + fb_w + fb_f + fb_bd + fb_n)
       blckm_sdr = -1*(fb_m + fb_es + fb_vs + fb_bd + fb_n)
+      blckm_exc = -1*(fb_m + fb_es + fb_x + fb_bd + fb_n)
 
       # Write results for the blocks
       resfile = open('./Results/Res-b%02d.dat' %(k+1), 'w')
@@ -1036,6 +1080,33 @@ def fe_values(blocks, components, temperature, pose, attach_rest, lambdas, weigh
           resfile.write('%-20s %8.2f\n' % ('Lennard-Jones ('+dec_int.upper()+');', fb_vs))
           resfile.write('%-20s %8.2f\n\n' % ('Release all;', fb_rel))
           resfile.write('%-20s %8.2f\n' % ('Binding free energy;', blckm_sdr))
+      if dec_method == 'exchange' and os.path.exists('./sdr/data/'):
+        if fb_t != 0 or fb_c != 0 or fb_r != 0 or fb_a != 0 or fb_l != 0:
+          resfile.write('\n----------------------------------------------\n')
+          resfile.write('All components SDR method')
+          resfile.write('\n----------------------------------------------\n\n')
+          resfile.write('%-20s %-10s\n\n' % ('Component', 'Free Energy'))
+          resfile.write('%-20s %8.2f\n' % ('Attach protein CF;', fb_a))
+          resfile.write('%-20s %8.2f\n' % ('Attach ligand CF;', fb_l))
+          resfile.write('%-20s %8.2f\n' % ('Attach ligand TR;', fb_t))
+          resfile.write('%-20s %8.2f\n' % ('Electrostatic ('+dec_int.upper()+');', fb_es))
+          resfile.write('%-20s %8.2f\n' % ('LJ exchange ('+dec_int.upper()+');', fb_x))
+          resfile.write('%-20s %8.2f\n' % ('Release ligand TR;', fb_bd))
+          resfile.write('%-20s %8.2f\n' % ('Release ligand CF;', fb_c))
+          resfile.write('%-20s %8.2f\n\n' % ('Release protein CF;', fb_r))
+          resfile.write('%-20s %8.2f\n' % ('Relative free energy;', blck_exc))
+        # Merged results
+        if fb_m != 0 or fb_n != 0:
+          fb_rel = fb_bd + fb_n
+          resfile.write('\n----------------------------------------------\n')
+          resfile.write('Merged components SDR method')
+          resfile.write('\n----------------------------------------------\n\n')
+          resfile.write('%-20s %-10s\n\n' % ('Component', 'Free Energy'))
+          resfile.write('%-20s %8.2f\n' % ('Attach all;', fb_m))
+          resfile.write('%-20s %8.2f\n' % ('Electrostatic ('+dec_int.upper()+');', fb_es))
+          resfile.write('%-20s %8.2f\n' % ('LJ exchange ('+dec_int.upper()+');', fb_x))
+          resfile.write('%-20s %8.2f\n\n' % ('Release all;', fb_rel))
+          resfile.write('%-20s %8.2f\n' % ('Relative free energy;', blckm_exc))
       resfile.write('\n----------------------------------------------\n\n')
       resfile.write('Energies in kcal/mol\n')
       resfile.close()
@@ -1051,11 +1122,15 @@ def fe_values(blocks, components, temperature, pose, attach_rest, lambdas, weigh
     total_dd = -1*(fe_a + fe_l + fe_t + fe_e + fe_v + fe_w + fe_f + fe_bd + fe_c + fe_r)
     merged_dd = -1*(fe_m + fe_e + fe_v + fe_w + fe_f + fe_bd + fe_n)
     total_sdr = -1*(fe_a + fe_l + fe_t + fe_es + fe_vs + fe_bd + fe_c + fe_r)
+    total_exc = -1*(fe_a + fe_l + fe_t + fe_es + fe_x + fe_bd + fe_c + fe_r)
     merged_sdr = -1*(fe_m + fe_es + fe_vs + fe_bd + fe_n)
+    merged_exc = -1*(fe_m + fe_es + fe_x + fe_bd + fe_n)
     sd_dd = math.sqrt(sd_a**2 + sd_l**2 + sd_t**2 + sd_e**2 + sd_v**2 + sd_w**2 + sd_f**2 + sd_bd**2 + sd_c**2 + sd_r**2)
     sd_merg_dd = math.sqrt(sd_m**2 + sd_e**2 + sd_v**2 + sd_w**2 + sd_f**2 + sd_bd**2 + sd_n**2)
     sd_sdr = math.sqrt(sd_a**2 + sd_l**2 + sd_t**2 + sd_es**2 + sd_vs**2 + sd_bd**2 + sd_c**2 + sd_r**2)
+    sd_exc = math.sqrt(sd_a**2 + sd_l**2 + sd_t**2 + sd_es**2 + sd_x**2 + sd_bd**2 + sd_c**2 + sd_r**2)
     sd_merg_sdr = math.sqrt(sd_m**2 + sd_es**2 + sd_vs**2 + sd_bd**2 + sd_n**2)
+    sd_merg_exc = math.sqrt(sd_m**2 + sd_es**2 + sd_x**2 + sd_bd**2 + sd_n**2)
 
     resfile = open('./Results/Results.dat', 'w')
     if dec_method == 'dd' and os.path.exists('./dd/data/'):
@@ -1116,13 +1191,42 @@ def fe_values(blocks, components, temperature, pose, attach_rest, lambdas, weigh
         resfile.write('%-20s %8.2f;    %3.2f\n' % ('Lennard-Jones ('+dec_int.upper()+');', fe_vs, sd_vs))
         resfile.write('%-20s %8.2f;    %3.2f\n\n' % ('Release all;', fe_rel, sd_n))
         resfile.write('%-20s %8.2f;    %3.2f\n' % ('Binding free energy;', merged_sdr, sd_merg_sdr))
+    if dec_method == 'exchange' and os.path.exists('./sdr/data/'):
+      if fe_t != 0 or fe_c != 0 or fe_r != 0 or fe_a != 0 or fe_l != 0:
+        resfile.write('\n----------------------------------------------\n')
+        resfile.write('All components SDR method')
+        resfile.write('\n----------------------------------------------\n\n')
+        resfile.write('%-20s %-10s %-4s\n\n' % ('Component', 'Free Energy;', 'Sigma'))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Attach protein CF;', fe_a, sd_a))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Attach ligand CF;', fe_l, sd_l))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Attach ligand TR;', fe_t, sd_t))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Electrostatic ('+dec_int.upper()+');', fe_es, sd_es))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('LJ exchange ('+dec_int.upper()+');', fe_x, sd_x))
+        resfile.write('%-20s %8.2f;    \n' % ('Release ligand TR;',fe_bd))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Release ligand CF;', fe_c, sd_c))
+        resfile.write('%-20s %8.2f;    %3.2f\n\n' % ('Release protein CF;', fe_r, sd_r))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Relative free energy;', total_exc, sd_exc))
+      # Merged results
+      if fe_m != 0 or fe_n != 0:
+        fe_rel = fe_bd + fe_n
+        resfile.write('\n----------------------------------------------\n')
+        resfile.write('Merged components SDR method')
+        resfile.write('\n----------------------------------------------\n\n')
+        resfile.write('%-20s %-10s %-4s\n\n' % ('Component', 'Free Energy;', 'Sigma'))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Attach all;', fe_m, sd_m))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Electrostatic ('+dec_int.upper()+');', fe_es, sd_es))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('LJ exchange ('+dec_int.upper()+');', fe_x, sd_x))
+        resfile.write('%-20s %8.2f;    %3.2f\n\n' % ('Release all;', fe_rel, sd_n))
+        resfile.write('%-20s %8.2f;    %3.2f\n' % ('Relative free energy;', merged_exc, sd_merg_exc))
     resfile.write('\n----------------------------------------------\n\n')
     resfile.write('Energies in kcal/mol\n\n')
+    cit = 'on'
     resfile.write('Total simulation time (based on input file): %6.1f nanoseconds\n\n' % total_time)
-    resfile.write('Please cite:\n\n')
-    resfile.write('G. Heinzelmann, D. J. Huggins and M. K. Gilson (2024). “BAT2: an Open-Source Tool for Flexible, Automated, and Low Cost Absolute Binding Free Energy Calculations”. Journal of Chemical Theory and Computation, 20, 6518.\n\n')
-    resfile.write('G. Heinzelmann and M. K. Gilson (2021). “Automation of absolute protein-ligand binding free energy calculations for docking refinement and compound evaluation”. Scientific Reports, 11, 1116.\n\n')
-    resfile.write('D. J. Huggins (2022) "Comparing the Performance of Different AMBER Protein Forcefields, Partial Charge Assignments, and Water Models for Absolute Binding Free Energy Calculations." Journal of Chemical Theory and Computation, 18, 2616.\n\n')
+    if cit == 'on':
+      resfile.write('Please cite:\n\n')
+      resfile.write('G. Heinzelmann, D. J. Huggins and M. K. Gilson (2024). “BAT2: an Open-Source Tool for Flexible, Automated, and Low Cost Absolute Binding Free Energy Calculations”. Journal of Chemical Theory and Computation, 20, 6518.\n\n')
+      resfile.write('G. Heinzelmann and M. K. Gilson (2021). “Automation of absolute protein-ligand binding free energy calculations for docking refinement and compound evaluation”. Scientific Reports, 11, 1116.\n\n')
+      resfile.write('D. J. Huggins (2022) "Comparing the Performance of Different AMBER Protein Forcefields, Partial Charge Assignments, and Water Models for Absolute Binding Free Energy Calculations." Journal of Chemical Theory and Computation, 18, 2616.\n\n')
     resfile.close()
 
 
@@ -1489,7 +1593,10 @@ def fe_dd(comp, pose, mode, lambdas, weights, dec_int, dec_method, rest_file, te
 
     os.chdir('fe')
     os.chdir(pose)
-    os.chdir(dec_method)
+    if dec_method == 'dd':
+      os.chdir('dd')
+    else:
+      os.chdir('sdr')
     if not os.path.exists('data'):
       os.makedirs('data')
 
