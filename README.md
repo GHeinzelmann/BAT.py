@@ -1,6 +1,16 @@
 \- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-*COMING SOON: Relative binding free energy calculations (RBFE) implemented into the BAT workflow!*
+*COMING SOON: The BAT.py 2.4 version, with the following new features:*
+
+- Relative binding free energy calculations (RBFE) implemented into the BAT workflow, using both OpenMM and AMBER
+
+- Use of the USalign alignment program instead of lovoalign, with no installation needed
+
+- New and easier instructions to install all the needed dependencies
+ 
+- Example input files for ranking different ligands
+
+
 
 \- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
