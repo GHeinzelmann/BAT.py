@@ -202,8 +202,11 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
             if not 'CRYST1' in line and not 'CONECT' in line and not 'END' in line:
                 newfile.write(line)
 
-    # Align to reference structure using lovoalign
-    sp.call('lovoalign -p1 complex.pdb -p2 reference.pdb -o aligned.pdb', shell=True)
+    # New work around to avoid chain swapping during alignment
+    sp.call('pdb4amber -i reference.pdb -o reference_amber.pdb -y', shell=True)
+    sp.call('vmd -dispdev text -e nochain.tcl', shell=True)
+    sp.call('./USalign complex-nc.pdb reference_amber-nc.pdb -mm 0 -ter 2 -o aligned-nc', shell=True)
+    sp.call('vmd -dispdev text -e measure-fit.tcl', shell=True)
 
     # Put in AMBER format and find ligand anchor atoms
     with open('aligned.pdb', 'r') as oldfile, open('aligned-clean.pdb', 'w') as newfile:
@@ -443,6 +446,7 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
       os.chdir('../build_files')
       # Get last state from equilibrium simulations
       shutil.copy('../../../equil/'+pose+'/md%02d.rst7' %fwin, './')
+      shutil.copy('../../../equil/'+pose+'/full.pdb', './aligned-nc.pdb')
       for file in glob.glob('../../../equil/%s/full*.prmtop' %pose.lower()):
         shutil.copy(file, './')
       for file in glob.glob('../../../equil/%s/vac*' %pose.lower()):
@@ -499,8 +503,8 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
             fout.write(line.replace('MMM', mol).replace('mmm', mol.lower()).replace('NN', p1_atom).replace('P1A', p1_vmd).replace('FIRST','2').replace('LAST',str(rec_res)).replace('STAGE','fe').replace('XDIS','%4.2f' %l1_x).replace('YDIS','%4.2f' %l1_y).replace('ZDIS','%4.2f' %l1_z).replace('RANG','%4.2f' %l1_range).replace('DMAX','%4.2f' %max_adis).replace('DMIN','%4.2f' %min_adis).replace('SDRD','%4.2f' %sdr_dist).replace('OTHRS', str(other_mol_vmd)))
 
 
-      # Align to reference structure using lovoalign
-      sp.call('lovoalign -p1 complex.pdb -p2 reference.pdb -o aligned.pdb', shell=True)
+      # Align to reference (equilibrium) structure using VMD's measure fit
+      sp.call('vmd -dispdev text -e measure-fit.tcl', shell=True)
 
       # Put in AMBER format and find ligand anchor atoms
       with open('aligned.pdb', 'r') as oldfile, open('aligned-clean.pdb', 'w') as newfile:
@@ -573,6 +577,7 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
           shutil.copytree('../../../build_files', '../exchange_files')
         os.chdir('../exchange_files')
         shutil.copy('../../../equil/'+poser+'/md%02d.rst7' %fwin, './')
+        shutil.copy('../../../equil/'+pose+'/full.pdb', './aligned-nc.pdb')
         for file in glob.glob('../../../equil/%s/full*.prmtop' %poser.lower()):
           shutil.copy(file, './')
         for file in glob.glob('../../../equil/%s/vac*' %poser.lower()):
@@ -629,8 +634,8 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
               fout.write(line.replace('MMM', molr).replace('mmm', molr.lower()).replace('NN', p1_atom).replace('P1A', p1_vmd).replace('FIRST','2').replace('LAST',str(rec_res)).replace('STAGE','fe').replace('XDIS','%4.2f' %l1_x).replace('YDIS','%4.2f' %l1_y).replace('ZDIS','%4.2f' %l1_z).replace('RANG','%4.2f' %l1_range).replace('DMAX','%4.2f' %max_adis).replace('DMIN','%4.2f' %min_adis).replace('SDRD','%4.2f' %sdr_dist).replace('OTHRS', str(other_mol_vmd)))
 
 
-        # Align to reference structure using lovoalign
-        sp.call('lovoalign -p1 complex.pdb -p2 reference.pdb -o aligned.pdb', shell=True)
+        # Align to reference (equilibrium) structure using VMD's measure fit
+        sp.call('vmd -dispdev text -e measure-fit.tcl', shell=True)
 
         # Put in AMBER format and find ligand anchor atoms
         with open('aligned.pdb', 'r') as oldfile, open('aligned-clean.pdb', 'w') as newfile:
