@@ -38,7 +38,7 @@ VMD (Visual Molecular Dynamics) [3] - https://www.ks.uiuc.edu/Development/Downlo
 
 Openbabel 2.4.1 [4] - https://github.com/openbabel/openbabel/releases/tag/openbabel-2-4-1 
 
-Lovoalign: Protein Structural Alignment  [5] - https://www.ime.unicamp.br/~martinez/lovoalign/home.html
+USalign: Universal structural alignment [5] - https://zhanggroup.org/US-align/ (No installation needed.)
 
 AmberTools20 or later [6] - http://ambermd.org/AmberTools.php 
 
@@ -131,7 +131,7 @@ The sample system shown here uses a particular ligand that binds to the second b
 
 ## Additional receptors
 
-To include a new receptor system, some additional input data is needed. They include a reference.pdb file to align the system using lovoalign, three chosen protein anchors, and possibly a few variables for ligand anchor atom search. These can be found inside the ./systems-library folder for three other bromodomains (CREBBP, BRD4(1) and BAZ2B) and the T4 Lysozyme. Other systems will be added with time, as the program is further tested and validated.
+To include a new receptor system, some additional input data is needed. They include a reference.pdb file to align the system using USalign, three chosen protein anchors, and possibly a few variables for ligand anchor atom search. These can be found inside the ./systems-library folder for three other bromodomains (CREBBP, BRD4(1) and BAZ2B) and the T4 Lysozyme. Other systems will be added with time, as the program is further tested and validated.
 
 # More information and BAT.py citations
 
@@ -158,7 +158,7 @@ Germano Heinzelmann thanks FAPESC and CNPq for the research grants, also Michael
 
 4. N. M. O'Boyle, M. Banck, C. A. James, C. Morley, T. Vandermeersch, and G. R. HutchisonEmail. (2011) "Open Babel: An open chemical toolbox." Journal of Cheminformatics, 3, 33.
 
-5. L. Martínez, R. Andreani, and J. M. Martínez (2007) “Convergent algorithms for protein structural alignment.” BMC Bioinformatics 8, 306.
+5. C. Zhang, M. Shine, A. M. Pyle, and Y. Zhang (2022) "US-align: Universal Structure Alignment of Proteins, Nucleic Acids and Macromolecular Complexes." Nature Methods, 19, 1109-1115.
 
 6. J. Wang, R.M. Wolf, J.W. Caldwell, and P. A. Kollman, D. A. Case (2004) "Development and testing of a general AMBER force field". Journal of Computational Chemistry, 25, 1157-1174. 
 
