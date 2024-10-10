@@ -27,6 +27,7 @@ other_mol = []
 bb_start = []
 bb_end = []
 mols = []
+celp_st = []
 
 # Defaults
 
@@ -266,7 +267,9 @@ for i in range(0, len(lines)):
         elif lines[i][0] == 'retain_lig_prot':
             retain_lig_prot = lines[i][1].lower()
         elif lines[i][0] == 'celpp_receptor':
-            celp_st = lines[i][1]
+            newline = lines[i][1].strip('\'\"-,.:;#()][').split(',')
+            for j in range(0, len(newline)):
+                celp_st.append(newline[j])
         elif lines[i][0] == 'p1':
             H1 = lines[i][1]
         elif lines[i][0] == 'p2':
@@ -543,15 +546,19 @@ if rec_bb == 'no':
   bb_end = [0]
   bb_equil = 'no'
 
+
 # Create poses definitions
 if calc_type == 'dock':
+  celp_st = celp_st[0]
   for i in range(0, len(poses_list)):
     poses_def.append('pose'+str(poses_list[i]))
-if calc_type == 'rank':
+elif calc_type == 'rank':
+  celp_st = celp_st[0]
   for i in range(0, len(ligand_list)):
     poses_def.append(ligand_list[i])
 elif calc_type == 'crystal':
-  poses_def = [celp_st]
+  for i in range(0, len(celp_st)):
+    poses_def.append(celp_st[i])
 
 # Obtain all ligand names
 if calc_type != 'crystal':
@@ -566,8 +573,18 @@ if calc_type != 'crystal':
           mols.append(lig_name)
           break 
 
-
+print('Receptor/complex structures:')
+print(celp_st)
+print('Ligand names')
 print(mols)
+print('Cobinders names:')
+print(other_mol)
+
+for i in range(0,len(mols)):
+  if mols[i] in other_mol:
+    print('Same residue name ('+mols[i]+') found in ligand name and cobinders, please change one of them')
+    sys.exit(1)
+
 
 # Create restraint definitions
 rest = [rec_dihcf_force, rec_discf_force, lig_distance_force, lig_angle_force, lig_dihcf_force, rec_com_force, lig_com_force]
