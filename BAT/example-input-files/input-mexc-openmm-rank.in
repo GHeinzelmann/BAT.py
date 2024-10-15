@@ -6,14 +6,10 @@
 
 # Calculation definitions
 
-calc_type = crystal                                                  # dock (compare poses), rank (compare ligands) or crystal (single complex)
-celpp_receptor = 5uf0                                    # Choose CELPP receptor in upper case or pdb code in lower case
-#ligand_list = [lig-5uf0,lig-5uez,lig-5uew,lig-5ueu,lig-5uey]      # List of different ligands for ranking calculations, without the pdb extension
+calc_type = rank                                                  # dock (compare poses), rank (compare ligands) or crystal (single complex)
+celpp_receptor = receptor-5uf0                                    # Choose CELPP receptor in upper case or pdb code in lower case
+ligand_list = [lig-5uf0,lig-5uez,lig-5uew,lig-5ueu,lig-5uey]      # List of different ligands for ranking calculations, without the pdb extension
 #poses_list = [0,1,2,3,4]                                         # List of poses for docked calculations, called pose0.pdb, pose1.pdb, pose2.pdb, etc. 
-
-# Specify ligand name for crystal calculations
-
-ligand_name = 89J
 
 # Protein anchors, using original protein sequence 
 
@@ -29,9 +25,9 @@ solv_shell = 4      # Water molecules around the protein that will be kept in th
 
 # Variables for setting up equilibrium and free energy calculations, also used on analysis       
 
-fe_type = relative  # Type of free energy calculations (rest, dd, sdr, dd-rest, sdr-rest, relative, custom)
+fe_type = custom  # Type of free energy calculations (rest, dd, sdr, dd-rest, sdr-rest, relative, custom)
 
-components = [ m ] # Used with custom option for fe_type. Do not include b component here. 
+components = [ m e x c ] # Used with custom option for fe_type. Do not include b component here. 
 
 release_eq = [ 10.0 2.5 0.5 0.0 ]   # Equilibrium gradual release weights
 
@@ -41,7 +37,7 @@ attach_rest = [ 0.00 0.10 0.24 0.56 1.33 3.16 7.50 17.78 42.17 100.0 ]   # Short
 
 sdr_dist = 32.00
 
-#dec_method = exchange
+dec_method = exchange
 
 dec_int = ti                                  # Integration method for double decoupling (MBAR or TI with Gaussian quadrature)
 
@@ -51,8 +47,8 @@ blocks = 5                                    # Number of blocks for block data 
 
 # Force constants
 
-rec_dihcf_force      =  50.0  # Protein conformational dihedral spring constant - kcal/mol/rad**2
-rec_discf_force      =   5.0  # Protein conformational distance spring constant - kcal/mol/Angstrom**2
+rec_dihcf_force      =   0.0  # Protein conformational dihedral spring constant - kcal/mol/rad**2
+rec_discf_force      =   0.0  # Protein conformational distance spring constant - kcal/mol/Angstrom**2
 lig_distance_force   =   5.0  # Guest pulling distance spring constant kcal/mol/Angstrom**2
 lig_angle_force      = 250.0  # Guest angle/dihedral spring constant - kcal/mol/rad**2
 lig_dihcf_force      =  70.0  # Guest conformational dihedral spring constant - kcal/mol/rad**2
@@ -87,8 +83,8 @@ eq_steps2	=   1000000  # Number of steps for equilibration after release
 m_itera1	=   200       # Number of iterations for component m (equilibrium)   
 m_itera2	=   400       # Number of iterations for component m (production) 
 
-n_itera1	=   200       # Number of iterations for component n (equilibrium)   
-n_itera2	=   400       # Number of iterations for component n (production) 
+c_itera1	=   200       # Number of iterations for component n (equilibrium)   
+c_itera2	=   400       # Number of iterations for component n (production) 
 
 e_itera1	=   400       # Number of iterations for component e (equilibrium)   
 e_itera2	=   800       # Number of iterations for component e (production) 
@@ -107,10 +103,10 @@ cut = 9.0                      # Simulation interaction cutoff
 
 # Conformational restraints on the protein backbone
 
-rec_bb		= yes       # Use protein backbone dihedrals conformational restraints
-bb_start        = 379       # First residues of the restrained ranges 
-bb_end          = 390       # Last residues of the restrained ranges
-bb_equil        = yes       # Keep this backbone section rigid during equilibration 
+rec_bb		=  no       # Use protein backbone dihedrals conformational restraints
+#bb_start        = 379       # First residues of the restrained ranges 
+#bb_end          = 390       # Last residues of the restrained ranges
+#bb_equil        = yes       # Keep this backbone section rigid during equilibration 
 
 # Ligand anchor search definitions
 

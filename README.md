@@ -1,6 +1,6 @@
 \- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-*COMING SOON: The BAT.py 2.4 version, with the following new features:*
+*Just released: The BAT.py 2.4 version, with the following new features:*
 
 - Relative binding free energy calculations (RBFE) implemented into the BAT workflow, using both OpenMM and AMBER
 
@@ -22,11 +22,15 @@ https://github.com/GHeinzelmann/GHOAT.py
 *A tutorial and a detailed user guide are available, as well as necessary parameter and input files for several hosts.*
 
 
-# BAT.py v2.3
+# BAT.py v2.4
 
-The Binding Affinity Tool (BAT.py) is a python tool for fully automated absolute binding free energy (ABFE) calculations using all-atom Molecular Dynamics (MD). Its workflow encompasses the creation of the bound complex, generation of parameters using Antechamber, preparation of the simulation files, and post-processing to retrieve the binding free energy [1,2]. BAT can set up simulations for the _pmemd.cuda_ software from AMBER, or the OpenMM program combined with OpenMMtools, both capable of performing simulations at a reduced computational cost using graphics processing units (GPUs).
+The Binding Affinity Tool (BAT.py) is a python tool for fully automated absolute binding free energy (ABFE) and relative binding free energy (RBFE) calculations using all-atom Molecular Dynamics (MD). Its workflow encompasses the creation of the bound complex, generation of parameters using Antechamber, preparation of the simulation files, and post-processing to retrieve the binding free energy [1,2]. BAT can set up simulations for the _pmemd.cuda_ software from AMBER, or the OpenMM program combined with OpenMMtools, both capable of performing simulations at a reduced computational cost using graphics processing units (GPUs).
 
-BAT.py can perform ABFE calculations by two alchemical routes in the presence of restraints, either with the double decoupling (DD) procedure or with the simultaneous decoupling and recoupling (SDR) method, the latter suitable for ligands with net charge. For binding free energy calculations using the attach-pull-release (APR) method, download the 1.0 version of the code at the BATv1.0 branch, or the BAT 1.0 release. In addition to AMBER _pmemd.cuda_ or OpenMM, BAT.py also requires a few additional programs to work properly, which are listed in the next section. 
+BAT.py can perform ABFE calculations by two alchemical routes in the presence of restraints, either with the double decoupling (DD) procedure or with the simultaneous decoupling and recoupling (SDR) method, the latter suitable for ligands with net charge. For binding free energy calculations using the attach-pull-release (APR) method, download the 1.0 version of the code at the BATv1.0 branch, or the BAT 1.0 release. 
+
+The RBFE calculations for BAT.py were just released and are still in their beta version, but they are already fully operational. To know more about the theory and how to perform them, please read the RBFE section at the end of the ABFE tutorial, and also the Relative User Guide available inside the ./doc/ folder. 
+
+In addition to AMBER _pmemd.cuda_ or OpenMM, BAT.py also requires a few additional programs to work properly, which are listed in the next section. 
 
 ![](doc/figure.png)
 
@@ -133,16 +137,24 @@ The sample system shown here uses a particular ligand that binds to the second b
 
 To include a new receptor system, some additional input data is needed. They include a reference.pdb file to align the system using USalign, three chosen protein anchors, and possibly a few variables for ligand anchor atom search. These can be found inside the ./systems-library folder for three other bromodomains (CREBBP, BRD4(1) and BAZ2B) and the T4 Lysozyme. Other systems will be added with time, as the program is further tested and validated.
 
+# RBFE calculations
+
+The relative calculations from BAT.py will use the separate topologies (SepTop) approach, which was proposed originally by Rocklin et al. [17], and recently reintroduced by Baumann et al. [18]. Here we propose a slightly different cycle, which makes our calculations also suitable for transformations between ligands that have different net charges. 
+
+![](doc/cycle.jpg)
+
+A few example input files for RBFE calculations are provided inside the ./BAT/example-input-files/ folder, which can be used the same way as explained in the ABFE tutorial above. More details on the meaning of each file are provided in the Relative User Guide included inside the ./doc folder. 
+
 # More information and BAT.py citations
 
-The complete BAT.py theoretical background and calculation procedures are available in Refs. [1,2]. The OpenMM calculations are based on David Huggins work on ABFE calculations, available at Ref [17]. Please cite these references if using the BAT code. For more information you can contact the author (me) directly:
+The complete BAT.py theoretical background and calculation procedures are available in Refs. [1,2]. The OpenMM calculations are based on David Huggins work on ABFE calculations, available at Ref [19]. Please cite these references if using the BAT code. For more information you can contact the author (me) directly:
 
 Germano Heinzelmann <br/>
 Departamento de Física, Universidade Federal de Santa Catarina <br/>
 Florianópolis - SC  88040-970 Brasil <br/>
 email: germanohei@gmail.com <br/>
 
-I provide free support (to an extent) for academic institutions, particularly students, or in specific cases in which there might be a bug in the code. I do not provide free support for private companies.
+I provide free support (to an extent) for academic institutions, or in specific cases in which there might be a bug in the code. 
 
 # Acknowledgments
 
@@ -182,6 +194,14 @@ Germano Heinzelmann thanks FAPESC and CNPq for the research grants, also Michael
 
 16. J. D. Chodera and M. R. Shirts (2011). "Replica exchange and expanded ensemble simulations as Gibbs multistate: Simple improvements for enhanced mixing." Journal of Chemical Physics, 135, 194110.
 
-17. D. J. Huggins (2022) "Comparing the Performance of Different AMBER Protein Forcefields, Partial Charge Assignments, and Water Models for Absolute Binding Free Energy Calculations." Journal of Chemical Theory and Computation, 18, 2616. 
+17.  G. J. Rocklin, D. L. Mobley and K. A. Dill (2023). “Separated topologies: A
+method for relative binding free energy calculations using orientational
+restraints”. Journal of Chemical Physics, 138, 085104.
+
+18. H. M. Baumann, E. Dybeck, C. L. McClendon, F. C. Pickard IV, V. Gapsys,
+L. Pérez-Benito, D. F. Hahn, G. Tresadern, A. M. Mathiowetz and D. L. Mobley (2023) “Broadening the Scope of Binding Free Energy Calculations Using a
+Separated Topologies Approach”. Journal of Chemical Theory and Computation, 19, 5058. 
+
+19. D. J. Huggins (2022) "Comparing the Performance of Different AMBER Protein Forcefields, Partial Charge Assignments, and Water Models for Absolute Binding Free Energy Calculations." Journal of Chemical Theory and Computation, 18, 2616. 
 
 
