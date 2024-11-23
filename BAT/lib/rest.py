@@ -499,7 +499,10 @@ composable_states = [alchemical_state_A, restraint_state]
 compound_state = openmmtools.states.CompoundThermodynamicState(thermodynamic_state=TS, composable_states=composable_states)
 reload(openmmtools.alchemy)
 integrator=LangevinIntegrator(TMPRT*unit_definitions.kelvin, GAMMA_LN/unit_definitions.picoseconds, TSTP*unit_definitions.femtoseconds)
-context = compound_state.create_context(integrator)
+context = compound_state.create_context(
+    integrator,
+    platform=Platform.getPlatformByName('CPU'),
+)
 alchemical_system_in=context.getSystem()
 
 #Use offsets to interpolate
@@ -554,11 +557,24 @@ print("Sampler: ReplicaExchangeSampler")
 
 lsd_move = openmmtools.mcmc.LangevinSplittingDynamicsMove(timestep=timeStep, collision_rate=GAMMA_LN/unit_definitions.picoseconds, n_steps=stepsPerIteration)
 print('Minimizing......')
+
+platform = 'CUDA'
+platform_name = Platform.getPlatformByName(platform)
+if platform == 'CUDA':
+    # Use mixed single/double precision
+    properties = dict(CudaPrecision='mixed')
+else:
+    properties = dict(Threads='4')
+
 for k in range(nstates):
       sampler_state = sampler_states[k]
       thermodynamic_state = thermodynamic_states[k]
       integrator=LangevinIntegrator(TMPRT*unit_definitions.kelvin, GAMMA_LN/unit_definitions.picoseconds, TSTP*unit_definitions.femtoseconds)
-      context = thermodynamic_state.create_context(integrator)
+      context = thermodynamic_state.create_context(
+        integrator,
+        platform=platform_name,
+        properties=properties,
+      )
       system = context.getSystem()
       for force in system.getForces(): # RIZZI CHECK
               if isinstance(force, CustomBondForce):

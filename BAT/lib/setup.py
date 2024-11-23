@@ -8,6 +8,8 @@ import signal as signal
 import subprocess as sp
 import sys as sys
 from lib import scripts as scripts
+from .utils import run_with_log, antechamber, tleap, cpptraj
+
 
 def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, molr, comp, bb_equil, sdr_dist, dec_method, other_mol):
 
@@ -333,7 +335,7 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, molr, comp, bb_
           assign_file.write('%s %s %s'%('dihedral r'+str(i), rst[i], 'out assign.dat\n'))
 
     assign_file.close() 
-    sp.call('cpptraj -i assign.in > assign.log', shell=True)
+    run_with_log(cpptraj + ' -i assign.in > assign.log')
 
     # Assign reference values for restraints
     with open('./assign.dat') as fin:
@@ -854,7 +856,7 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, molr, comp, bb_
           assign_file.write('%s %s %s'%('dihedral r'+str(i), rst[i], 'out assign2.dat\n'))
 
       assign_file.close() 
-      sp.call('cpptraj -i assign2.in > assign2.log', shell=True)
+      run_with_log(cpptraj + ' -i assign2.in > assign2.log')
 
       # Assign reference values for restraints
       with open('./assign2.dat') as fin:

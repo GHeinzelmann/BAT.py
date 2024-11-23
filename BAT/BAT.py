@@ -10,7 +10,13 @@ from lib import build
 from lib import scripts 
 from lib import setup
 from lib import analysis
-import numpy as np 
+import numpy as np
+from lib.utils import run_with_log, antechamber, tleap, cpptraj
+
+import loguru
+# set logging level to INFO
+loguru.logger.remove()
+loguru.logger.add(sys.stderr, level="INFO")
 
 ion_def = []
 poses_list = []
@@ -716,7 +722,7 @@ if software == 'openmm' and stage == 'fe':
       convert_file.write('trajin md%02d.dcd\n' %rng)
       convert_file.write('trajout md%02d.rst7 onlyframes 10\n' %rng)
       convert_file.close() 
-      sp.call('cpptraj -i convert.in > convert.log', shell=True)
+      run_with_log(cpptraj + ' -i convert.in > convert.log')
       os.chdir('../')
   os.chdir('../')
 

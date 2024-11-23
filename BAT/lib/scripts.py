@@ -7,6 +7,10 @@ import shutil as shutil
 import signal as signal
 import subprocess as sp
 import sys as sys
+from .utils import run_with_log
+
+antechamber = '$GROUP_HOME/software/amber20/amber20_src/bin/antechamber'
+tleap = '$GROUP_HOME/software/amber20/amber20_src/bin/tleap'
 
 def help_message():
     print('Use the flags -i and -s for the input file and current stage of the calculations')
@@ -41,7 +45,7 @@ def write_tleap(mol, molr, comp, water_model, water_box, buff, buffer_x, buffer_
 
 
 def check_tleap():
-    p = sp.call('tleap -s -f tmp_tleap.in > tmp.log', shell=True)
+    p = run_with_log(tleap + ' -s -f tmp_tleap.in > tmp.log')
     # Get how many residues were added to the system
     num_added = None
     f = open('tmp.log', 'r')
@@ -57,7 +61,7 @@ def check_tleap():
 
 
 def cross_sectional_area():
-    p = sp.call('tleap -s -f tmp_tleap.in > tmp.log', shell=True)
+    p = run_with_log(tleap + ' -s -f tmp_tleap.in > tmp.log')
     # Get the total box size in the x and y axes and the xy cross sectional area
     num_added = None
     f = open('tmp.log', 'r')
@@ -71,7 +75,7 @@ def cross_sectional_area():
     return cross_area
 
 def box_volume():
-    p = sp.call('tleap -s -f tmp_tleap.in > tmp.log', shell=True)
+    p = run_with_log(tleap + ' -s -f tmp_tleap.in > tmp.log')
     # Get box volume and adjust it to system density after equilibration
     num_added = None
     dens = 1.00    # Final estimated density of the equilibrated system (close to 1)

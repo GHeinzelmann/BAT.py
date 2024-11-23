@@ -369,7 +369,21 @@ system.addForce(comforce) # after
 
 integrator=LangevinIntegrator(TMPRT*unit_definitions.kelvin, GAMMA_LN/unit_definitions.picoseconds, TSTP*unit_definitions.femtoseconds)
 
-simulation = Simulation(prmtop.topology, system, integrator)
+platform = 'CUDA'
+platform_name = Platform.getPlatformByName(platform)
+if platform == 'CUDA':
+    # Use mixed single/double precision
+    properties = dict(CudaPrecision='mixed')
+else:
+    properties = dict(Threads='4')
+
+simulation = Simulation(
+    prmtop.topology,
+    system,
+    integrator,
+    platform=platform_name,
+    platformProperties=properties
+)
 
 if stge != '00':
   prv = int(stge) - 1

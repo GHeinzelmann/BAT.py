@@ -2,4 +2,4 @@
 
 
 rm -r trajectory
-python rest.py > output.dat
+mpirun -np 1 python rest.py > output.dat

@@ -2,4 +2,4 @@
 
 
 rm -r trajectory
-python dd.py > output.dat
+mpirun -np 1 python dd.py > output.dat

@@ -1,15 +1,16 @@
 #!/bin/bash
 
 #SBATCH --job-name="STAGE-POSE"
-#SBATCH --partition=168h
-#SBATCH --gpus=1
+#SBATCH --partition=rondror
+#SBATCH --nodes=1
+#SBATCH --output=STAGE-POSE.out
+#SBATCH --error=STAGE-POSE.err
+#SBATCH --gres=gpu:1
+#SBATCH --gpu_cmode=shared
 #SBATCH --ntasks=1
-#SBATCH --mem=4G
-#SBATCH -t 24:00:00
+#SBATCH -t 12:00:00
 
-# Main command goes here
-conda activate Germano
+scontrol show job $SLURM_JOB_ID
 source run-local.bash
 
 exit
-

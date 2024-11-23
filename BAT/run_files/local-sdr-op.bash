@@ -2,4 +2,4 @@
 
 
 rm -r trajectory
-python sdr.py > output.dat
+mpirun -np 1 python sdr.py > output.dat

@@ -9,6 +9,9 @@ import subprocess as sp
 import sys as sys
 from lib import scripts as scripts
 import filecmp
+from .utils import run_with_log, antechamber, tleap, cpptraj, parmchk2
+
+
 
 def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_range, min_adis, max_adis, ligand_ff, ligand_ph, retain_lig_prot, ligand_charge, other_mol, solv_shell):
 
@@ -44,7 +47,7 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
         with open("prep.tcl", "wt") as fout:
           for line in fin:
             fout.write(line.replace('MMM', mol).replace('mmm', mol.lower()).replace('CCCC', pose))
-      sp.call('vmd -dispdev text -e prep.tcl', shell=True)
+      run_with_log('vmd -dispdev text -e prep.tcl')
  
     # Split initial receptor file
     with open("split-ini.tcl", "rt") as fin:
@@ -56,14 +59,14 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
         for line in fin:
           if 'lig' not in line:
             fout.write(line.replace('SHLL','%4.2f' %solv_shell).replace('OTHRS', str(other_mol_vmd)).replace('MMM', mol.upper()))
-    sp.call('vmd -dispdev text -e split.tcl', shell=True)
+    run_with_log('vmd -dispdev text -e split.tcl')
 
     # Remove possible remaining molecules 
     if not other_mol:
       open('others.pdb', 'w').close()
 
     shutil.copy('./protein.pdb', './protein_vmd.pdb')
-    sp.call('pdb4amber -i protein_vmd.pdb -o protein.pdb -y', shell=True)
+    run_with_log('pdb4amber -i protein_vmd.pdb -o protein.pdb -y')
 
     # Get beginning and end of protein and save first residue as global variable
     with open('./protein_vmd.pdb') as myfile:
@@ -152,11 +155,15 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
         shutil.copy('./'+mol.lower()+'.pdb', './'+mol.lower()+'-h.pdb')
     else:
       if calc_type == 'dock' or calc_type == 'rank':
-        sp.call('obabel -i pdb '+pose+'.pdb -o pdb -O '+mol.lower()+'.pdb -d', shell=True)                            # Remove all hydrogens from the ligand
+        run_with_log('obabel -i pdb '+pose+'.pdb -o pdb -O '+mol.lower()+'.pdb -d',
+            error_match='cannot read input format!')                            # Remove all hydrogens from the ligand
       elif calc_type == 'crystal':
-        sp.call('obabel -i pdb '+mol.lower()+'.pdb -o pdb -O '+mol.lower()+'.pdb -d', shell=True)                     # Remove all hydrogens from crystal ligand
-      sp.call('obabel -i pdb '+mol.lower()+'.pdb -o pdb -O '+mol.lower()+'-h-ini.pdb -p %4.2f' %ligand_ph, shell=True)  # Put all hydrogens back using babel
-      sp.call('obabel -i pdb '+mol.lower()+'.pdb -o mol2 -O '+mol.lower()+'-crg.mol2 -p %4.2f' %ligand_ph, shell=True)
+        run_with_log('obabel -i pdb '+mol.lower()+'.pdb -o pdb -O '+mol.lower()+'.pdb -d',
+        error_match='cannot read input format!')                     # Remove all hydrogens from crystal ligand
+      run_with_log('obabel -i pdb '+mol.lower()+'.pdb -o pdb -O '+mol.lower()+'-h-ini.pdb -p %4.2f' %ligand_ph,
+      error_match='cannot read input format!')  # Put all hydrogens back using babel
+      run_with_log('obabel -i pdb '+mol.lower()+'.pdb -o mol2 -O '+mol.lower()+'-crg.mol2 -p %4.2f' %ligand_ph,
+      error_match='cannot read input format!')
       # Clean ligand protonated pdb file
       with open(mol.lower()+'-h-ini.pdb') as oldfile, open(mol.lower()+'-h.pdb', 'w') as newfile:
         for line in oldfile:
@@ -179,16 +186,16 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
 
     # Get ligand parameters
     if not os.path.exists('../ff/%s.mol2' %mol.lower()):
-      print('Antechamber parameters command: antechamber -i '+mol.lower()+'-h.pdb -fi pdb -o '+mol.lower()+'.mol2 -fo mol2 -c bcc -s 2 -at '+ligand_ff.lower()+' -nc %d' % ligand_charge)
-      sp.call('antechamber -i '+mol.lower()+'-h.pdb -fi pdb -o '+mol.lower()+'.mol2 -fo mol2 -c bcc -s 2 -at '+ligand_ff.lower()+' -nc %d' % ligand_charge, shell=True)
+      print('antechamber parameters command: antechamber -i '+mol.lower()+'-h.pdb -fi pdb -o '+mol.lower()+'.mol2 -fo mol2 -c bcc -s 2 -at '+ligand_ff.lower()+' -nc %d' % ligand_charge)
+      run_with_log(antechamber + ' -i '+mol.lower()+'-h.pdb -fi pdb -o '+mol.lower()+'.mol2 -fo mol2 -c bcc -s 2 -at '+ligand_ff.lower()+' -nc %d' % ligand_charge)
       shutil.copy('./%s.mol2' %(mol.lower()), '../ff/')
     if not os.path.exists('../ff/%s.frcmod' %mol.lower()):
       if ligand_ff == 'gaff':
-        sp.call('parmchk2 -i '+mol.lower()+'.mol2 -f mol2 -o '+mol.lower()+'.frcmod -s 1', shell=True)
+        run_with_log(parmchk2 + ' -i '+mol.lower()+'.mol2 -f mol2 -o '+mol.lower()+'.frcmod -s 1')
       elif ligand_ff == 'gaff2':
-        sp.call('parmchk2 -i '+mol.lower()+'.mol2 -f mol2 -o '+mol.lower()+'.frcmod -s 2', shell=True)
+        run_with_log(parmchk2 + ' -i '+mol.lower()+'.mol2 -f mol2 -o '+mol.lower()+'.frcmod -s 2')
       shutil.copy('./%s.frcmod' %(mol.lower()), '../ff/')
-    sp.call('antechamber -i '+mol.lower()+'-h.pdb -fi pdb -o '+mol.lower()+'.pdb -fo pdb', shell=True)
+    run_with_log(antechamber + ' -i '+mol.lower()+'-h.pdb -fi pdb -o '+mol.lower()+'.pdb -fo pdb')
 
     # Create raw complex and clean it
     filenames = ['protein.pdb', '%s.pdb' %mol.lower(), 'others.pdb', 'crystalwat.pdb']
@@ -203,10 +210,10 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
                 newfile.write(line)
 
     # New work around to avoid chain swapping during alignment
-    sp.call('pdb4amber -i reference.pdb -o reference_amber.pdb -y', shell=True)
-    sp.call('vmd -dispdev text -e nochain.tcl', shell=True)
-    sp.call('./USalign complex-nc.pdb reference_amber-nc.pdb -mm 0 -ter 2 -o aligned-nc', shell=True)
-    sp.call('vmd -dispdev text -e measure-fit.tcl', shell=True)
+    run_with_log('pdb4amber -i reference.pdb -o reference_amber.pdb -y')
+    run_with_log('vmd -dispdev text -e nochain.tcl')
+    run_with_log('./USalign complex-nc.pdb reference_amber-nc.pdb -mm 0 -ter 2 -o aligned-nc')
+    run_with_log('vmd -dispdev text -e measure-fit.tcl')
 
     # Put in AMBER format and find ligand anchor atoms
     with open('aligned.pdb', 'r') as oldfile, open('aligned-clean.pdb', 'w') as newfile:
@@ -214,8 +221,8 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
             splitdata = line.split()
             if len(splitdata) > 4:
                 newfile.write(line)
-    sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y', shell=True)
-    sp.call('vmd -dispdev text -e prep.tcl', shell=True)
+    run_with_log('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y')
+    run_with_log('vmd -dispdev text -e prep.tcl')
 
     # Check size of anchor file 
     anchor_file = 'anchors.txt'
@@ -436,7 +443,7 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
       if (dec_method == 'sdr' or dec_method == 'exchange') and os.path.exists('../build_files'):
         shutil.rmtree('../build_files')    
       try:
-        shutil.copytree('../../../build_files', '../build_files')
+        shutil.copytree('../../../equil/build_files', '../build_files')
       # Directories are the same
       except shutil.Error as e:
         print('Directory not copied. Error: %s' % e)
@@ -451,7 +458,7 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
         shutil.copy(file, './')
       for file in glob.glob('../../../equil/%s/vac*' %pose.lower()):
         shutil.copy(file, './')
-      sp.call('cpptraj -p full.prmtop -y md%02d.rst7 -x rec_file.pdb' %fwin, shell=True)
+      run_with_log(cpptraj + ' -p full.prmtop -y md%02d.rst7 -x rec_file.pdb' %fwin)
 
       # Split initial receptor file
       with open("split-ini.tcl", "rt") as fin:
@@ -462,7 +469,7 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
             other_mol_vmd = 'XXX'
           for line in fin:
             fout.write(line.replace('SHLL','%4.2f' %solv_shell).replace('OTHRS', str(other_mol_vmd)).replace('mmm', mol.lower()).replace('MMM', mol.upper()))
-      sp.call('vmd -dispdev text -e split.tcl', shell=True)
+      run_with_log('vmd -dispdev text -e split.tcl')
 
       # Remove possible remaining molecules 
       if not other_mol:
@@ -504,7 +511,7 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
 
 
       # Align to reference (equilibrium) structure using VMD's measure fit
-      sp.call('vmd -dispdev text -e measure-fit.tcl', shell=True)
+      run_with_log('vmd -dispdev text -e measure-fit.tcl')
 
       # Put in AMBER format and find ligand anchor atoms
       with open('aligned.pdb', 'r') as oldfile, open('aligned-clean.pdb', 'w') as newfile:
@@ -512,8 +519,8 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
             splitdata = line.split()
             if len(splitdata) > 3:
                 newfile.write(line)
-      sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y', shell=True)
-      sp.call('vmd -dispdev text -e prep.tcl', shell=True)
+      run_with_log('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y')
+      run_with_log('vmd -dispdev text -e prep.tcl')
 
       # Check size of anchor file 
       anchor_file = 'anchors.txt'
@@ -582,7 +589,7 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
           shutil.copy(file, './')
         for file in glob.glob('../../../equil/%s/vac*' %poser.lower()):
           shutil.copy(file, './')
-        sp.call('cpptraj -p full.prmtop -y md%02d.rst7 -x rec_file.pdb' %fwin, shell=True)
+        run_with_log(cpptraj + ' -p full.prmtop -y md%02d.rst7 -x rec_file.pdb' %fwin)
 
         # Split initial receptor file
         with open("split-ini.tcl", "rt") as fin:
@@ -593,7 +600,7 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
               other_mol_vmd = 'XXX'
             for line in fin:
               fout.write(line.replace('SHLL','%4.2f' %solv_shell).replace('OTHRS', str(other_mol_vmd)).replace('mmm', molr.lower()).replace('MMM', molr.upper()))
-        sp.call('vmd -dispdev text -e split.tcl', shell=True)
+        run_with_log('vmd -dispdev text -e split.tcl')
 
         # Remove possible remaining molecules 
         if not other_mol:
@@ -635,7 +642,7 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
 
 
         # Align to reference (equilibrium) structure using VMD's measure fit
-        sp.call('vmd -dispdev text -e measure-fit.tcl', shell=True)
+        run_with_log('vmd -dispdev text -e measure-fit.tcl')
 
         # Put in AMBER format and find ligand anchor atoms
         with open('aligned.pdb', 'r') as oldfile, open('aligned-clean.pdb', 'w') as newfile:
@@ -643,8 +650,8 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
               splitdata = line.split()
               if len(splitdata) > 3:
                   newfile.write(line)
-        sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y', shell=True)
-        sp.call('vmd -dispdev text -e prep.tcl', shell=True)
+        run_with_log('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y')
+        run_with_log('vmd -dispdev text -e prep.tcl')
 
         # Check size of anchor file 
         anchor_file = 'anchors.txt'
@@ -760,6 +767,7 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
 
     if int(win) == 0 and altm == 'None':
       # Build new system
+      print(os.getcwd())
       for file in glob.glob('../../build_files/vac_ligand*'):
         shutil.copy(file, './')
       shutil.copy('../../build_files/%s.pdb' %mol.lower(), './')
@@ -781,7 +789,7 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
         for line in oldfile:
           if not 'WAT' in line:
             newfile.write(line)
-      sp.call('pdb4amber -i rec_file-clean.pdb -o rec_amber.pdb -y', shell=True)
+      run_with_log('pdb4amber -i rec_file-clean.pdb -o rec_amber.pdb -y')
       with open('./rec_amber.pdb') as f_in:
         lines = (line.rstrip() for line in f_in)
         lines = list(line for line in lines if line) # Non-blank lines in a list   
@@ -1073,7 +1081,7 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
         tleap_vac.write('quit\n\n')
         tleap_vac.close()
 
-        p = sp.call('tleap -s -f tleap_vac.in > tleap_vac.log', shell=True)
+        p = run_with_log(tleap + ' -s -f tleap_vac.in > tleap_vac.log')
     # Copy system from other attach component
     if int(win) == 0 and altm != 'None':
       for file in glob.glob('../'+altm+'/*'):
@@ -1167,10 +1175,10 @@ def create_box(comp, hmr, pose, mol, molr, num_waters, water_model, ion_def, neu
 
 
     # Generate complex in vacuum
-    p = sp.call('tleap -s -f tleap_vac.in > tleap_vac.log', shell=True)
+    p = run_with_log(tleap + ' -s -f tleap_vac.in > tleap_vac.log')
 
     # Generate ligand structure in vacuum
-    p = sp.call('tleap -s -f tleap_vac_ligand.in > tleap_vac_ligand.log', shell=True)
+    p = run_with_log(tleap + ' -s -f tleap_vac_ligand.in > tleap_vac_ligand.log')
 
     # Find out how many cations/anions are needed for neutralization
     neu_cat = 0
@@ -1377,7 +1385,7 @@ def create_box(comp, hmr, pose, mol, molr, num_waters, water_model, ion_def, neu
     tleap_solvate.write('saveamberparm model full.prmtop full.inpcrd\n')
     tleap_solvate.write('quit')
     tleap_solvate.close()
-    p = sp.call('tleap -s -f tleap_solvate.in > tleap_solvate.log', shell=True)
+    p = run_with_log(tleap + ' -s -f tleap_solvate.in > tleap_solvate.log')
     
     f = open('tleap_solvate.log', 'r')
     for line in f:
@@ -1398,7 +1406,7 @@ def create_box(comp, hmr, pose, mol, molr, num_waters, water_model, ion_def, neu
     # Apply hydrogen mass repartitioning
     print('Applying mass repartitioning...')
     shutil.copy('../amber_files/parmed-hmr.in', './')
-    sp.call('parmed -O -n -i parmed-hmr.in > parmed-hmr.log', shell=True)
+    run_with_log('parmed -O -n -i parmed-hmr.in > parmed-hmr.log')
 
     if stage != 'fe':
       os.chdir('../')
@@ -1478,12 +1486,12 @@ def ligand_box(mol, lig_buffer, water_model, neut, ion_def, comp, ligand_ff):
     tleap_solvate.write('saveamberparm model full.prmtop full.inpcrd\n')
     tleap_solvate.write('quit\n')
     tleap_solvate.close()
-    p = sp.call('tleap -s -f tleap_solvate.in > tleap_solvate.log', shell=True)
+    p = run_with_log(tleap + ' -s -f tleap_solvate.in > tleap_solvate.log')
  
     # Apply hydrogen mass repartitioning
     print('Applying mass repartitioning...')
     shutil.copy('../amber_files/parmed-hmr.in', './')
-    sp.call('parmed -O -n -i parmed-hmr.in > parmed-hmr.log', shell=True)
+    run_with_log('parmed -O -n -i parmed-hmr.in > parmed-hmr.log')
 
     # Copy a few files for consistency
     if (comp != 'f' and comp != 'w'):

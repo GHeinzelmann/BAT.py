@@ -2,5 +2,5 @@
 
 
 rm -r trajectory
-python equil-sdr.py > output0.dat
-python sdr-ti.py > output.dat
+mpirun -np 1 python equil-sdr.py > output0.dat
+mpirun -np 1 python sdr-ti.py > output.dat

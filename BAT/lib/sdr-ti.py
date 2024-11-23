@@ -53,7 +53,22 @@ system = prmtop.createSystem(nonbondedMethod=PME, nonbondedCutoff=CTF*nanometer,
 # Read restart file
 
 integrator=LangevinIntegrator(TMPRT*unit_definitions.kelvin, GAMMA_LN/unit_definitions.picoseconds, TSTP*unit_definitions.femtoseconds)
-simulation = Simulation(prmtop.topology, system, integrator)
+
+platform = 'CUDA'
+platform_name = Platform.getPlatformByName(platform)
+if platform == 'CUDA':
+    # Use mixed single/double precision
+    properties = dict(CudaPrecision='mixed')
+else:
+    properties = dict(Threads='4')
+
+simulation = Simulation(
+        prmtop.topology,
+        system,
+        integrator,
+        platform=platform_name,
+        platformProperties=properties)
+
 with open('restart.chk', 'rb') as f:
   simulation.context.loadCheckpoint(f.read())
 state = simulation.context.getState(getPositions=True, getVelocities=True)
@@ -458,7 +473,10 @@ composable_states = [alchemical_state_A, alchemical_state_B, restraint_state]
 compound_state = openmmtools.states.CompoundThermodynamicState(thermodynamic_state=TS, composable_states=composable_states)
 reload(openmmtools.alchemy)
 integrator=LangevinIntegrator(TMPRT*unit_definitions.kelvin, GAMMA_LN/unit_definitions.picoseconds, TSTP*unit_definitions.femtoseconds)
-context = compound_state.create_context(integrator)
+context = compound_state.create_context(
+        integrator,
+        platform=Platform.getPlatformByName('CPU')
+)
 alchemical_system_in=context.getSystem()
 
 #Use offsets to interpolate
@@ -527,7 +545,10 @@ for k in range(nstates):
 	sampler_state = sampler_states[k]
 	thermodynamic_state = thermodynamic_states[k]
 	integrator=LangevinIntegrator(TMPRT*unit_definitions.kelvin, GAMMA_LN/unit_definitions.picoseconds, TSTP*unit_definitions.femtoseconds)
-	context = thermodynamic_state.create_context(integrator)
+	context = thermodynamic_state.create_context(
+        integrator,
+        platform=Platform.getPlatformByName('CPU')
+    )
 	system = context.getSystem()
 	for force in system.getForces(): #RIZZI CHECK
 		if isinstance(force, CustomBondForce):

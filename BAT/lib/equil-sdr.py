@@ -9,7 +9,6 @@ import sys
 from sys import stdout
 import numpy as np
 from importlib import reload
-from openmmtools.multistate import MultiStateReporter, MultiStateSampler, ReplicaExchangeSampler, ParallelTemperingSampler, SAMSSampler, ReplicaExchangeAnalyzer
 from openmmtools.states import GlobalParameterState
 import os
 
@@ -437,7 +436,11 @@ composable_states = [alchemical_state_A, alchemical_state_B, restraint_state]
 compound_state = openmmtools.states.CompoundThermodynamicState(thermodynamic_state=TS, composable_states=composable_states)
 reload(openmmtools.alchemy)
 integrator=LangevinIntegrator(TMPRT*unit_definitions.kelvin, GAMMA_LN/unit_definitions.picoseconds, TSTP*unit_definitions.femtoseconds)
-context = compound_state.create_context(integrator)
+context = compound_state.create_context(
+           integrator,
+           platform=Platform.getPlatformByName('CPU')
+           )
+
 alchemical_system_in=context.getSystem()
 
 #Use offsets to interpolate
@@ -459,7 +462,21 @@ reload(openmmtools.alchemy)
 
 integrator=LangevinIntegrator(TMPRT*unit_definitions.kelvin, GAMMA_LN/unit_definitions.picoseconds, TSTP*unit_definitions.femtoseconds)
 
-simulation = Simulation(prmtop.topology, alchemical_system_in, integrator)
+platform = 'CUDA'
+platform_name = Platform.getPlatformByName(platform)
+if platform == 'CUDA':
+    # Use mixed single/double precision
+    properties = dict(CudaPrecision='mixed')
+else:
+    properties = dict(Threads='4')
+
+simulation = Simulation(
+    prmtop.topology,
+    alchemical_system_in,
+    integrator,
+    platform=platform_name,
+    platformProperties=properties
+    )
 
 simulation.context.setPositions(inpcrd.positions)
 if inpcrd.boxVectors is not None:
@@ -492,9 +509,7 @@ simulation.reporters.append(app.DCDReporter('complex_trajectory_0.dcd', int(EQIT
 simulation.reporters.append(CheckpointReporter('restart.chk', int(EQIT/10)))
 
 simulation.reporters.append(app.StateDataReporter(stdout, int(EQIT/10), step=True,
-
         potentialEnergy=True, temperature=True, progress=True, remainingTime=True,
-
         speed=True, totalSteps=EQIT, separator='      '))
 
 simulation.step(EQIT)
