@@ -1,0 +1,38 @@
+*******************************************************
+*****************************       mini.in
+*******************************************************
+Minimizing.
+ &cntrl
+  imin = 1,
+  ntmin = 2,
+  ntx = 1, 
+  ntpr = 50,
+  maxcyc = 1000,
+  ncyc = 1000,
+  irest = 0,
+  ntf = 1,
+  ntc = 1,
+  ntb = 1,
+  cut = 9.0,
+  nmropt = 1,
+  pencut = -1,
+  ntr = 1,
+  restraint_wt = 50.0,
+  restraintmask = ':1-2',
+  logdvdl = 0,
+  icfe = 1, clambda = lbd_val, scalpha = 0.5, scbeta = 12.0,
+  timask1 = ':mk1,mk2', timask2 = ':mk3,mk4',
+  ifsc=1, scmask1=':mk1,mk2', scmask2=':mk3,mk4', crgmask = ':mk1,mk2,mk3,mk4',
+  gti_chg_keep = 0,
+  gti_add_sc = 1,
+  infe = 1,
+ /
+ &pmd
+ output_file = 'cmass.txt'
+ output_freq = 1000
+ cv_file = 'cv.in'
+ /
+ &wt type = 'END', /
+DISANG=disang.rest
+LISTOUT=POUT
+

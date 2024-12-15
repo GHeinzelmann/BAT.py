@@ -427,7 +427,7 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
     if comp == 'a' or comp == 'l' or comp == 't' or comp == 'm' or comp == 'c' or comp == 'r':
       dec_method = 'dd'
 
-    if comp == 'x':
+    if comp == 'x' or comp == 'ex':
       dec_method = 'exchange'
  
     # Get files or finding new anchors and building some systems
@@ -565,11 +565,11 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
           os.chdir('../dd/')
         if dec_method == 'sdr' or dec_method == 'exchange':
           os.chdir('../sdr/')
-      elif comp != 'x':
+      elif comp != 'x' and comp != 'ex':
         os.chdir('../rest/')
 
     # Create reference for relative calculations
-    if comp == 'x' and win == 0:
+    if (comp == 'x' or comp == 'ex') and win == 0:
 
         # Build reference ligand from last state of equilibrium simulations
 
@@ -891,7 +891,7 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
  
 
       # Get coordinates from reference ligand
-      if comp == 'x': 
+      if comp == 'x' or comp == 'ex': 
         shutil.copy('../../exchange_files/%s.pdb' %molr.lower(), './')
         shutil.copy('../../exchange_files/anchors-'+poser+'.txt', './')
         shutil.copy('../../exchange_files/vac_ligand.pdb', './vac_reference.pdb')
@@ -994,24 +994,25 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
         print('Creating new system for vdw decoupling...')
 
       # Other ligands for relative calculations
-      if (comp == 'x'):
+      if (comp == 'x' or comp == 'ex'):
         for i in range(0, ref_lig_atom):
             build_file.write('%-4s  %5s %-4s %3s  %4.0f    '%('ATOM', i+1, ref_lig_atomlist[i],molr, float(lig_resid + 1)))
             build_file.write('%8.3f%8.3f%8.3f'%(float(ref_lig_coords[i][0]), float(ref_lig_coords[i][1]),float(ref_lig_coords[i][2]+sdr_dist)))
 
             build_file.write('%6.2f%6.2f\n'%(0, 0))
         build_file.write('TER\n')
+        # Slightly change x coordinate to avoid OpenMM bug on self calculations
         for i in range(0, ref_lig_atom):
             build_file.write('%-4s  %5s %-4s %3s  %4.0f    '%('ATOM', i+1, ref_lig_atomlist[i],molr, float(lig_resid + 2)))
-            build_file.write('%8.3f%8.3f%8.3f'%(float(ref_lig_coords[i][0]), float(ref_lig_coords[i][1]),float(ref_lig_coords[i][2])))
+            build_file.write('%8.3f%8.3f%8.3f'%(float(ref_lig_coords[i][0]+0.01), float(ref_lig_coords[i][1]),float(ref_lig_coords[i][2])))
 
             build_file.write('%6.2f%6.2f\n'%(0, 0))
         build_file.write('TER\n')
         for i in range(0, lig_atom):
-           build_file.write('%-4s  %5s %-4s %3s  %4.0f    '%('ATOM', i+1, lig_atomlist[i],mol, float(lig_resid+3)))
-           build_file.write('%8.3f%8.3f%8.3f'%(float(lig_coords[i][0]), float(lig_coords[i][1]),float(lig_coords[i][2]+sdr_dist)))
+            build_file.write('%-4s  %5s %-4s %3s  %4.0f    '%('ATOM', i+1, lig_atomlist[i],mol, float(lig_resid+3)))
+            build_file.write('%8.3f%8.3f%8.3f'%(float(lig_coords[i][0]+0.01), float(lig_coords[i][1]),float(lig_coords[i][2]+sdr_dist)))
 
-           build_file.write('%6.2f%6.2f\n'%(0, 0))
+            build_file.write('%6.2f%6.2f\n'%(0, 0))
         build_file.write('TER\n')
         print('Creating new system for vdw ligand exchange...')
 
@@ -1093,7 +1094,7 @@ def create_box(comp, hmr, pose, mol, molr, num_waters, water_model, ion_def, neu
       buffer_x = buffer_x - solv_shell
       buffer_y = buffer_y - solv_shell
       if buffer_z != 0:
-        if ((dec_method == 'sdr') and (comp == 'e' or comp == 'v')) or comp == 'n' or comp == 'x':
+        if ((dec_method == 'sdr') and (comp == 'e' or comp == 'v')) or comp == 'n' or comp == 'x' or comp == 'ex':
           buffer_z = buffer_z - (solv_shell/2)
         else: 
           buffer_z = buffer_z - solv_shell
@@ -1137,9 +1138,9 @@ def create_box(comp, hmr, pose, mol, molr, num_waters, water_model, ion_def, neu
       tleap_vac.write('%s = loadmol2 %s.mol2\n'%(other_mol[i].upper(), other_mol[i].lower()))
     tleap_vac.write('loadamberparams %s.frcmod\n'%(mol.lower()))
     tleap_vac.write('%s = loadmol2 %s.mol2\n\n'%(mol.upper(), mol.lower()))
-    if comp == 'x':
+    if comp == 'x' or comp == 'ex':
       tleap_vac.write('loadamberparams %s.frcmod\n'%(molr.lower()))
-    if comp == 'x':
+    if comp == 'x' or comp == 'ex':
       tleap_vac.write('%s = loadmol2 %s.mol2\n\n'%(molr.upper(), molr.lower()))
     tleap_vac.write('# Load the water parameters\n')        
     if water_model.lower() != 'tip3pf':
@@ -1199,7 +1200,7 @@ def create_box(comp, hmr, pose, mol, molr, num_waters, water_model, ion_def, neu
     f.close()
      
     # Adjust ions for LJ and electrostatic Calculations (avoid neutralizing plasma)
-    if (comp == 'v' and dec_method == 'sdr') or comp == 'x':
+    if (comp == 'v' and dec_method == 'sdr') or comp == 'x' or comp == 'ex':
       charge_neut = neu_cat - neu_ani - 2*lig_cat + 2*lig_ani
       neu_cat = 0
       neu_ani = 0
@@ -1343,9 +1344,9 @@ def create_box(comp, hmr, pose, mol, molr, num_waters, water_model, ion_def, neu
       tleap_solvate.write('%s = loadmol2 %s.mol2\n'%(other_mol[i].upper(), other_mol[i].lower()))
     tleap_solvate.write('loadamberparams %s.frcmod\n'%(mol.lower()))
     tleap_solvate.write('%s = loadmol2 %s.mol2\n\n'%(mol.upper(), mol.lower()))
-    if comp == 'x':
+    if comp == 'x' or comp == 'ex':
       tleap_solvate.write('loadamberparams %s.frcmod\n'%(molr.lower()))
-    if comp == 'x':
+    if comp == 'x' or comp == 'ex':
       tleap_solvate.write('%s = loadmol2 %s.mol2\n\n'%(molr.upper(), molr.lower()))
     tleap_solvate.write('# Load the water and jc ion parameters\n')        
     if water_model.lower() != 'tip3pf':

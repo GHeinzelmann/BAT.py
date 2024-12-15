@@ -19,9 +19,9 @@ def write_tleap(mol, molr, comp, water_model, water_box, buff, buffer_x, buffer_
     for i in range(0, len(other_mol)):
       tmp_file.write('loadamberparams %s.frcmod\n'%(other_mol[i].lower()))
       tmp_file.write('%s = loadmol2 %s.mol2\n'%(other_mol[i].upper(), other_mol[i].lower()))
-    if comp == 'x':
+    if comp == 'x' or comp == 'ex':
       tmp_file.write('loadamberparams %s.frcmod\n'%(molr.lower()))
-    if comp == 'x':
+    if comp == 'x' or comp == 'ex':
       tmp_file.write('%s = loadmol2 %s.mol2\n\n'%(molr.upper(), molr.lower()))
     tmp_file.write('loadamberparams %s.frcmod\n'%(mol.lower()))
     tmp_file.write('%s = loadmol2 %s.mol2\n\n'%(mol.upper(), mol.lower()))

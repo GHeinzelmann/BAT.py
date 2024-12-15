@@ -55,6 +55,8 @@ w_steps1 = 0
 w_steps2 = 0
 x_steps1 = 0
 x_steps2 = 0
+ex_steps1 = 0
+ex_steps2 = 0
 
 a_itera1 = 0
 a_itera2 = 0
@@ -80,6 +82,8 @@ w_itera1 = 0
 w_itera2 = 0
 x_itera1 = 0
 x_itera2 = 0
+ex_itera1 = 0
+ex_itera2 = 0
 
 sdr_dist = 0
 rng = 0
@@ -186,6 +190,10 @@ for i in range(0, len(lines)):
             x_steps1 = scripts.check_input('int', lines[i][1], input_file, lines[i][0]) 
         elif lines[i][0] == 'x_steps2':
             x_steps2 = scripts.check_input('int', lines[i][1], input_file, lines[i][0]) 
+        elif lines[i][0] == 'ex_steps1':
+            ex_steps1 = scripts.check_input('int', lines[i][1], input_file, lines[i][0]) 
+        elif lines[i][0] == 'ex_steps2':
+            ex_steps2 = scripts.check_input('int', lines[i][1], input_file, lines[i][0]) 
         # OpenMM only
         elif lines[i][0] == 'a_itera1':
             a_itera1 = scripts.check_input('int', lines[i][1], input_file, lines[i][0]) 
@@ -235,6 +243,10 @@ for i in range(0, len(lines)):
             x_itera1 = scripts.check_input('int', lines[i][1], input_file, lines[i][0]) 
         elif lines[i][0] == 'x_itera2':
             x_itera2 = scripts.check_input('int', lines[i][1], input_file, lines[i][0]) 
+        elif lines[i][0] == 'ex_itera1':
+            ex_itera1 = scripts.check_input('int', lines[i][1], input_file, lines[i][0]) 
+        elif lines[i][0] == 'ex_itera2':
+            ex_itera2 = scripts.check_input('int', lines[i][1], input_file, lines[i][0]) 
         elif lines[i][0] == 'itera_steps':
             itera_steps = scripts.check_input('int', lines[i][1], input_file, lines[i][0]) 
         elif lines[i][0] == 'itcheck':
@@ -295,10 +307,12 @@ for i in range(0, len(lines)):
                 fe_type = lines[i][1].lower()
             elif lines[i][1].lower() == 'relative':
                 fe_type = lines[i][1].lower()
+            elif lines[i][1].lower() == 'relative-ex':
+                fe_type = lines[i][1].lower()
             elif lines[i][1].lower() == 'custom':
                 fe_type = lines[i][1].lower()
             else:
-                print('Free energy type not recognized, please choose rest (restraints only), dd (double decoupling only), sdr (simultaneous decoupling-recoupling only), express (sdr with simultaneous restraints), dd-rest (dd with restraints), sdr-rest (sdr with restraints), relative (using merged restraints) or custom.')
+                print('Free energy type not recognized, please choose rest (restraints only), dd (double decoupling only), sdr (simultaneous decoupling-recoupling only), express (sdr with simultaneous restraints), dd-rest (dd with restraints), sdr-rest (sdr with restraints), relative (using merged restraints), relative-ex or custom.')
                 sys.exit(1)
         elif lines[i][0] == 'dec_int':
             if lines[i][1].lower() == 'mbar':
@@ -510,25 +524,28 @@ if fe_type == 'custom':
     print('Wrong input! Please choose a decoupling method (dd, sdr or exchange) when using the custom option.')
     sys.exit(1)
 elif fe_type == 'rest':
-  components = ['c', 'a', 'l', 't', 'r'] 
+  components = ['a', 'l', 't', 'c', 'r'] 
   dec_method = 'dd'
 elif fe_type == 'sdr':
   components = ['e', 'v'] 
   dec_method = 'sdr'
 elif fe_type == 'dd':
-  components = ['e', 'v', 'f', 'w'] 
+  components = ['e', 'v', 'w', 'f'] 
   dec_method = 'dd'
 elif fe_type == 'sdr-rest':
-  components = ['c', 'a', 'l', 't', 'r', 'e', 'v'] 
+  components = ['a', 'l', 't', 'e', 'v', 'c', 'r'] 
   dec_method = 'sdr'
 elif fe_type == 'express':
-  components = ['m', 'n', 'e', 'v'] 
+  components = ['m', 'e', 'v', 'n'] 
   dec_method = 'sdr'
 elif fe_type == 'dd-rest':
-  components = ['c', 'a', 'l', 't', 'r', 'e', 'v', 'f', 'w'] 
+  components = ['a', 'l', 't', 'e', 'v', 'w', 'f', 'c', 'r'] 
   dec_method = 'dd'
 elif fe_type == 'relative':
-  components = ['x', 'e', 'n', 'm'] 
+  components = ['m', 'e', 'x', 'n'] 
+  dec_method = 'exchange'
+elif fe_type == 'relative-ex':
+  components = ['m', 'ex', 'n'] 
   dec_method = 'exchange'
 
 if (dec_method == 'sdr' or dec_method == 'exchange') and sdr_dist == 0:
@@ -619,6 +636,8 @@ dic_steps1['f'] = f_steps1
 dic_steps2['f'] = f_steps2
 dic_steps1['x'] = x_steps1
 dic_steps2['x'] = x_steps2
+dic_steps1['ex'] = ex_steps1
+dic_steps2['ex'] = ex_steps2
 
 # Define number of steps for all stages (openmm)
 dic_itera1 = {}
@@ -647,6 +666,8 @@ dic_itera1['f'] = f_itera1
 dic_itera2['f'] = f_itera2
 dic_itera1['x'] = x_itera1
 dic_itera2['x'] = x_itera2
+dic_itera1['ex'] = ex_itera1
+dic_itera2['ex'] = ex_itera2
 
 # Obtain Gaussian Quadrature lambdas and weights
 
@@ -914,7 +935,7 @@ elif stage == 'fe':
         if anch != 'all':  
           break
         os.chdir('../')
-      elif (comp == 'x'):
+      elif (comp == 'x' or comp == 'ex'):
         steps1 = dic_steps1[comp]
         steps2 = dic_steps2[comp]
         if not os.path.exists('sdr'):
@@ -1426,7 +1447,7 @@ if software == 'openmm' and stage == 'fe':
               os.chdir('../')
             os.chdir('../')
         os.chdir('../') 
-      elif comp == 'x':
+      elif comp == 'x' or comp == 'ex':
           if not os.path.exists('sdr'):
             os.makedirs('sdr')
           os.chdir('sdr')

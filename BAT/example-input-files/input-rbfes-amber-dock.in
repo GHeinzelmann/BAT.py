@@ -102,10 +102,10 @@ dt = 0.004                 # simulation time step in ps
 
 # Conformational restraints on the protein backbone
 
-rec_bb		=  no       # Use protein backbone dihedrals conformational restraints
-#bb_start        = 379       # First residues of the restrained ranges 
-#bb_end          = 390       # Last residues of the restrained ranges
-#bb_equil        = yes       # Keep this backbone section rigid during equilibration 
+rec_bb		= yes       # Use protein backbone dihedrals conformational restraints
+bb_start        = 379       # First residues of the restrained ranges 
+bb_end          = 390       # Last residues of the restrained ranges
+bb_equil        = yes       # Keep this backbone section rigid during equilibration 
 
 # Ligand anchor search definitions
 

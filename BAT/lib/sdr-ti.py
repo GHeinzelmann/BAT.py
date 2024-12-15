@@ -404,7 +404,7 @@ if dum_atom > 1:
   print('comforce.addBond('+str(com_atoms[1])+', '+str(bondParameters[0])+', '+str(bondParameters[1])+', '+str(bondParameters[2])+', '+str(bondParameters[3])+')')
   print('')
 
-if comp == 'x':
+if comp == 'x' or comp == 'ex':
 
   bondGroups = []
   bondParameters = []
@@ -441,12 +441,19 @@ num_b_torsions=len(ligand_b_torsions)
 
 #Setup alchemical system
 reload(openmmtools.alchemy)
-factory = openmmtools.alchemy.AbsoluteAlchemicalFactory(consistent_exceptions=False, split_alchemical_forces = True, alchemical_pme_treatment = 'exact')  #RIZZI CHECK
+if comp != 'ex':
+  factory = openmmtools.alchemy.AbsoluteAlchemicalFactory(consistent_exceptions=False, split_alchemical_forces = True, alchemical_pme_treatment = 'exact')  #RIZZI CHECK
+else:
+  factory = openmmtools.alchemy.AbsoluteAlchemicalFactory(consistent_exceptions=False, split_alchemical_forces = True, alchemical_pme_treatment = 'direct-space')  #RIZZI CHECK
 reference_system = system
 
 # Define alchemical regions A and B
-alchemical_region_A = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_a_atoms, name='A')
-alchemical_region_B = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_b_atoms, name='B')
+if comp != 'ex':
+  alchemical_region_A = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_a_atoms, name='A')
+  alchemical_region_B = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_b_atoms, name='B')
+else:
+  alchemical_region_A = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_a_atoms, name='A', softcore_beta = 6.0)
+  alchemical_region_B = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_b_atoms, name='B', softcore_beta = 6.0)
 alchemical_system_in = factory.create_alchemical_system(reference_system, alchemical_regions = [alchemical_region_A, alchemical_region_B])
 
 # Create alchemical states
@@ -514,6 +521,11 @@ for k in range(nstates):
         compound_state.lambda_sterics_B=float(1.0-lambdas[k])
         compound_state.lambda_electrostatics_A=0.0
         compound_state.lambda_electrostatics_B=0.0
+      elif comp == 'ex':
+        compound_state.lambda_sterics_A=lambdas[k]
+        compound_state.lambda_sterics_B=float(1.0-lambdas[k])
+        compound_state.lambda_electrostatics_A=lambdas[k]
+        compound_state.lambda_electrostatics_B=float(1.0-lambdas[k])
     compound_state.lambda_restraints=1.0
     sys = compound_state.get_system()
     sampler_states.append(openmmtools.states.SamplerState(positions=posit, velocities=veloc, box_vectors=box_vec))

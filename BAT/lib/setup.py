@@ -75,7 +75,7 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, molr, comp, bb_
 
 
       if dec_method == 'sdr' or dec_method == 'exchange':
-        if (comp == 'e' or comp == 'v' or comp == 'n' or comp == 'x'):
+        if (comp == 'e' or comp == 'v' or comp == 'n' or comp == 'x' or comp == 'ex'):
 
           rec_res = int(recep_last) + 2
           lig_res = str((int(lig_res) + 1))
@@ -110,7 +110,7 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, molr, comp, bb_
           with open('./vac.pdb') as f_in:
             lines = (line.rstrip() for line in f_in)
             lines = list(line for line in lines if line) # Non-blank lines in a list   
-            if comp == 'x':
+            if comp == 'x' or comp == 'ex':
               for i in range(0, len(lines)):
                 if (lines[i][0:6].strip() == 'ATOM') or (lines[i][0:6].strip() == 'HETATM'):
                   if lines[i][22:26].strip() == str(int(lig_res) + 3):
@@ -162,7 +162,7 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, molr, comp, bb_
         vac_atoms = int(data[-3][6:11].strip())
 
     # Get number of reference ligand atoms
-    if comp == 'x':
+    if comp == 'x' or comp == 'ex':
       with open('./vac_reference.pdb') as myfile:
           data = myfile.readlines()
           ref_atoms = int(data[-3][6:11].strip())
@@ -179,7 +179,7 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, molr, comp, bb_
       beg = bb_start[i] - int(first_res) + 2 
       end = bb_end[i] - int(first_res) + 2
       if dec_method == 'sdr' or dec_method == 'exchange':
-        if (comp == 'e' or comp == 'v' or comp == 'n' or comp == 'x'):
+        if (comp == 'e' or comp == 'v' or comp == 'n' or comp == 'x' or comp == 'ex'):
           beg = bb_start[i] - int(first_res) + 3
           end = bb_end[i] - int(first_res) + 3
       for i in range(beg, end):
@@ -403,7 +403,7 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, molr, comp, bb_
       ldhf = weight*rest[4]/100
       rcom = rest[5]
       lcom = rest[6]
-    elif comp == 'v' or comp == 'e' or comp == 'w' or comp == 'f' or comp == 'x':
+    elif comp == 'v' or comp == 'e' or comp == 'w' or comp == 'f' or comp == 'x' or comp == 'ex':
       rdhf = rest[0]
       rdsf = rest[1]
       ldf = rest[2]
@@ -492,7 +492,7 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, molr, comp, bb_
               nums2 = str(atm_num.index(data[0])+vac_atoms)+','+str(atm_num.index(data[1])+vac_atoms)+','+str(atm_num.index(data[2])+vac_atoms)+','+str(atm_num.index(data[3])+vac_atoms)+','  
               disang_file.write('%s %-23s '%('&rst iat=', nums2))
               disang_file.write('r1= %10.4f, r2= %10.4f, r3= %10.4f, r4= %10.4f, rk2= %11.7f, rk3= %11.7f, &end %s \n' % (float(vals[i]) - 180, float(vals[i]), float(vals[i]), float(vals[i]) + 180, ldhf, ldhf, lign_d))
-            if comp == 'x' and dec_method == 'exchange':
+            if (comp == 'x' or comp == 'ex') and dec_method == 'exchange':
               nums2 = str(atm_num.index(data[0])+vac_atoms+2*ref_atoms)+','+str(atm_num.index(data[1])+vac_atoms+2*ref_atoms)+','+str(atm_num.index(data[2])+vac_atoms+2*ref_atoms)+','+str(atm_num.index(data[3])+vac_atoms+2*ref_atoms)+','  
               disang_file.write('%s %-23s '%('&rst iat=', nums2))
               disang_file.write('r1= %10.4f, r2= %10.4f, r3= %10.4f, r4= %10.4f, rk2= %11.7f, rk3= %11.7f, &end %s \n' % (float(vals[i]) - 180, float(vals[i]), float(vals[i]), float(vals[i]) + 180, ldhf, ldhf, lign_d))
@@ -522,7 +522,7 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, molr, comp, bb_
       cv_file.write(' anchor_strength = %10.4f, %10.4f, \n' % (rcom, rcom))
       cv_file.write('/ \n')
       if dec_method == 'sdr' or dec_method == 'exchange':
-        if comp == 'e' or comp == 'v' or comp == 'n' or comp == 'x':
+        if comp == 'e' or comp == 'v' or comp == 'n' or comp == 'x' or comp == 'ex':
           cv_file.write('&colvar \n')
           cv_file.write(' cv_type = \'COM_DISTANCE\' \n')
           cv_file.write(' cv_ni = %s, cv_i = 2,0,' % str(len(hvy_g)+2))
@@ -533,7 +533,7 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, molr, comp, bb_
           cv_file.write(' anchor_position = %10.4f, %10.4f, %10.4f, %10.4f \n' % (float(0.0), float(0.0), float(0.0), float(999.0)))
           cv_file.write(' anchor_strength = %10.4f, %10.4f, \n' % (lcom, lcom))
           cv_file.write('/ \n')
-        if comp == 'x':
+        if comp == 'x' or comp == 'ex':
           cv_file.write('&colvar \n')
           cv_file.write(' cv_type = \'COM_DISTANCE\' \n')
           cv_file.write(' cv_ni = %s, cv_i = 2,0,' % str(len(hvy_g2)+2))
@@ -713,12 +713,12 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, molr, comp, bb_
         if len(arr) == 4:
           restraints_file.write('%s %s %s'%('dihedral a'+str(i), rst[i], 'out restraints.dat\n'))
  
-    if comp != 'x':
+    if comp != 'x' and comp != 'ex':
       disang_file.write('\n')
     disang_file.close()
 
     # Write additional restraints for reference ligand
-    if comp == 'x':
+    if comp == 'x' or comp == 'ex':
 
       rst = []
       mlines = []
@@ -1408,9 +1408,95 @@ def dec_files(temperature, mol, num_sim, pose, comp, win, stage, steps1, steps2,
         with open("./heat.in", "wt") as fout:
           for line in fin: 
             fout.write(line.replace('_temperature_', str(temperature)).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)).replace('mk2',str(mk2)).replace('mk3',str(mk3)).replace('mk4',str(mk4)))
+      with open("../amber_files/mini-ex.in", "rt") as fin:
+        with open("./mini.in", "wt") as fout:
+          for line in fin: 
+            fout.write(line.replace('_temperature_', str(temperature)).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)).replace('mk2',str(mk2)).replace('mk3',str(mk3)).replace('mk4',str(mk4)))
 
       # Create running scripts for local and server
-      with open('../run_files/local-dd.bash', "rt") as fin:
+      with open('../run_files/local-ex.bash', "rt") as fin:
+        with open("./run-local.bash", "wt") as fout:
+          for line in fin:
+            fout.write(line)
+      with open('../run_files/PBS-Am', "rt") as fin:
+        with open("./PBS-run", "wt") as fout:
+          for line in fin:
+            fout.write(line.replace('STAGE', pose).replace('POSE', '%s%02d' %(comp, int(win))))
+      with open('../run_files/SLURMM-Am', "rt") as fin:
+        with open("./SLURMM-run", "wt") as fout:
+          for line in fin:
+            fout.write(line.replace('STAGE', pose).replace('POSE', '%s%02d' %(comp, int(win))))
+
+    if (comp == 'ex'):
+      # Create simulation files for vdw exchange
+      with open('./vac.pdb') as myfile:
+        data = myfile.readlines()
+        mk4 = int(last_lig)
+        mk3 = int(mk4 - 1)
+        mk2 = int(mk4 - 2)
+        mk1 = int(mk4 - 3)
+      for i in range(0, num_sim+1):
+        with open('../amber_files/mdin-ex', "rt") as fin:
+          with open('./mdin-tmp', "wt") as fout:
+            for line in fin:
+              fout.write(line.replace(':mk1,mk2,mk3,mk4',''))
+        fout.close
+        with open('./mdin-tmp', "rt") as fin:
+          with open("./mdin-%02d" %int(i), "wt") as fout:
+            if i == 1 or i == 0:
+              for line in fin:
+                fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(round(steps1/2))).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)).replace('mk2',str(mk2)).replace('mk3',str(mk3)).replace('mk4',str(mk4)))
+            else:
+              for line in fin:
+                fout.write(line.replace('_temperature_', str(temperature)).replace('_num-atoms_', str(vac_atoms)).replace('_num-steps_', str(steps2)).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)).replace('mk2',str(mk2)).replace('mk3',str(mk3)).replace('mk4',str(mk4)))
+        fout.close
+        mdin = open("./mdin-%02d" %int(i), 'a')
+        mdin.write('  mbar_states = %02d\n' %len(lambdas))
+        mdin.write('  mbar_lambda = ')
+        for i in range(0, len(lambdas)):
+          mdin.write(' %6.5f,' %(lambdas[i]))
+        mdin.write('\n')
+        mdin.write('  infe = 1,\n')
+        mdin.write(' /\n')
+        mdin.write(' &pmd \n')
+        mdin.write(' output_file = \'cmass.txt\' \n')
+        mdin.write(' output_freq = %02d \n' % int(ntwx))
+        mdin.write(' cv_file = \'cv.in\' \n')
+        mdin.write(' /\n')
+        mdin.write(' &wt type = \'END\' , /\n')
+        mdin.write('DISANG=disang.rest\n')
+        mdin.write('LISTOUT=POUT\n')
+
+      with open('../amber_files/eqnpt-ex.in', "rt") as fin:
+        with open('./eqnpt-tmp.in', "wt") as fout:
+          for line in fin:
+            fout.write(line.replace(':mk1,mk2,mk3,mk4',''))
+      fout.close
+      with open("./eqnpt-tmp.in", "rt") as fin:
+        with open("./eqnpt.in", "wt") as fout:
+          for line in fin: 
+            fout.write(line.replace('_temperature_', str(temperature)).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)).replace('mk2',str(mk2)).replace('mk3',str(mk3)).replace('mk4',str(mk4)))
+      with open('../amber_files/heat-ex.in', "rt") as fin:
+        with open('./heat-tmp.in', "wt") as fout:
+          for line in fin:
+            fout.write(line.replace(':mk1,mk2,mk3,mk4',''))
+      fout.close
+      with open("./heat-tmp.in", "rt") as fin:
+        with open("./heat.in", "wt") as fout:
+          for line in fin: 
+            fout.write(line.replace('_temperature_', str(temperature)).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)).replace('mk2',str(mk2)).replace('mk3',str(mk3)).replace('mk4',str(mk4)))
+      with open('../amber_files/mini-ex.in', "rt") as fin:
+        with open('./mini-tmp.in', "wt") as fout:
+          for line in fin:
+            fout.write(line.replace(':mk1,mk2,mk3,mk4',''))
+      fout.close
+      with open("./mini-tmp.in", "rt") as fin:
+        with open("./mini.in", "wt") as fout:
+          for line in fin: 
+            fout.write(line.replace('_temperature_', str(temperature)).replace('lbd_val', '%6.5f' %float(weight)).replace('mk1',str(mk1)).replace('mk2',str(mk2)).replace('mk3',str(mk3)).replace('mk4',str(mk4)))
+
+      # Create running scripts for local and server
+      with open('../run_files/local-ex.bash', "rt") as fin:
         with open("./run-local.bash", "wt") as fout:
           for line in fin:
             fout.write(line)
