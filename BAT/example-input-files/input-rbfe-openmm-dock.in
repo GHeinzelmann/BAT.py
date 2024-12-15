@@ -11,7 +11,7 @@ celpp_receptor = LMCSS-5uf0_5uez                                  # Choose CELPP
 #ligand_list = [lig-5uf0,lig-5uez,lig-5uew,lig-5ueu,lig-5uey]     # List of different ligands for ranking calculations, without the pdb extension
 poses_list = [0,1,2,3,4]                                          # List of poses for docked calculations, called pose0.pdb, pose1.pdb, pose2.pdb, etc. 
 
-# Protein anchors, using original protein sequence 
+# Protein anchors 
 
 P1 = :425@CA          
 P2 = :447@CA

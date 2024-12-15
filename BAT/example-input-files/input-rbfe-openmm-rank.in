@@ -6,16 +6,12 @@
 
 # Calculation definitions
 
-calc_type = crystal                                                  # dock (compare poses), rank (compare ligands) or crystal (single complex)
-celpp_receptor = [5uf0,5uez]                                    # Choose CELPP receptor in upper case or pdb code in lower case
-#ligand_list = [lig-5uf0,lig-5uez,lig-5uew,lig-5ueu,lig-5uey]      # List of different ligands for ranking calculations, without the pdb extension
+calc_type = rank                                                  # dock (compare poses), rank (compare ligands) or crystal (single complex)
+celpp_receptor = receptor-5uf0                                    # Choose CELPP receptor in upper case or pdb code in lower case
+ligand_list = [lig-5uf0,lig-5uez,lig-5uew,lig-5ueu,lig-5uey]      # List of different ligands for ranking calculations, without the pdb extension
 #poses_list = [0,1,2,3,4]                                         # List of poses for docked calculations, called pose0.pdb, pose1.pdb, pose2.pdb, etc. 
 
-# Specify ligand names for crystal calculations
-
-ligand_name = [89J,89G]
-
-# Protein anchors, using original protein sequence 
+# Protein anchors 
 
 P1 = :425@CA          
 P2 = :447@CA
