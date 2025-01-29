@@ -84,6 +84,8 @@ x_itera1 = 0
 x_itera2 = 0
 ex_itera1 = 0
 ex_itera2 = 0
+sp_itera1 = 0
+sp_itera2 = 0
 
 sdr_dist = 0
 rng = 0
@@ -247,6 +249,10 @@ for i in range(0, len(lines)):
             ex_itera1 = scripts.check_input('int', lines[i][1], input_file, lines[i][0]) 
         elif lines[i][0] == 'ex_itera2':
             ex_itera2 = scripts.check_input('int', lines[i][1], input_file, lines[i][0]) 
+        elif lines[i][0] == 'sp_itera1':
+            sp_itera1 = scripts.check_input('int', lines[i][1], input_file, lines[i][0]) 
+        elif lines[i][0] == 'sp_itera2':
+            sp_itera2 = scripts.check_input('int', lines[i][1], input_file, lines[i][0]) 
         elif lines[i][0] == 'itera_steps':
             itera_steps = scripts.check_input('int', lines[i][1], input_file, lines[i][0]) 
         elif lines[i][0] == 'itcheck':
@@ -309,10 +315,12 @@ for i in range(0, len(lines)):
                 fe_type = lines[i][1].lower()
             elif lines[i][1].lower() == 'relative-ex':
                 fe_type = lines[i][1].lower()
+            elif lines[i][1].lower() == 'relative-sp':
+                fe_type = lines[i][1].lower()
             elif lines[i][1].lower() == 'custom':
                 fe_type = lines[i][1].lower()
             else:
-                print('Free energy type not recognized, please choose rest (restraints only), dd (double decoupling only), sdr (simultaneous decoupling-recoupling only), express (sdr with simultaneous restraints), dd-rest (dd with restraints), sdr-rest (sdr with restraints), relative (using merged restraints), relative-ex or custom.')
+                print('Free energy type not recognized, please choose rest (restraints only), dd (double decoupling only), sdr (simultaneous decoupling-recoupling only), express (sdr with simultaneous restraints), dd-rest (dd with restraints), sdr-rest (sdr with restraints), relative (using merged restraints), relative-ex, relative-sp or custom.')
                 sys.exit(1)
         elif lines[i][0] == 'dec_int':
             if lines[i][1].lower() == 'mbar':
@@ -547,6 +555,13 @@ elif fe_type == 'relative':
 elif fe_type == 'relative-ex':
   components = ['m', 'ex', 'n'] 
   dec_method = 'exchange'
+elif fe_type == 'relative-sp':
+  components = ['m', 'sp', 'n'] 
+  dec_method = 'exchange'
+
+if 'sp' in components and software == 'amber':
+  print('Wrong input! The sp component is not available for AMBER, please choose software = openmm.')
+  sys.exit(1)
 
 if (dec_method == 'sdr' or dec_method == 'exchange') and sdr_dist == 0:
   print('Wrong input! Please choose a positive value for the sdr_dist variable when performing sdr or exchange.')
@@ -668,6 +683,8 @@ dic_itera1['x'] = x_itera1
 dic_itera2['x'] = x_itera2
 dic_itera1['ex'] = ex_itera1
 dic_itera2['ex'] = ex_itera2
+dic_itera1['sp'] = sp_itera1
+dic_itera2['sp'] = sp_itera2
 
 # Obtain Gaussian Quadrature lambdas and weights
 
@@ -1544,6 +1561,119 @@ if software == 'openmm' and stage == 'fe':
               fin = open('sdr-ti.py', "wt")
               fin.write(data)
               fin.close()
+              shutil.copy('../../../../../'+stage+'/'+poses_def[i]+'/sdr/x00/disang.rest', './')
+              shutil.copy('../../../../../'+stage+'/'+poses_def[i]+'/sdr/x00/cv.in', './')
+              for file in glob.glob('../../../../../'+stage+'/'+poses_def[i]+'/sdr/x00/full*'):
+                shutil.copy(file, './')
+              for file in glob.glob('../../../../../'+stage+'/'+poses_def[i]+'/sdr/x00/vac*'):
+                shutil.copy(file, './')
+              for file in glob.glob('../../../../../'+stage+'/'+poses_def[i]+'/sdr/x00/tleap_solvate*'):
+                shutil.copy(file, './')
+              for file in glob.glob('../../../../../'+stage+'/'+poses_def[i]+'/sdr/x00/build*'):
+                shutil.copy(file, './')
+              os.chdir('../') 
+            os.chdir('../')
+          os.chdir('../') 
+      elif comp == 'sp':
+          subcomp = ['ee', '1v', '2v']
+          if not os.path.exists('sdr'):
+            os.makedirs('sdr')
+          os.chdir('sdr')
+          if dec_int == 'mbar':
+            if not os.path.exists(comp+'-comp'):
+              os.makedirs(comp+'-comp')
+            os.chdir(comp+'-comp')
+            itera1 = dic_itera1[comp]
+            itera2 = dic_itera2[comp]
+            shutil.copy('../../../../run_files/local-sp.bash', './run-local.bash')
+            fin = open('../../../../run_files/PBS-Op', "rt")
+            data = fin.read()
+            data = data.replace('POSE', comp).replace('STAGE', poses_def[i]) 
+            fin.close()
+            fin = open('PBS-run', "wt")
+            fin.write(data)
+            fin.close()
+            fin = open('../../../../run_files/SLURMM-Op', "rt")
+            data = fin.read()
+            data = data.replace('POSE', comp).replace('STAGE', poses_def[i]) 
+            fin.close()
+            fin = open('SLURMM-run', "wt")
+            fin.write(data)
+            fin.close()
+            for k in subcomp:
+              fin = open('../../../../lib/sdr.py', "rt")
+              data = fin.read()
+              data = data.replace('LAMBDAS', '[%s]' % ' , '.join(map(str, lambdas))).replace('LIG', mol.upper()).replace('LREF', molr.upper()).replace('TMPRT', str(temperature)).replace('TSTP', str(dt)).replace('SPITR', str(itera_steps)).replace('PRIT', str(itera2)).replace('EQIT', str(itera1)).replace('ITCH', str(itcheck)).replace('GAMMA_LN', str(gamma_ln)).replace('CMPN', str(k)).replace('CTF', cut).replace('BLCKS', str(blocks)) 
+              if hmr == 'yes':
+                data = data.replace('PRMFL', 'full.hmr.prmtop') 
+              else:
+                data = data.replace('PRMFL', 'full.prmtop') 
+              fin.close()
+              fin = open('sdr-'+k+'.py', "wt")
+              fin.write(data)
+              fin.close()
+            shutil.copy('../../../../'+stage+'/'+poses_def[i]+'/sdr/x00/disang.rest', './')
+            shutil.copy('../../../../'+stage+'/'+poses_def[i]+'/sdr/x00/cv.in', './')
+            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/sdr/x00/full*'):
+              shutil.copy(file, './')
+            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/sdr/x00/vac*'):
+              shutil.copy(file, './')
+            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/sdr/x00/tleap_solvate*'):
+              shutil.copy(file, './')
+            for file in glob.glob('../../../../'+stage+'/'+poses_def[i]+'/sdr/x00/build*'):
+              shutil.copy(file, './')
+            os.chdir('../') 
+          elif dec_int == 'ti':
+            if not os.path.exists(comp+'-comp'):
+              os.makedirs(comp+'-comp')
+            os.chdir(comp+'-comp')
+            itera1 = int(dic_itera1[comp]*itera_steps)
+            itera2 = int(dic_itera2[comp]/2)
+            for k in range(0, len(lambdas)):               
+              if not os.path.exists('%s%02d' %(comp, int(k))):
+                os.makedirs('%s%02d' %(comp, int(k)))
+              os.chdir('%s%02d' %(comp, int(k)))
+              shutil.copy('../../../../../run_files/local-sp-ti.bash', './run-local.bash')
+              fin = open('../../../../../run_files/SLURMM-Op', "rt")
+              data = fin.read()
+              data = data.replace('STAGE', poses_def[i]).replace('POSE', '%s%02d' %(comp, int(k)))
+              fin.close()
+              fin = open("SLURMM-run", "wt")
+              fin.write(data)
+              fin.close()
+              fin = open('../../../../../run_files/PBS-Op', "rt")
+              data = fin.read()
+              data = data.replace('STAGE', poses_def[i]).replace('POSE', '%s%02d' %(comp, int(k)))
+              fin.close()
+              fin = open("PBS-run", "wt")
+              fin.write(data)
+              fin.close()
+              for m in subcomp:
+                fin = open('../../../../../lib/equil-sdr.py', "rt")
+                data = fin.read()
+                data = data.replace('LBD0', '%8.6f' % lambdas[k]).replace('LIG', mol.upper()).replace('LREF', molr.upper()).replace('TMPRT', str(temperature)).replace('TSTP', str(dt)).replace('SPITR', str(itera_steps)).replace('PRIT', str(itera2)).replace('EQIT', str(itera1)).replace('ITCH', str(itcheck)).replace('GAMMA_LN', str(gamma_ln)).replace('CMPN', str(m)).replace('CTF', cut) 
+                if hmr == 'yes':
+                  data = data.replace('PRMFL', 'full.hmr.prmtop') 
+                else:
+                  data = data.replace('PRMFL', 'full.prmtop') 
+                fin.close()
+                fin = open('equil-sdr-'+m+'.py', "wt")
+                fin.write(data)
+                fin.close()
+                fin = open('../../../../../lib/sdr-ti.py', "rt")
+                data = fin.read()
+                # "Split" initial lambda into two close windows 
+                lambda1 = float(lambdas[k] - dlambda/2)
+                lambda2 = float(lambdas[k] + dlambda/2)
+                data = data.replace('LBD1', '%8.6f' % lambda1).replace('LBD2', '%8.6f' % lambda2).replace('LIG', mol.upper()).replace('LREF', molr.upper()).replace('TMPRT', str(temperature)).replace('TSTP', str(dt)).replace('SPITR', str(itera_steps)).replace('PRIT', str(itera2)).replace('EQIT', str(itera1)).replace('ITCH', str(itcheck)).replace('GAMMA_LN', str(gamma_ln)).replace('CMPN', str(m)).replace('CTF', cut).replace('BLCKS', str(blocks)) 
+                if hmr == 'yes':
+                  data = data.replace('PRMFL', 'full.hmr.prmtop') 
+                else:
+                  data = data.replace('PRMFL', 'full.prmtop') 
+                fin.close()
+                fin = open('sdr-ti-'+m+'.py', "wt")
+                fin.write(data)
+                fin.close()
               shutil.copy('../../../../../'+stage+'/'+poses_def[i]+'/sdr/x00/disang.rest', './')
               shutil.copy('../../../../../'+stage+'/'+poses_def[i]+'/sdr/x00/cv.in', './')
               for file in glob.glob('../../../../../'+stage+'/'+poses_def[i]+'/sdr/x00/full*'):

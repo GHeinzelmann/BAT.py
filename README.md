@@ -2,7 +2,9 @@
 
 *Just released: The BAT.py 2.4 version, with the following new features:*
 
-- Relative binding free energy calculations (RBFE) implemented into the BAT workflow, using both OpenMM and AMBER
+- Relative binding free energy calculations (RBFE) fully implemented into the BAT workflow for OpenMM and AMBER, using separate topologies (Septop).
+
+- Choice of three different thermodynamic paths for the RBFE calculations, with the new free energy components **x**, **ex** and **sp**.
 
 - Use of the USalign alignment program instead of lovoalign, with no installation needed
 

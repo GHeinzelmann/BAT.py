@@ -235,25 +235,85 @@ with open('full.pdb') as f_in:
     lines = (line.rstrip() for line in f_in)
     lines = list(line for line in lines if line) # Non-blank lines in a list   
 
-# Create decoupling list
+atoms_lines = []
+atoms_list = []
+atoms_array = []
+
+# Get lines from decoupling atoms
 for i in range(0, len(lines)):
     if (lines[i][0:6].strip() == 'ATOM') or (lines[i][0:6].strip() == 'HETATM'):
       if lines[i][17:20].strip() == 'LIG' or lines[i][17:20].strip() == 'LREF':
-        atoms_list.append(lines[i][6:11].strip())
+        atoms_lines.append(lines[i])
 
-for i in range(0, len(atoms_list)):
-    # Adjust atom numbering 
-    atoms_list[i]=int(atoms_list[i])-1 
+# Separate the two or four alchemical ligands
+resid_pre = float(atoms_lines[0][22:26].strip())
+j = 0
+for i in range(0, len(atoms_lines)):
+  if i != 0:
+    resid_pre = float(atoms_lines[i-1][22:26].strip())
+  resid_lig = float(atoms_lines[i][22:26].strip())
+  if resid_lig == resid_pre:
+    atoms_list.append(atoms_lines[i][6:11].strip())
+  else:
+    for k in range(0, len(atoms_list)):
+      # Adjust atom numbering 
+      atoms_list[k]=int(atoms_list[k])-1
+    atoms_array.append(list(atoms_list))
+    j = j + 1
+    atoms_list = []
+    atoms_list.append(atoms_lines[i][6:11].strip())
 
-dec_atoms=list(atoms_list)
+# Last ligand
+for k in range(0, len(atoms_list)):
+  # Adjust atom numbering 
+  atoms_list[k]=int(atoms_list[k])-1
+atoms_array.append(list(atoms_list))
 
-def split_list(a_list):
-    half = len(a_list)//2
-    return a_list[:half], a_list[half:]
+print(atoms_array)
+print(len(atoms_array))
+for i in range(0, len(atoms_array)):
+  print('Ligand size %i' %len(atoms_array[i]))
 
-A = dec_atoms
-dec_atoms_A, dec_atoms_B = split_list(A)
-
+if comp == 'v' or comp == 'e':
+  dec_atoms_A, dec_atoms_B = atoms_array[0], atoms_array[1]
+elif comp == 'x' or comp == 'ex' or comp == 'ee':
+  dec_atoms_A, dec_atoms_B = (atoms_array[0]+atoms_array[1]), (atoms_array[2]+atoms_array[3])
+elif comp == '2v':
+  dec_atoms_A, coupled_atoms1, coupled_atoms2, dec_atoms_B = atoms_array[0], atoms_array[1], atoms_array[2], atoms_array[3]
+  coupled_atoms = coupled_atoms1 + coupled_atoms2
+  all_dec_atoms = dec_atoms_A + dec_atoms_B
+  print('')
+  print('Reference ligand fully coupled atoms')
+  print('')
+  print(coupled_atoms)
+  print('')
+  print('All alchemical atoms')
+  print('')
+  print(all_dec_atoms)
+  print('')
+  # Remove interactions between alchemical and coupled atoms from ligands
+  nonbonded = [f for f in system.getForces() if isinstance(f, NonbondedForce)][0]
+  for i in all_dec_atoms:
+    for j in coupled_atoms:
+      nonbonded.addException(i,j,0.0,1.0,0.0,replace=True)
+elif comp == '1v':
+  coupled_atoms1, dec_atoms_A, dec_atoms_B, coupled_atoms2 = atoms_array[0], atoms_array[1], atoms_array[2], atoms_array[3]
+  coupled_atoms = coupled_atoms1 + coupled_atoms2
+  all_dec_atoms = dec_atoms_A + dec_atoms_B
+  print('')
+  print('Target ligand fully coupled atoms')
+  print('')
+  print(coupled_atoms)
+  print('')
+  print('All alchemical atoms')
+  print('')
+  print(all_dec_atoms)
+  print('')
+  # Remove interactions between alchemical and coupled atoms from ligands
+  nonbonded = [f for f in system.getForces() if isinstance(f, NonbondedForce)][0]
+  for i in all_dec_atoms:
+    for j in coupled_atoms:
+      nonbonded.addException(i,j,0.0,1.0,0.0,replace=True)
 print('')
 print('Ligand decoupling atoms')
 print('')
@@ -404,7 +464,7 @@ if dum_atom > 1:
   print('comforce.addBond('+str(com_atoms[1])+', '+str(bondParameters[0])+', '+str(bondParameters[1])+', '+str(bondParameters[2])+', '+str(bondParameters[3])+')')
   print('')
 
-if comp == 'x' or comp == 'ex':
+if comp == 'x' or comp == 'ex' or comp == 'ee' or comp == '2v' or comp == '1v':
 
   bondGroups = []
   bondParameters = []
@@ -516,7 +576,7 @@ for k in range(nstates):
         compound_state.lambda_sterics_B=1.0
         compound_state.lambda_electrostatics_A=lambdas[k]
         compound_state.lambda_electrostatics_B=float(1.0-lambdas[k])
-      elif comp == 'v' or comp =='w' or comp == 'x':
+      elif comp == 'v' or comp =='w' or comp == 'x' or comp == '2v' or comp == '1v':
         compound_state.lambda_sterics_A=lambdas[k]
         compound_state.lambda_sterics_B=float(1.0-lambdas[k])
         compound_state.lambda_electrostatics_A=0.0
@@ -524,6 +584,11 @@ for k in range(nstates):
       elif comp == 'ex':
         compound_state.lambda_sterics_A=lambdas[k]
         compound_state.lambda_sterics_B=float(1.0-lambdas[k])
+        compound_state.lambda_electrostatics_A=lambdas[k]
+        compound_state.lambda_electrostatics_B=float(1.0-lambdas[k])
+      elif comp == 'ee':
+        compound_state.lambda_sterics_A=1.0
+        compound_state.lambda_sterics_B=1.0
         compound_state.lambda_electrostatics_A=lambdas[k]
         compound_state.lambda_electrostatics_B=float(1.0-lambdas[k])
     compound_state.lambda_restraints=1.0

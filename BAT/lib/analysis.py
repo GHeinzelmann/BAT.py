@@ -19,15 +19,17 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
     for i in components:
       if i == 'a' or i == 'l' or i == 't' or i == 'c' or i == 'r' or i == 'm' or i == 'n':
         total_time = total_time + (dic_itera1[i]+dic_itera2[i])*itera_steps*len(attach_rest)*float(dt)/1000
+      elif i == 'sp':
+        total_time = total_time + 3*(dic_itera1[i]+dic_itera2[i])*itera_steps*len(lambdas)*float(dt)/1000
       else:
         total_time = total_time + (dic_itera1[i]+dic_itera2[i])*itera_steps*len(lambdas)*float(dt)/1000
 #    print(total_time)
 
 
     # Set initial values to zero
-    fe_a = fe_bd = fe_t = fe_m = fe_n = fe_v = fe_e = fe_c = fe_r = fe_l = fe_f = fe_w = fe_vs = fe_es = fe_x = fe_ex = 0
-    fb_a = fb_bd = fb_t = fb_m = fb_n = fb_v = fb_e = fb_c = fb_r = fb_l = fb_f = fb_w = fb_es = fb_vs = fb_x = fb_ex = 0
-    sd_a = sd_bd = sd_t = sd_m = sd_n = sd_v = sd_e = sd_c = sd_r = sd_l = sd_f = sd_w = sd_vs = sd_es = sd_x = sd_ex = 0
+    fe_a = fe_bd = fe_t = fe_m = fe_n = fe_v = fe_e = fe_c = fe_r = fe_l = fe_f = fe_w = fe_vs = fe_es = fe_x = fe_ex = fe_ee = fe_1v = fe_2v = 0
+    fb_a = fb_bd = fb_t = fb_m = fb_n = fb_v = fb_e = fb_c = fb_r = fb_l = fb_f = fb_w = fb_es = fb_vs = fb_x = fb_ex = fb_ee = fb_1v = fb_2v = 0
+    sd_a = sd_bd = sd_t = sd_m = sd_n = sd_v = sd_e = sd_c = sd_r = sd_l = sd_f = sd_w = sd_vs = sd_es = sd_x = sd_ex = sd_ee = sd_1v = sd_2v = 0
 
     # Get free energies for the whole run
     os.chdir('fe')
@@ -84,81 +86,135 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
                   fe_l = float(splitdata[9])
                 elif comp == 'r':
                   fe_r = -1.00*float(splitdata[9])
-      elif comp == 'e' or comp == 'v' or comp == 'f' or comp == 'w' or comp == 'x' or comp == 'ex':
+      elif comp == 'e' or comp == 'v' or comp == 'f' or comp == 'w' or comp == 'x' or comp == 'ex' or comp == 'sp':
         if dec_method == 'dd':
           os.chdir(dec_method)
         if dec_method == 'sdr' or dec_method == 'exchange':
+          print(os.getcwd())
           os.chdir('sdr')
         os.chdir('%s-comp' %(comp))
-        out_file=Path('./output.dat')
-        if dec_int == 'mbar':
-          if out_file.exists(): 
-            with open(out_file, "r") as f_in:
-              lines = (line.rstrip() for line in f_in)
-              lines = list(line for line in lines if line) # Non-blank lines in a list   
-              for k in range(0, len(lines)):
-                splitdata = lines[k].split()
-                if (splitdata[0].strip() == 'Relative' and splitdata[6].strip() == 'whole'):
-                  if comp == 'e' and dec_method == 'dd':
-                    fe_e = -1.00*float(splitdata[9])
-                  elif comp == 'v' and dec_method == 'dd':
-                    fe_v = -1.00*float(splitdata[9])
-                  elif comp == 'e' and dec_method == 'sdr':
-                    fe_es = -1.00*float(splitdata[9])
-                  elif comp == 'v' and dec_method == 'sdr':
-                    fe_vs = -1.00*float(splitdata[9])
-                  elif comp == 'x':
-                    fe_x = -1.00*float(splitdata[9])
-                  elif comp == 'ex':
-                    fe_ex = -1.00*float(splitdata[9])
-                  elif comp == 'f':
-                    fe_f = float(splitdata[9])
-                  elif comp == 'w':
-                    fe_w = float(splitdata[9])
-        elif dec_int == 'ti':
-          ### Determine Number of windows
-          K = 0
-          filename = './'+comp+'%02.0f/output.dat' % K
-          while os.path.isfile(filename):
-            K = K+1
-            filename = './'+comp+'%02.0f/output.dat' % K
-#          print(K)
-          if K != ti_points:
-            print('Error: Missing simulation data for TI-GQ for the '+comp+' component of the '+pose+' calculation')
-            sys.exit(1)
-          deltagop = 0
-          deltagop_er = 0
-          for k in range(K):
-            filename = './'+comp+'%02.0f/output.dat' % k
-            wind_d = 0
-            wind_er = 0
-            if  os.path.exists(filename):
-              with open(filename, "r") as f_in:
+        if comp != 'sp':
+          out_file=Path('./output.dat')
+          if dec_int == 'mbar':
+            if out_file.exists(): 
+              with open(out_file, "r") as f_in:
                 lines = (line.rstrip() for line in f_in)
                 lines = list(line for line in lines if line) # Non-blank lines in a list   
-                for j in range(0, len(lines)):
-                  splitdata = lines[j].split()
+                for k in range(0, len(lines)):
+                  splitdata = lines[k].split()
                   if (splitdata[0].strip() == 'Relative' and splitdata[6].strip() == 'whole'):
-                    wind_d = float(splitdata[9])
-                    wind_er = float(splitdata[12])
-            deltagop = deltagop + wind_d*weights[k]   
-            deltagop_er = deltagop_er + wind_er*weights[k]   
-          if comp == 'e' and dec_method == 'dd':
-            fe_e = -1.00*float(deltagop/dlambda)
-          elif comp == 'v' and dec_method == 'dd':
-            fe_v = -1.00*float(deltagop/dlambda)
-          elif comp == 'e' and (dec_method == 'sdr' or dec_method == 'exchange'):
-            fe_es = -1.00*float(deltagop/dlambda)
-          elif comp == 'v' and dec_method == 'sdr':
-            fe_vs = -1.00*float(deltagop/dlambda)
-          elif comp == 'x':
-            fe_x = -1.00*float(deltagop/dlambda)
-          elif comp == 'ex':
-            fe_ex = -1.00*float(deltagop/dlambda)
-          elif comp == 'f':
-            fe_f = float(deltagop/dlambda)
-          elif comp == 'w':
-            fe_w = float(deltagop/dlambda)
+                    if comp == 'e' and dec_method == 'dd':
+                      fe_e = -1.00*float(splitdata[9])
+                    elif comp == 'v' and dec_method == 'dd':
+                      fe_v = -1.00*float(splitdata[9])
+                    elif comp == 'e' and dec_method == 'sdr':
+                      fe_es = -1.00*float(splitdata[9])
+                    elif comp == 'v' and dec_method == 'sdr':
+                      fe_vs = -1.00*float(splitdata[9])
+                    elif comp == 'x':
+                      fe_x = -1.00*float(splitdata[9])
+                    elif comp == 'ex':
+                      fe_ex = -1.00*float(splitdata[9])
+                    elif comp == 'f':
+                      fe_f = float(splitdata[9])
+                    elif comp == 'w':
+                      fe_w = float(splitdata[9])
+          elif dec_int == 'ti':
+            ### Determine Number of windows
+            K = 0
+            filename = './'+comp+'%02.0f/output.dat' % K
+            while os.path.isfile(filename):
+              K = K+1
+              filename = './'+comp+'%02.0f/output.dat' % K
+#            print(K)
+            if K != ti_points:
+              print('Error: Missing simulation data for TI-GQ for the '+comp+' component of the '+pose+' calculation')
+              sys.exit(1)
+            deltagop = 0
+            deltagop_er = 0
+            for k in range(K):
+              filename = './'+comp+'%02.0f/output.dat' % k
+              wind_d = 0
+              wind_er = 0
+              if  os.path.exists(filename):
+                with open(filename, "r") as f_in:
+                  lines = (line.rstrip() for line in f_in)
+                  lines = list(line for line in lines if line) # Non-blank lines in a list   
+                  for j in range(0, len(lines)):
+                    splitdata = lines[j].split()
+                    if (splitdata[0].strip() == 'Relative' and splitdata[6].strip() == 'whole'):
+                      wind_d = float(splitdata[9])
+                      wind_er = float(splitdata[12])
+              deltagop = deltagop + wind_d*weights[k]   
+              deltagop_er = deltagop_er + wind_er*weights[k]   
+            if comp == 'e' and dec_method == 'dd':
+              fe_e = -1.00*float(deltagop/dlambda)
+            elif comp == 'v' and dec_method == 'dd':
+              fe_v = -1.00*float(deltagop/dlambda)
+            elif comp == 'e' and (dec_method == 'sdr' or dec_method == 'exchange'):
+              fe_es = -1.00*float(deltagop/dlambda)
+            elif comp == 'v' and dec_method == 'sdr':
+              fe_vs = -1.00*float(deltagop/dlambda)
+            elif comp == 'x':
+              fe_x = -1.00*float(deltagop/dlambda)
+            elif comp == 'ex':
+              fe_ex = -1.00*float(deltagop/dlambda)
+            elif comp == 'f':
+              fe_f = float(deltagop/dlambda)
+            elif comp == 'w':
+              fe_w = float(deltagop/dlambda)
+        else:
+          subcomp = ['ee','1v','2v']
+          for m in subcomp:
+            out_file=Path('./output-%s.dat' %m )
+            if dec_int == 'mbar':
+              if out_file.exists(): 
+                with open(out_file, "r") as f_in:
+                  lines = (line.rstrip() for line in f_in)
+                  lines = list(line for line in lines if line) # Non-blank lines in a list   
+                  for k in range(0, len(lines)):
+                    splitdata = lines[k].split()
+                    if (splitdata[0].strip() == 'Relative' and splitdata[6].strip() == 'whole'):
+                      if m == 'ee':
+                        fe_ee = -1.00*float(splitdata[9])
+                      elif m == '1v':
+                        fe_1v = -1.00*float(splitdata[9])
+                      elif m == '2v':
+                        fe_2v = -1.00*float(splitdata[9])
+            elif dec_int == 'ti':
+              ### Determine Number of windows
+              K = 0
+              filename = './'+comp+'%02.0f/output-%s.dat' % (K,m)
+              while os.path.isfile(filename):
+                K = K+1
+                filename = './'+comp+'%02.0f/output-%s.dat' % (K,m)
+#              print(K)
+              if K != ti_points:
+                print('Error: Missing simulation data for TI-GQ for the '+comp+' component of the '+pose+' calculation')
+                sys.exit(1)
+              deltagop = 0
+              deltagop_er = 0
+              for k in range(K):
+                filename = './'+comp+'%02.0f/output-%s.dat' % (k,m)
+                wind_d = 0
+                wind_er = 0
+                if  os.path.exists(filename):
+                  with open(filename, "r") as f_in:
+                    lines = (line.rstrip() for line in f_in)
+                    lines = list(line for line in lines if line) # Non-blank lines in a list   
+                    for j in range(0, len(lines)):
+                      splitdata = lines[j].split()
+                      if (splitdata[0].strip() == 'Relative' and splitdata[6].strip() == 'whole'):
+                        wind_d = float(splitdata[9])
+                        wind_er = float(splitdata[12])
+                deltagop = deltagop + wind_d*weights[k]   
+                deltagop_er = deltagop_er + wind_er*weights[k]   
+              if m == 'ee':
+                fe_ee = -1.00*float(deltagop/dlambda)
+              elif m == '1v':
+                fe_1v = -1.00*float(deltagop/dlambda)
+              elif m == '2v':
+                fe_2v = -1.00*float(deltagop/dlambda)
       os.chdir('../../') 
 
     os.chdir('../../') 
@@ -177,13 +233,16 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
     blstd_vs = []
     blstd_x = []
     blstd_ex = []
+    blstd_ee = []
+    blstd_1v = []
+    blstd_2v = []
     blstd_f = []
     blstd_w = []
     blstd_m = []
     blstd_n = []
     for k in range(0, blocks):
       # Reset free energy values
-      fb_a = fb_bd = fb_t = fb_m = fb_n = fb_v = fb_e = fb_c = fb_r = fb_l = fb_f = fb_w = fb_es = fb_vs = 0
+      fb_a = fb_bd = fb_t = fb_m = fb_n = fb_v = fb_e = fb_c = fb_r = fb_l = fb_f = fb_w = fb_es = fb_vs = fb_x = fb_ex = fb_ee = fb_1v = fb_2v = 0 
       for i in range(0, len(components)):
         comp = components[i]
         if comp == 'a' or comp == 'l' or comp == 't' or comp == 'c' or comp == 'r' or comp == 'm' or comp == 'n':
@@ -214,82 +273,127 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
               fb_r = -1.00*float(splitdata[8])
               blstd_r.append(fb_r)
           os.chdir('../')
-        elif comp == 'v' or comp == 'e' or comp == 'f' or comp == 'w' or comp == 'x' or comp == 'ex':
+        elif comp == 'v' or comp == 'e' or comp == 'f' or comp == 'w' or comp == 'x' or comp == 'ex' or comp == 'sp':
           if dec_method == 'dd':
             os.chdir(dec_method)
           if dec_method == 'sdr' or dec_method == 'exchange':
             os.chdir('sdr')
-          if dec_int == 'mbar': 
-            with open('./'+comp+'-comp/output.dat', "r") as f_in:
-              lines = (line.rstrip() for line in f_in)
-              lines = list(line for line in lines if 'Relative' in line and 'block' in line)
-              splitdata = lines[k].split()
-              if comp == 'e' and dec_method == 'dd':
-                fb_e = -1.00*float(splitdata[8])
-                blstd_e.append(fb_e)
-              elif comp == 'e' and (dec_method == 'sdr' or dec_method == 'exchange'):
-                fb_es = -1.00*float(splitdata[8])
-                blstd_es.append(fb_es)
-              elif comp == 'v' and dec_method == 'dd':
-                fb_v = -1.00*float(splitdata[8])
-                blstd_v.append(fb_v)
-              elif comp == 'v' and dec_method == 'sdr':
-                fb_vs = -1.00*float(splitdata[8])
-                blstd_vs.append(fb_vs)
-              elif comp == 'x':
-                fb_x = -1.00*float(splitdata[8])
-                blstd_x.append(fb_x)
-              elif comp == 'ex':
-                fb_ex = -1.00*float(splitdata[8])
-                blstd_ex.append(fb_ex)
-              elif comp == 'f':
-                fb_f = float(splitdata[8])
-                blstd_f.append(fb_f)
-              elif comp == 'w':
-                fb_w = float(splitdata[8])
-                blstd_w.append(fb_w)
-          elif dec_int == 'ti': 
-              ### Determine Number of windows
-              K = 0
-              filename = './'+comp+'-comp/'+comp+'%02.0f/output.dat' % K
-              while os.path.isfile(filename):
-                K = K+1
+          if comp != 'sp':
+            if dec_int == 'mbar': 
+              with open('./'+comp+'-comp/output.dat', "r") as f_in:
+                lines = (line.rstrip() for line in f_in)
+                lines = list(line for line in lines if 'Relative' in line and 'block' in line)
+                splitdata = lines[k].split()
+                if comp == 'e' and dec_method == 'dd':
+                  fb_e = -1.00*float(splitdata[8])
+                  blstd_e.append(fb_e)
+                elif comp == 'e' and (dec_method == 'sdr' or dec_method == 'exchange'):
+                  fb_es = -1.00*float(splitdata[8])
+                  blstd_es.append(fb_es)
+                elif comp == 'v' and dec_method == 'dd':
+                  fb_v = -1.00*float(splitdata[8])
+                  blstd_v.append(fb_v)
+                elif comp == 'v' and dec_method == 'sdr':
+                  fb_vs = -1.00*float(splitdata[8])
+                  blstd_vs.append(fb_vs)
+                elif comp == 'x':
+                  fb_x = -1.00*float(splitdata[8])
+                  blstd_x.append(fb_x)
+                elif comp == 'ex':
+                  fb_ex = -1.00*float(splitdata[8])
+                  blstd_ex.append(fb_ex)
+                elif comp == 'f':
+                  fb_f = float(splitdata[8])
+                  blstd_f.append(fb_f)
+                elif comp == 'w':
+                  fb_w = float(splitdata[8])
+                  blstd_w.append(fb_w)
+            elif dec_int == 'ti': 
+                ### Determine Number of windows
+                K = 0
                 filename = './'+comp+'-comp/'+comp+'%02.0f/output.dat' % K
-              deltagop = 0
-              for j in range(K):
-                filename = './'+comp+'-comp/'+comp+'%02.0f/output.dat' % j
-                wind_d = 0
-                if  os.path.exists(filename):
-                  with open(filename, "r") as f_in:
-                    lines = (line.rstrip() for line in f_in)
-                    lines = list(line for line in lines if 'Relative' in line and 'block' in line)
-                    splitdata = lines[k].split()
-                    wind_d = float(splitdata[8])
-                    deltagop = deltagop + wind_d*weights[j]   
-              if comp == 'e' and dec_method == 'dd':
-                fb_e = -1.00*float(deltagop/dlambda)
-                blstd_e.append(fb_e)
-              elif comp == 'v' and dec_method == 'dd':
-                fb_v = -1.00*float(deltagop/dlambda)
-                blstd_v.append(fb_v)
-              elif comp == 'e' and (dec_method == 'sdr' or dec_method == 'exchange'):
-                fb_es = -1.00*float(deltagop/dlambda)
-                blstd_es.append(fb_es)
-              elif comp == 'v' and dec_method == 'sdr':
-                fb_vs = -1.00*float(deltagop/dlambda)
-                blstd_vs.append(fb_vs)
-              elif comp == 'x':
-                fb_x = -1.00*float(deltagop/dlambda)
-                blstd_x.append(fb_x)
-              elif comp == 'ex':
-                fb_ex = -1.00*float(deltagop/dlambda)
-                blstd_ex.append(fb_ex)
-              elif comp == 'f':
-                fb_f = float(deltagop/dlambda)
-                blstd_f.append(fb_f)
-              elif comp == 'w':
-                fb_w = float(deltagop/dlambda)
-                blstd_w.append(fb_w)
+                while os.path.isfile(filename):
+                  K = K+1
+                  filename = './'+comp+'-comp/'+comp+'%02.0f/output.dat' % K
+                deltagop = 0
+                for j in range(K):
+                  filename = './'+comp+'-comp/'+comp+'%02.0f/output.dat' % j
+                  wind_d = 0
+                  if  os.path.exists(filename):
+                    with open(filename, "r") as f_in:
+                      lines = (line.rstrip() for line in f_in)
+                      lines = list(line for line in lines if 'Relative' in line and 'block' in line)
+                      splitdata = lines[k].split()
+                      wind_d = float(splitdata[8])
+                      deltagop = deltagop + wind_d*weights[j]   
+                if comp == 'e' and dec_method == 'dd':
+                  fb_e = -1.00*float(deltagop/dlambda)
+                  blstd_e.append(fb_e)
+                elif comp == 'v' and dec_method == 'dd':
+                  fb_v = -1.00*float(deltagop/dlambda)
+                  blstd_v.append(fb_v)
+                elif comp == 'e' and (dec_method == 'sdr' or dec_method == 'exchange'):
+                  fb_es = -1.00*float(deltagop/dlambda)
+                  blstd_es.append(fb_es)
+                elif comp == 'v' and dec_method == 'sdr':
+                  fb_vs = -1.00*float(deltagop/dlambda)
+                  blstd_vs.append(fb_vs)
+                elif comp == 'x':
+                  fb_x = -1.00*float(deltagop/dlambda)
+                  blstd_x.append(fb_x)
+                elif comp == 'ex':
+                  fb_ex = -1.00*float(deltagop/dlambda)
+                  blstd_ex.append(fb_ex)
+                elif comp == 'f':
+                  fb_f = float(deltagop/dlambda)
+                  blstd_f.append(fb_f)
+                elif comp == 'w':
+                  fb_w = float(deltagop/dlambda)
+                  blstd_w.append(fb_w)
+          else:
+            subcomp = ['ee','1v','2v']
+            for m in subcomp:
+              if dec_int == 'mbar': 
+                with open('./'+comp+'-comp/output-%s.dat' % m, "r") as f_in:
+                  lines = (line.rstrip() for line in f_in)
+                  lines = list(line for line in lines if 'Relative' in line and 'block' in line)
+                  splitdata = lines[k].split()
+                  if m == 'ee':
+                    fb_ee = -1.00*float(splitdata[8])
+                    blstd_ee.append(fb_ee)
+                  elif m == '1v':
+                    fb_1v = -1.00*float(splitdata[8])
+                    blstd_1v.append(fb_1v)
+                  elif m == '2v':
+                    fb_2v = -1.00*float(splitdata[8])
+                    blstd_2v.append(fb_2v)
+              elif dec_int == 'ti': 
+                  ### Determine Number of windows
+                  K = 0
+                  filename = './'+comp+'-comp/'+comp+'%02.0f/output-%s.dat' % (K,m)
+                  while os.path.isfile(filename):
+                    K = K+1
+                    filename = './'+comp+'-comp/'+comp+'%02.0f/output-%s.dat' % (K,m)
+                  deltagop = 0
+                  for j in range(K):
+                    filename = './'+comp+'-comp/'+comp+'%02.0f/output-%s.dat' % (j,m)
+                    wind_d = 0
+                    if  os.path.exists(filename):
+                      with open(filename, "r") as f_in:
+                        lines = (line.rstrip() for line in f_in)
+                        lines = list(line for line in lines if 'Relative' in line and 'block' in line)
+                        splitdata = lines[k].split()
+                        wind_d = float(splitdata[8])
+                        deltagop = deltagop + wind_d*weights[j]   
+                  if m == 'ee':
+                    fb_ee = -1.00*float(deltagop/dlambda)
+                    blstd_ee.append(fb_ee)
+                  elif m == '1v':
+                    fb_1v = -1.00*float(deltagop/dlambda)
+                    blstd_1v.append(fb_1v)
+                  elif m == '2v':
+                    fb_2v = -1.00*float(deltagop/dlambda)
+                    blstd_2v.append(fb_2v)
           os.chdir('../')
 
       # Add components and write results for the blocks
@@ -340,6 +444,13 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
         if components[i] == 'ex' and dec_method == 'exchange':
           resfile.write('%-20s %8.2f\n' % ('Full exchange ('+dec_int.upper()+');', fb_ex))
           total_fb = total_fb + fb_ex
+        if components[i] == 'sp' and dec_method == 'exchange':
+          resfile.write('%-20s %8.2f\n' % ('LJ 1 (2) ('+dec_int.upper()+');', fb_1v))
+          total_fb = total_fb + fb_1v
+          resfile.write('%-20s %8.2f\n' % ('Electro 1-2 ('+dec_int.upper()+');', fb_ee))
+          total_fb = total_fb + fb_ee
+          resfile.write('%-20s %8.2f\n' % ('LJ 2 (1) ('+dec_int.upper()+');', fb_2v))
+          total_fb = total_fb + fb_2v
         # mevc modification
         if components[i] == 'c':
           resfile.write('%-20s %8.2f\n' % ('Release ligand TR;', fb_bd))
@@ -389,10 +500,18 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
         sd_x = np.std(blstd_x)
       if comp == 'ex':
         sd_ex = np.std(blstd_ex)
+      if comp == 'sp':
+        sd_ee = np.std(blstd_ee)
+        sd_1v = np.std(blstd_1v)
+        sd_2v = np.std(blstd_2v)
       if comp == 'f':
         sd_f = np.std(blstd_f)
       if comp == 'w':
         sd_w = np.std(blstd_w)
+
+#    print(sd_ee, sd_1v, sd_2v)
+#    print(blstd_ee, blstd_1v, blstd_2v)
+#    print(np.average(blstd_ee), np.average(blstd_1v), np.average(blstd_2v))
 
     # Write final results
     total_fe = 0
@@ -454,6 +573,16 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
           resfile.write('%-20s %8.2f;    %3.2f\n' % ('Full exchange ('+dec_int.upper()+');', fe_ex, sd_ex))
           total_fe = total_fe + fe_ex
           total_sd2 = total_sd2 + sd_ex**2
+        if components[i] == 'sp' and dec_method == 'exchange':
+          resfile.write('%-20s %8.2f;    %3.2f\n' % ('LJ 1 (2) ('+dec_int.upper()+');', fe_1v, sd_1v))
+          total_fe = total_fe + fe_1v
+          total_sd2 = total_sd2 + sd_1v**2
+          resfile.write('%-20s %8.2f;    %3.2f\n' % ('Electro 1-2 ('+dec_int.upper()+');', fe_ee, sd_ee))
+          total_fe = total_fe + fe_ee
+          total_sd2 = total_sd2 + sd_ee**2
+          resfile.write('%-20s %8.2f;    %3.2f\n' % ('LJ 2 (1) ('+dec_int.upper()+');', fe_2v, sd_2v))
+          total_fe = total_fe + fe_2v
+          total_sd2 = total_sd2 + sd_2v**2
         # mevc modification
         if components[i] == 'c':
           resfile.write('%-20s %8.2f;    \n' % ('Release ligand TR;',fe_bd))
@@ -923,7 +1052,7 @@ def fe_values(blocks, components, temperature, pose, attach_rest, lambdas, weigh
     # Get MBAR free energy averages for the blocks
     for k in range(0, blocks):
       # Reset free energy values
-      fb_a = fb_bd = fb_t = fb_m = fb_n = fb_v = fb_e = fb_c = fb_r = fb_l = fb_f = fb_w = fb_es = fb_vs = 0
+      fb_a = fb_bd = fb_t = fb_m = fb_n = fb_v = fb_e = fb_c = fb_r = fb_l = fb_f = fb_w = fb_es = fb_vs = fb_x = fb_ex = 0 
       for i in range(0, len(components)):
         comp = components[i]
         if comp == 'a' or comp == 'l' or comp == 't' or comp == 'c' or comp == 'r' or comp == 'm' or comp == 'n':
