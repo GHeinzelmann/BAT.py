@@ -141,11 +141,11 @@ To include a new receptor system, some additional input data is needed. They inc
 
 # RBFE calculations
 
-The relative calculations from BAT.py will use the separate topologies (SepTop) approach, which was proposed originally by Rocklin et al. [17], and recently reintroduced by Baumann et al. [18]. Here we propose a slightly different cycle, which makes our calculations also suitable for transformations between ligands that have different net charges. 
+The relative calculations from BAT.py will use the separate topologies (SepTop) approach, which was proposed originally by Rocklin et al. [17], and recently reintroduced by Baumann et al. [18]. Here we propose three different paths with two possible thermodynamic cycles, introducing the new free energy components **x**, **ex** and **sp**. Our SDR approach makes our calculations also suitable for transformations between ligands that have different net charges. 
 
 ![](doc/cycle.jpg)
 
-A few example input files for RBFE calculations are provided inside the ./BAT/example-input-files/ folder, which can be used the same way as explained in the ABFE tutorial above. More details on the meaning of each file are provided in the Relative User Guide included inside the ./doc folder. 
+A few example input files for RBFE calculations are provided inside the ./BAT/example-input-files/ folder, which can be used the same way as explained in the ABFE tutorial above. More details on the meaning of each file are provided in the Relative User Guide, inside the ./doc folder. This guide is currently being updated to also include the **ex** and **sp** components.  ´
 
 # More information and BAT.py citations
 
