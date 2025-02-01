@@ -145,7 +145,7 @@ The relative calculations from BAT.py will use the separate topologies (SepTop) 
 
 ![](doc/cycle.jpg)
 
-A few example input files for RBFE calculations are provided inside the ./BAT/example-input-files/ folder, which can be used the same way as explained in the ABFE tutorial above. More details on the meaning of each file are provided in the Relative User Guide, inside the ./doc folder. This guide is currently being updated to also include the **ex** and **sp** components.  ´
+A few example input files for RBFE calculations are provided inside the ./BAT/example-input-files/ folder, which can be used the same way as explained in the ABFE tutorial above. More details on the meaning of each file are provided in the Relative User Guide, inside the ./doc folder. 
 
 # More information and BAT.py citations
 
