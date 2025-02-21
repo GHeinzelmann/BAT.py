@@ -577,7 +577,8 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
           shutil.copytree('../../../build_files', '../exchange_files')
         os.chdir('../exchange_files')
         shutil.copy('../../../equil/'+poser+'/md%02d.rst7' %fwin, './')
-        shutil.copy('../../../equil/'+pose+'/full.pdb', './aligned-nc.pdb')
+#        shutil.copy('../../../equil/'+poser+'/full.pdb', './aligned-nc.pdb')
+        shutil.copy('../build_files/fe-'+mol.lower()+'.pdb', './aligned-nc.pdb')
         for file in glob.glob('../../../equil/%s/full*.prmtop' %poser.lower()):
           shutil.copy(file, './')
         for file in glob.glob('../../../equil/%s/vac*' %poser.lower()):
@@ -627,12 +628,23 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
         p1_vmd = p1_resid
   
 
+        lines = []
         # Replace names in initial files and VMD scripts
         with open("prep-ini.tcl", "rt") as fin:
           with open("prep.tcl", "wt") as fout:
             for line in fin:
+              lines.append(line)
               fout.write(line.replace('MMM', molr).replace('mmm', molr.lower()).replace('NN', p1_atom).replace('P1A', p1_vmd).replace('FIRST','2').replace('LAST',str(rec_res)).replace('STAGE','fe').replace('XDIS','%4.2f' %l1_x).replace('YDIS','%4.2f' %l1_y).replace('ZDIS','%4.2f' %l1_z).replace('RANG','%4.2f' %l1_range).replace('DMAX','%4.2f' %max_adis).replace('DMIN','%4.2f' %min_adis).replace('SDRD','%4.2f' %sdr_dist).replace('OTHRS', str(other_mol_vmd)))
+        fin.close()
+        fout.close()
 
+        # Do not center protein to maintain alignment
+        with open("prep2.tcl", "wt") as fout:
+          for i in range (0,len(lines)):
+            if '$all moveby [vecinvert [measure center $pr weight mass]]' not in lines[i]:
+              fout.write(lines[i].replace('MMM', molr).replace('mmm', molr.lower()).replace('NN', p1_atom).replace('P1A', p1_vmd).replace('FIRST','2').replace('LAST',str(rec_res)).replace('STAGE','fe').replace('XDIS','%4.2f' %l1_x).replace('YDIS','%4.2f' %l1_y).replace('ZDIS','%4.2f' %l1_z).replace('RANG','%4.2f' %l1_range).replace('DMAX','%4.2f' %max_adis).replace('DMIN','%4.2f' %min_adis).replace('SDRD','%4.2f' %sdr_dist).replace('OTHRS', str(other_mol_vmd)))
+        fout.close()
+        lines = []
 
         # Align to reference (equilibrium) structure using VMD's measure fit
         sp.call('vmd -dispdev text -e measure-fit.tcl', shell=True)
@@ -644,7 +656,7 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
               if len(splitdata) > 3:
                   newfile.write(line)
         sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y', shell=True)
-        sp.call('vmd -dispdev text -e prep.tcl', shell=True)
+        sp.call('vmd -dispdev text -e prep2.tcl', shell=True)
 
         # Check size of anchor file 
         anchor_file = 'anchors.txt'

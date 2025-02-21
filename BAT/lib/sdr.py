@@ -499,8 +499,8 @@ if comp != 'ex':
   alchemical_region_A = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_a_atoms, name='A')
   alchemical_region_B = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_b_atoms, name='B')
 else:
-  alchemical_region_A = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_a_atoms, name='A', softcore_beta = 6.0)
-  alchemical_region_B = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_b_atoms, name='B', softcore_beta = 6.0)
+  alchemical_region_A = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_a_atoms, name='A', softcore_beta = 4.0)
+  alchemical_region_B = openmmtools.alchemy.AlchemicalRegion(alchemical_atoms = ligand_b_atoms, name='B', softcore_beta = 4.0)
 alchemical_system_in = factory.create_alchemical_system(reference_system, alchemical_regions = [alchemical_region_A, alchemical_region_B])
 
 # Create alchemical states

@@ -21,7 +21,7 @@ P3 = :363@CA
 
 #other_mol = []     # List of extra residues names that will be included in the simulations
 
-solv_shell = 4      # Water molecules around the protein that will be kept in the initial structure (in angstroms)
+#solv_shell = 4      # Water molecules around the protein that will be kept in the initial structure (in angstroms)
 
 # Variables for setting up equilibrium and free energy calculations, also used on analysis       
 
