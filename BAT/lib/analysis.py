@@ -107,7 +107,7 @@ def fe_openmm(components, temperature, pose, dec_method, rest, attach_rest, lamb
                       fe_e = -1.00*float(splitdata[9])
                     elif comp == 'v' and dec_method == 'dd':
                       fe_v = -1.00*float(splitdata[9])
-                    elif comp == 'e' and dec_method == 'sdr':
+                    elif comp == 'e' and (dec_method == 'sdr' or dec_method == 'exchange'):
                       fe_es = -1.00*float(splitdata[9])
                     elif comp == 'v' and dec_method == 'sdr':
                       fe_vs = -1.00*float(splitdata[9])
@@ -1516,8 +1516,11 @@ def fe_mbar(comp, pose, mode, rest_file, temperature):
     datfile = open('./data/mbar-'+comp+'-'+mode+'.dat', 'w')
     for k in range(K):
       if comp != 'u': # Attach/release
-        print ("%10.5f %10.5f %10.5f %12.7f %12.7f" % ( rfc[k,0]/rfc[-1,0], Deltaf[0,k]/beta, dDeltaf[0,k]/beta, req[k,0], rfc[k,0] ))
-        datfile.write ( "%10.5f %10.5f %10.5f %12.7f %12.7f\n" % ( rfc[k,0]/rfc[-1,0], Deltaf[0,k]/beta, dDeltaf[0,k]/beta, req[k,0], rfc[k,0] ) )
+        rfc_last = rfc[-1,0]
+        if rfc_last == 0:
+          rfc_last = 1
+        print ("%10.5f %10.5f %10.5f %12.7f %12.7f" % ( rfc[k,0]/rfc_last, Deltaf[0,k]/beta, dDeltaf[0,k]/beta, req[k,0], rfc[k,0] ))
+        datfile.write ( "%10.5f %10.5f %10.5f %12.7f %12.7f\n" % ( rfc[k,0]/rfc_last, Deltaf[0,k]/beta, dDeltaf[0,k]/beta, req[k,0], rfc[k,0] ) )
       else: # Umbrella/Translation
         print ("%10.5f %10.5f %10.5f %12.7f %12.7f" % ( req[k,0], Deltaf[0,k]/beta, dDeltaf[0,k]/beta, req[k,0], rfc[k,0] ))
         datfile.write ( "%10.5f %10.5f %10.5f %12.7f %12.7f\n" % ( req[k,0], Deltaf[0,k]/beta, dDeltaf[0,k]/beta, req[k,0], rfc[k,0] ) )
