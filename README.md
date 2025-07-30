@@ -12,12 +12,16 @@
  
 - Example input files for ranking different ligands
 
+*COMING SOON:*
+
+- Regular (common-core) RBFE calculations using AMBER's *pmemd.cuda* software, which will be fully integrated into the BAT workflow
+
 
 
 \- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
-*See also: GHOAT.py, a fully automated tool for guest-host ABFE calculations using SDR with pmemd.cuda:* 
+*See also: GHOAT.py, a fully automated tool for guest-host ABFE calculations using SDR, compatible with AMBER and OpenMM:* 
 
 https://github.com/GHeinzelmann/GHOAT.py 
 
