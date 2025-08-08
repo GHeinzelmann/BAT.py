@@ -1,0 +1,126 @@
+#!/usr/bin/env python2
+
+#############################################################################################################
+################ Input file for BAT.py, for fully automated binding free energy calculations ################
+#############################################################################################################
+
+# Calculation definitions
+
+calc_type = rank                                                  # dock (compare poses), rank (compare ligands) or crystal (single complex)
+celpp_receptor = receptor-5uf0                                    # Choose CELPP receptor in upper case or pdb code in lower case
+ligand_list = [lig-5uoo,lig-4z93]                                 # Names of the two ligands for the RBFE transformation
+#ligand_list = [lig-5uey,lig-5uew]                                # Names for the other transformation
+#ligand_list = [lig-7usj,lig-5u2c]                                # Names for the other transformation
+
+# Protein anchors 
+
+P1 = :425@CA          
+P2 = :447@CA
+P3 = :363@CA
+
+# Molecules other than receptor and ligand 
+
+#other_mol = []     # List of extra residues names that will be included in the simulations
+
+solv_shell = 4      # Water molecules around the protein that will be kept in the initial structure (in angstroms)
+
+# Variables for setting up equilibrium and free energy calculations, also used on analysis       
+
+fe_type = custom                    # Configuration for common-core RBFE 
+
+components = [ e x ]                # Configuration for common-core RBFE
+
+release_eq = [ 10.0 2.5 0.5 0.0 ]   # Equilibrium gradual release weights
+
+attach_rest = [ 0.00 ]              # Attach/release weights (not used for common-core RBFE, set as zero)
+
+#lambdas = [0.009219682876640378 0.0479413718147626 0.11504866290284765 0.20634102285669126 0.31608425050090994 0.43738329574426554 0.5626167042557344 0.6839157494990901 0.7936589771433087 0.8849513370971523 0.9520586281852375 0.9907803171233596]  # MBAR
+
+sdr_dist = 32.00                    # SDR distance
+
+dec_method = exchange               # Using exchange for common-core RBFE
+
+dec_int = ti                        # Integration method for double decoupling (MBAR or TI with Gaussian quadrature)
+
+ti_points = 12                      # Number of TI-GQ points
+
+gti_add_sc = 3                      # Choose which sets of interactions are scaled with lambda
+
+blocks = 5                          # Number of blocks for block data analysis
+
+# Force constants (Only applied during equilibration when using common-core RBFE)
+
+rec_dihcf_force      =   0.0  # Protein conformational dihedral spring constant - kcal/mol/rad**2 - zero for common-core RBFE
+rec_discf_force      =   0.0  # Protein conformational distance spring constant - kcal/mol/Angstrom**2 - zero for common-core RBFE
+lig_distance_force   =   5.0  # Ligand pulling distance spring constant kcal/mol/Angstrom**2
+lig_angle_force      = 250.0  # Ligand angle/dihedral spring constant - kcal/mol/rad**2
+lig_dihcf_force      =  70.0  # Ligand conformational dihedral spring constant - kcal/mol/rad**2
+rec_com_force        =  10.0  # Protein COM spring constant
+lig_com_force        =  10.0  # Ligand COM spring constant for simultaneous decoupling
+
+# Water model, number and box size in the x and y direction
+
+water_model     = TIP3P   # Water model (SPCE, TIP4PEW, TIP3P, TIP3PF or OPC)
+#num_waters      = 13000   # Number of waters in the system
+buffer_x        = 12      # Box solvation buffer in the x axis
+buffer_y        = 12      # Box solvation buffer in the y axis 
+buffer_z        = 12      # Box solvation buffer in the z axis 
+lig_buffer      = 15      # Buffer size for the three axes of the ligand-only box
+
+# Counterions 
+
+neutralize_only = no     # neutralize only or also ionize (yes or no)
+cation = Na+             # cation for neutralization/ionization                
+anion = Cl-              # anion  for neutralization/ionization   
+ion_conc = 0.15          # salt concentration for all boxes
+
+# Simulation parameters
+
+hmr         =   no           # Use hydrogen mass repartitioning (yes or no)
+
+Temperature	=   298.15       # Temperature of simulation and analysis 
+
+eq_steps1	=   100000       # Number of steps for equilibration gradual release 
+eq_steps2	=   1000000      # Number of steps for equilibration after release
+
+e_steps1	=   200000       # Number of steps per charging window (equilibrium)   
+e_steps2	=   400000       # Number of steps per charging window (production) 
+
+x_steps1	=   400000       # Number of steps per LJ exchange window (equilibrium)   
+x_steps2	=   600000       # Number of steps per LJ exchange window (production) 
+
+# Amber options for production simulations
+
+ntpr = 1000                # print energy every ntpr steps to output file (controls DD output)
+ntwr = 10000               # write the restart file every ntwr steps
+ntwe = 0                   # write energies and temperatures to mden file every ntwe steps (0 = not write to this file)
+ntwx = 2500                # write coordinates to trajectory file every ntwx steps (controls PMF and restraints output)
+cut = 9.0                  # cutoff for nonbonded interactions 
+gamma_ln = 1.0             # collision frequency in ps^-1 for Langevin Dynamics (temperature control)
+barostat = 2               # type of barostat to keep the pressure constant (1 = Berendsen-default /2 - Monte Carlo)
+dt = 0.002                 # simulation time step in ps
+
+# Conformational restraints on the protein backbone (not used for common-core RBFE)
+
+rec_bb		=  no          
+
+# Ligand anchor search definitions
+
+l1_x            =  2.38     # X distance between P1 and center of L1 search range
+l1_y            =  1.75     # Y distance between P1 and center of L1 search range  
+l1_z            = 11.13     # Z distance between P1 and center of L1 search range  
+l1_range        =  2.50     # search radius for the first ligand anchor L1 
+min_adis        =  3.00     # minimum distance between anchors
+max_adis        =  7.00     # maximum distance between anchors
+
+# Force field options for receptor and ligand
+
+receptor_ff = protein.ff14SB   # Force field for receptor atoms
+ligand_ff = gaff               # Force field for ligand atoms (gaff or gaff2 available)
+ligand_ph = 7.0                # Choose pH for ligand protonation
+retain_lig_prot = yes          # Retain ligand protonation
+ligand_charge = 0              # Choose ligand charge (only needed for the equil step)
+
+# Simulation software
+
+software = amber

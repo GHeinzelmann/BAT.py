@@ -1624,12 +1624,18 @@ def fe_dd(comp, pose, mode, lambdas, weights, dec_int, dec_method, rest_file, te
     N_max = 20000 # Max frames for any simulation window, you should check this if you did some long runs
 
 
-    os.chdir('fe')
-    os.chdir(pose)
-    if dec_method == 'dd':
+    if dec_method == 'sdr' or dec_method == 'exchange':
+      os.chdir('fe')
+      os.chdir(pose)
+      os.chdir('sdr')
+    elif dec_method == 'dd':
+      os.chdir('fe')
+      os.chdir(pose)
       os.chdir('dd')
     else:
-      os.chdir('sdr')
+      os.chdir('rbfe')
+      os.chdir(pose)
+      os.chdir(dec_method)
     if not os.path.exists('data'):
       os.makedirs('data')
 
