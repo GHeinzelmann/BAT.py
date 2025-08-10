@@ -8,9 +8,9 @@
 
 calc_type = rank                                                  # dock (compare poses), rank (compare ligands) or crystal (single complex)
 celpp_receptor = receptor-5uf0                                    # Choose CELPP receptor in upper case or pdb code in lower case
-ligand_list = [lig-5uoo,lig-4z93]                                 # Names of the two ligands for the RBFE transformation
-#ligand_list = [lig-5uey,lig-5uew]                                # Names for the other transformation
-#ligand_list = [lig-7usj,lig-5u2c]                                # Names for the other transformation
+ligand_list = [lig-5uew,lig-5uey]                                 # Names of the two ligands for the RBFE transformation
+#ligand_list = [lig-4z93,lig-5uoo]                                 # Names for the other transformation
+#ligand_list = [lig-5u2c,lig-7usj]                                 # Names for the other transformation
 
 # Protein anchors 
 
@@ -48,7 +48,7 @@ gti_add_sc = 3                      # Choose which sets of interactions are scal
 
 blocks = 5                          # Number of blocks for block data analysis
 
-# Force constants (Only applied during equilibration when using common-core RBFE)
+# Force constants (COM ones always present, others only applied during equilibration when using common-core RBFE)
 
 rec_dihcf_force      =   0.0  # Protein conformational dihedral spring constant - kcal/mol/rad**2 - zero for common-core RBFE
 rec_discf_force      =   0.0  # Protein conformational distance spring constant - kcal/mol/Angstrom**2 - zero for common-core RBFE
