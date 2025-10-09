@@ -839,11 +839,12 @@ def restraints(pose, rest, bb_start, bb_end, weight, stage, mol, molr, comp, bb_
       # Get initial restraint values for references
 
       shutil.copy('../../exchange_files/rec_file.pdb', './')
+      shutil.copy('../../exchange_files/rec_file.rst7', './')
       shutil.copy('../../exchange_files/full.hmr.prmtop', './full-ref.hmr.prmtop')
       assign_file = open('assign2.in', 'w')
       assign_file.write('%s  %s  %s  %s  %s  %s  %s\n'%('# Anchor atoms', P1, P2, P3, L1, L2, L3))
       assign_file.write('parm full-ref.hmr.prmtop\n')
-      assign_file.write('trajin rec_file.pdb\n')
+      assign_file.write('trajin rec_file.rst7\n')
       for i in range(0, len(rst)):
         arr = rst[i].split()
         if len(arr) == 2:

@@ -63,7 +63,7 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
       open('others.pdb', 'w').close()
 
     shutil.copy('./protein.pdb', './protein_vmd.pdb')
-    sp.call('pdb4amber -i protein_vmd.pdb -o protein.pdb -y', shell=True)
+    sp.call('pdb4amber -i protein_vmd.pdb -o protein.pdb -y --no-conect', shell=True)
 
     # Get beginning and end of protein and save first residue as global variable
     with open('./protein_vmd.pdb') as myfile:
@@ -203,7 +203,7 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
                 newfile.write(line)
 
     # New work around to avoid chain swapping during alignment
-    sp.call('pdb4amber -i reference.pdb -o reference_amber.pdb -y', shell=True)
+    sp.call('pdb4amber -i reference.pdb -o reference_amber.pdb -y --no-conect', shell=True)
     sp.call('vmd -dispdev text -e nochain.tcl', shell=True)
     sp.call('./USalign complex-nc.pdb reference_amber-nc.pdb -mm 0 -ter 2 -o aligned-nc', shell=True)
     sp.call('vmd -dispdev text -e measure-fit.tcl', shell=True)
@@ -214,7 +214,7 @@ def build_equil(pose, celp_st, mol, H1, H2, H3, calc_type, l1_x, l1_y, l1_z, l1_
             splitdata = line.split()
             if len(splitdata) > 4:
                 newfile.write(line)
-    sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y', shell=True)
+    sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y --no-conect', shell=True)
     sp.call('vmd -dispdev text -e prep.tcl', shell=True)
 
     # Check size of anchor file 
@@ -512,7 +512,7 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
             splitdata = line.split()
             if len(splitdata) > 3:
                 newfile.write(line)
-      sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y', shell=True)
+      sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y --no-conect', shell=True)
       sp.call('vmd -dispdev text -e prep.tcl', shell=True)
 
       # Check size of anchor file 
@@ -584,6 +584,7 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
         for file in glob.glob('../../../equil/%s/vac*' %poser.lower()):
           shutil.copy(file, './')
         sp.call('cpptraj -p full.prmtop -y md%02d.rst7 -x rec_file.pdb' %fwin, shell=True)
+        sp.call('cpptraj -p full.prmtop -y md%02d.rst7 -x rec_file.rst7' %fwin, shell=True)
 
         # Split initial receptor file
         with open("split-ini.tcl", "rt") as fin:
@@ -655,7 +656,7 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
               splitdata = line.split()
               if len(splitdata) > 3:
                   newfile.write(line)
-        sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y', shell=True)
+        sp.call('pdb4amber -i aligned-clean.pdb -o aligned_amber.pdb -y --no-conect', shell=True)
         sp.call('vmd -dispdev text -e prep2.tcl', shell=True)
 
         # Check size of anchor file 
@@ -793,7 +794,7 @@ def build_dec(fwin, hmr, mol, pose, molr, poser, comp, win, water_model, ntpr, n
         for line in oldfile:
           if not 'WAT' in line:
             newfile.write(line)
-      sp.call('pdb4amber -i rec_file-clean.pdb -o rec_amber.pdb -y', shell=True)
+      sp.call('pdb4amber -i rec_file-clean.pdb -o rec_amber.pdb -y --no-conect', shell=True)
       with open('./rec_amber.pdb') as f_in:
         lines = (line.rstrip() for line in f_in)
         lines = list(line for line in lines if line) # Non-blank lines in a list   
