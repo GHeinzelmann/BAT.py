@@ -124,7 +124,7 @@ The OpenMM simulations are fully integrated into the BAT workflow, with the equi
 
 In order to run the equilibration and free energy simulations in the respective folders, inside them are included a bash script, to perform the simulations in a local machine, as well as the PBS-run and SLURMM-run scripts. Both of these files might have to be adjusted, depending on your computer or server configuration. After concluding the simulations and performing the final analysis step, the results will be written in the same location and in the same format as with the AMBER version.
 
-The user might want to compare the AMBER and OpenMM free energy results calculated over the same equilibrated poses states. In that case, the equilibration step should be performed using AMBER, and the free energy step can be performed using both AMBER and OpenMM. Performing equilibration with the latter and free energy with the former may cause problems due to incompatibility between input/output files.    
+The BAT setup allows for systems equilibrated with AMBER (equil step) to serve as input for calculations using OpenMM (fe and analysis setps), and vice-versa. That way, the user can compare the AMBER and OpenMM free energy results calculated over the same equilibrated states.   
 
 
 # Extending it to other systems

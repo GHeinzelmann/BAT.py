@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 
 #############################################################################################################
-########## Input file for BAT.py, for fully automated absolute binding free energy calculations ##########
+########## Input file for BAT.py, for fully automated binding free energy calculations ##########
 #############################################################################################################
 
 # Calculation definitions
@@ -21,7 +21,7 @@ P3 = :363@CA
 
 #other_mol = []     # List of extra residues names that will be included in the simulations
 
-#solv_shell = 4      # Water molecules around the protein that will be kept in the initial structure (in angstroms)
+solv_shell = 4      # Water molecules around the protein that will be kept in the initial structure (in angstroms)
 
 # Variables for setting up equilibrium and free energy calculations, also used on analysis       
 
@@ -49,11 +49,11 @@ blocks = 5                                    # Number of blocks for block data 
 
 rec_dihcf_force      =  50.0  # Protein conformational dihedral spring constant - kcal/mol/rad**2
 rec_discf_force      =   5.0  # Protein conformational distance spring constant - kcal/mol/Angstrom**2
-lig_distance_force   =   5.0  # Guest pulling distance spring constant kcal/mol/Angstrom**2
-lig_angle_force      = 250.0  # Guest angle/dihedral spring constant - kcal/mol/rad**2
-lig_dihcf_force      =  70.0  # Guest conformational dihedral spring constant - kcal/mol/rad**2
+lig_distance_force   =   5.0  # Ligand pulling distance spring constant kcal/mol/Angstrom**2
+lig_angle_force      = 250.0  # Ligand angle/dihedral spring constant - kcal/mol/rad**2
+lig_dihcf_force      =  70.0  # Ligand conformational dihedral spring constant - kcal/mol/rad**2
 rec_com_force        =  10.0  # Protein COM spring constant
-lig_com_force        =  10.0  # Guest COM spring constant for simultaneous decoupling
+lig_com_force        =  10.0  # Ligand COM spring constant for simultaneous decoupling
 
 # Water model, number and box size in the x and y direction
 
