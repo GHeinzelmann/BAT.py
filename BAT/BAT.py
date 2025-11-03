@@ -531,32 +531,55 @@ if fe_type == 'custom':
   except NameError:
     print('Wrong input! Please choose a decoupling method (dd, sdr or exchange) when using the custom option.')
     sys.exit(1)
-elif fe_type == 'rest':
-  components = ['a', 'l', 't', 'c', 'r'] 
-  dec_method = 'dd'
 elif fe_type == 'sdr':
-  components = ['e', 'v'] 
+  components = ['m', 'e', 'v', 'n'] 
   dec_method = 'sdr'
 elif fe_type == 'dd':
-  components = ['e', 'v', 'w', 'f'] 
+  components = ['m', 'e', 'v', 'w', 'f', 'n'] 
   dec_method = 'dd'
 elif fe_type == 'sdr-rest':
   components = ['a', 'l', 't', 'e', 'v', 'c', 'r'] 
   dec_method = 'sdr'
-elif fe_type == 'express':
-  components = ['m', 'e', 'v', 'n'] 
-  dec_method = 'sdr'
 elif fe_type == 'dd-rest':
   components = ['a', 'l', 't', 'e', 'v', 'w', 'f', 'c', 'r'] 
   dec_method = 'dd'
+elif fe_type == 'express':
+  components = ['m', 'e', 'v', 'c'] 
+  rec_bb = 'no'
+  rec_dihcf_force = 0.0
+  rec_discf_force = 0.0
+  dec_method = 'sdr'
+elif fe_type == 'express-TR':
+  components = ['t', 'e', 'v'] 
+  rec_bb = 'no'
+  rec_dihcf_force = 0.0
+  rec_discf_force = 0.0
+  lig_dihcf_force = 0.0
+  dec_method = 'sdr'
 elif fe_type == 'relative':
-  components = ['m', 'e', 'x', 'n'] 
+  components = ['m', 'e', 'x', 'c'] 
+  rec_bb = 'no'
+  rec_dihcf_force = 0.0
+  rec_discf_force = 0.0
+  dec_method = 'exchange'
+elif fe_type == 'relative-TR':
+  components = ['t', 'e', 'x'] 
+  rec_bb = 'no'
+  rec_dihcf_force = 0.0
+  rec_discf_force = 0.0
+  lig_dihcf_force = 0.0
   dec_method = 'exchange'
 elif fe_type == 'relative-ex':
-  components = ['m', 'ex', 'n'] 
+  components = ['m', 'ex', 'c'] 
+  rec_bb = 'no'
+  rec_dihcf_force = 0.0
+  rec_discf_force = 0.0
   dec_method = 'exchange'
 elif fe_type == 'relative-sp':
-  components = ['m', 'sp', 'n'] 
+  components = ['m', 'sp', 'c'] 
+  rec_bb = 'no'
+  rec_dihcf_force = 0.0
+  rec_discf_force = 0.0
   dec_method = 'exchange'
 
 if 'sp' in components and software == 'amber':

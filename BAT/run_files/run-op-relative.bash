@@ -2,7 +2,7 @@ cd rest
 cd m-comp
 sbatch SLURMM-run
 cd ../
-cd n-comp
+cd c-comp
 sbatch SLURMM-run
 cd ../
 cd ../

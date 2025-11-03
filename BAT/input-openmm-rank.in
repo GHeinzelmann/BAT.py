@@ -1,18 +1,18 @@
 #!/usr/bin/env python2
 
 #############################################################################################################
-########## Input file for BAT.py, for fully automated absolute binding free energy calculations ##########
+########## Input file for BAT.py, for fully automated binding free energy calculations ##########
 #############################################################################################################
 
 # Calculation definitions
 
-calc_type = dock                                # docked or crystal structure
-celpp_receptor = LMCSS-5uf0_5uez              # Choose CELPP receptor in upper case or pdb code in lower case
-poses_list = [0,1,2,3,4]                        # List of poses for docked calculations, called pose0.pdb, pose1.pdb, pose2.pdb, etc. 
+calc_type = rank                                                  # rank, dock or crystal
+celpp_receptor = receptor-5uf0                                    # Choose receptor (dock, rank) or complex pdb file (crystal)
+ligand_list = [lig-5uf0,lig-5uez,lig-5uew,lig-5ueu,lig-5uey]      # List of different ligands for ranking calculations, without the pdb extension
 
 # Protein anchors 
 
-P1 = :425@CA          
+P1 = :425@CA
 P2 = :447@CA
 P3 = :363@CA
 
@@ -24,28 +24,30 @@ solv_shell = 4      # Water molecules around the protein that will be kept in th
 
 # Variables for setting up equilibrium and free energy calculations, also used on analysis       
 
-fe_type = express  # Type of free energy calculations (rest, dd, sdr, dd-rest, sdr-rest, custom)
+fe_type = express  # Type of free energy calculations
 
-components = [ e v ] # Used with custom option for fe_type. Do not include b component here. 
+#components = [ m e v c ] # Used with custom option for fe_type. Do not include b component here. 
 
 release_eq = [ 10.0 2.5 0.5 0.0 ]   # Equilibrium gradual release weights
 
 attach_rest = [ 0.00 0.10 0.24 0.56 1.33 3.16 7.50 17.78 42.17 100.0 ]   # Short attach/release weights
 
-lambdas = [ 0.0001 0.02 0.04 0.06 0.08 0.10  0.15  0.20  0.25  0.30  0.40  0.50  0.60  0.70 0.75 0.80 0.85 0.90 0.92 0.94 0.96 0.98 0.9999 ] # MBAR
+#lambdas = [ 0.0001 0.02 0.04 0.06 0.08 0.10  0.15  0.20  0.25  0.30  0.40  0.50  0.60  0.70 0.75 0.80 0.85 0.90 0.92 0.94 0.96 0.98 0.9999 ] # MBAR
 
 sdr_dist = 32.00
 
-dec_method = sdr
+#dec_method = sdr
 
-dec_int = mbar
+dec_int = ti                                  # Integration method for double decoupling (MBAR or TI with Gaussian quadrature)
+
+ti_points = 12                                # Number of TI-GQ points
 
 blocks = 5                                    # Number of blocks for block data analysis
 
 # Force constants
 
-rec_dihcf_force      =  50.0  # Protein conformational dihedral spring constant - kcal/mol/rad**2
-rec_discf_force      =   5.0  # Protein conformational distance spring constant - kcal/mol/Angstrom**2
+rec_dihcf_force      =   0.0  # Protein conformational dihedral spring constant - kcal/mol/rad**2
+rec_discf_force      =   0.0  # Protein conformational distance spring constant - kcal/mol/Angstrom**2
 lig_distance_force   =   5.0  # Ligand pulling distance spring constant kcal/mol/Angstrom**2
 lig_angle_force      = 250.0  # Ligand angle/dihedral spring constant - kcal/mol/rad**2
 lig_dihcf_force      =  70.0  # Ligand conformational dihedral spring constant - kcal/mol/rad**2
@@ -80,8 +82,8 @@ eq_steps2	=   1000000  # Number of steps for equilibration after release
 m_itera1	=   200       # Number of iterations for component m (equilibrium)   
 m_itera2	=   400       # Number of iterations for component m (production) 
 
-n_itera1	=   200       # Number of iterations for component n (equilibrium)   
-n_itera2	=   400       # Number of iterations for component n (production) 
+c_itera1	=   200       # Number of iterations for component c (equilibrium)   
+c_itera2	=   400       # Number of iterations for component c (production) 
 
 e_itera1	=   400       # Number of iterations for component e (equilibrium)   
 e_itera2	=   800       # Number of iterations for component e (production) 
@@ -100,10 +102,10 @@ cut = 9.0                      # Simulation interaction cutoff
 
 # Conformational restraints on the protein backbone
 
-rec_bb		= yes       # Use protein backbone dihedrals conformational restraints
-bb_start        = 379       # First residues of the restrained ranges 
-bb_end          = 390       # Last residues of the restrained ranges
-bb_equil        = yes       # Keep this backbone section rigid during equilibration 
+rec_bb		=  no       # Use protein backbone dihedrals conformational restraints
+#bb_start        = 379       # First residues of the restrained ranges 
+#bb_end          = 390       # Last residues of the restrained ranges
+#bb_equil        = yes       # Keep this backbone section rigid during equilibration 
 
 # Ligand anchor search definitions
 
