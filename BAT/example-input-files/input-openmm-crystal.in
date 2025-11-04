@@ -6,9 +6,13 @@
 
 # Calculation definitions
 
-calc_type = rank                                                  # rank, dock or crystal
-celpp_receptor = receptor-5uf0                                    # Choose receptor (dock, rank) or complex pdb file (crystal)
-ligand_list = [lig-5uf0,lig-5uez,lig-5uew,lig-5ueu,lig-5uey]      # List of different ligands for ranking calculations, without the pdb extension
+calc_type = crystal                                # rank, dock or crystal
+celpp_receptor = 5uf0                              # Choose receptor (dock, rank) or complex pdb file (crystal)
+#poses_list = [0,1,2,3,4]                          # List of poses for docked calculations, called pose0.pdb, pose1.pdb, pose2.pdb, etc. 
+
+# Ligand residue name
+
+ligand_name     = 89J                              # Ligand name in crystal structure 
 
 # Protein anchors 
 
@@ -24,9 +28,9 @@ solv_shell = 4      # Water molecules around the protein that will be kept in th
 
 # Variables for setting up equilibrium and free energy calculations, also used on analysis       
 
-fe_type = relative  # Type of free energy calculations
+fe_type = express  # Type of free energy calculations
 
-#components = [ m e x c ] # Used with custom option for fe_type. Do not include b component here. 
+#components = [ m e v c ] # Used with custom option for fe_type. Do not include b component here. 
 
 release_eq = [ 10.0 2.5 0.5 0.0 ]   # Equilibrium gradual release weights
 
@@ -36,7 +40,7 @@ attach_rest = [ 0.00 0.10 0.24 0.56 1.33 3.16 7.50 17.78 42.17 100.0 ]   # Short
 
 sdr_dist = 32.00
 
-#dec_method = exchange
+#dec_method = sdr
 
 dec_int = ti                                  # Integration method for double decoupling (MBAR or TI with Gaussian quadrature)
 
@@ -46,8 +50,8 @@ blocks = 5                                    # Number of blocks for block data 
 
 # Force constants
 
-rec_dihcf_force      =   0.0  # Protein conformational dihedral spring constant - kcal/mol/rad**2
-rec_discf_force      =   0.0  # Protein conformational distance spring constant - kcal/mol/Angstrom**2
+rec_dihcf_force      =  50.0  # Protein conformational dihedral spring constant - kcal/mol/rad**2
+rec_discf_force      =   5.0  # Protein conformational distance spring constant - kcal/mol/Angstrom**2
 lig_distance_force   =   5.0  # Ligand pulling distance spring constant kcal/mol/Angstrom**2
 lig_angle_force      = 250.0  # Ligand angle/dihedral spring constant - kcal/mol/rad**2
 lig_dihcf_force      =  70.0  # Ligand conformational dihedral spring constant - kcal/mol/rad**2
@@ -79,28 +83,26 @@ Temperature	=   298.15    # Temperature of simulation and analysis
 eq_steps1	=   100000    # Number of steps for equilibration gradual release 
 eq_steps2	=   1000000  # Number of steps for equilibration after release
 
-m_steps1	=   100000       # Number of steps for component m (equilibrium)   
-m_steps2	=   200000       # Number of steps for component m (production) 
+m_itera1	=   200       # Number of iterations for component m (equilibrium)   
+m_itera2	=   400       # Number of iterations for component m (production) 
 
-c_steps1	=   100000       # Number of steps for component c (equilibrium)   
-c_steps2	=   200000       # Number of steps for component c (production) 
+c_itera1	=   200       # Number of iterations for component c (equilibrium)   
+c_itera2	=   400       # Number of iterations for component c (production) 
 
-e_steps1	=   200000       # Number of steps for component e (equilibrium)   
-e_steps2	=   400000       # Number of steps for component e (production) 
+e_itera1	=   400       # Number of iterations for component e (equilibrium)   
+e_itera2	=   800       # Number of iterations for component e (production) 
 
-x_steps1	=   2000000      # Number of steps for component x (equilibrium)   
-x_steps2	=   600000       # Number of steps for component x (production) 
+v_itera1	=   800       # Number of iterations for component v (equilibrium)   
+v_itera2	=   1200       # Number of iterations for component v (production) 
 
-# Amber options for production simulations
+itera_steps     =   500       # Number of steps per iteration (total steps will be the number of iterations multiplied by this number)
 
-ntpr = 1000                # print energy every ntpr steps to output file (controls DD output)
-ntwr = 10000               # write the restart file every ntwr steps
-ntwe = 0                   # write energies and temperatures to mden file every ntwe steps (0 = not write to this file)
-ntwx = 2500                # write coordinates to trajectory file every ntwx steps (controls PMF and restraints output)
-cut = 9.0                  # cutoff for nonbonded interactions 
-gamma_ln = 1.0             # collision frequency in ps^-1 for Langevin Dynamics (temperature control)
-barostat = 2               # type of barostat to keep the pressure constant (1 = Berendsen-default /2 - Monte Carlo)
-dt = 0.004                 # simulation time step in ps
+# OpenMM simulation options 
+
+itcheck = 100                # write checkpoint file every itcheck iterations
+gamma_ln = 1.0               # collision frequency in ps^-1 for Langevin Dynamics (temperature control)
+dt = 0.004                     # simulation time step in ps
+cut = 9.0                      # Simulation interaction cutoff
 
 # Conformational restraints on the protein backbone
 
@@ -126,4 +128,4 @@ ligand_ph = 7.0                # Choose pH for ligand protonation
 
 # Simulation software
 
-software = amber
+software = openmm

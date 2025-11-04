@@ -79,35 +79,6 @@ Temperature	=   298.15    # Temperature of simulation and analysis
 eq_steps1	=   100000    # Number of steps for equilibration gradual release 
 eq_steps2	=   1000000  # Number of steps for equilibration after release
 
-a_itera1	=   200       # Number of iterations for component a (equilibrium)
-a_itera2	=   400       # Number of iterations for component a (production) 
-
-l_itera1	=   200       # Number of iterations for component l (equilibrium)   
-l_itera2	=   400       # Number of iterations for component l (production)         
-
-t_itera1	=   200       # Number of iterations for component t (equilibrium)   
-t_itera2	=   400       # Number of iterations for component t (production) 
-
-c_itera1	=   200       # Number of iterations for component c (equilibrium)   
-c_itera2	=   400       # Number of iterations for component c (production) 
-
-r_itera1	=   200       # Number of iterations for component r (equilibrium)   
-r_itera2	=   400       # Number of iterations for component r (production) 
-
-e_itera1	=   400       # Number of iterations for component e (equilibrium)   
-e_itera2	=   800       # Number of iterations for component e (production) 
-
-v_itera1	=   800       # Number of iterations for component v (equilibrium)   
-v_itera2	=   1200       # Number of iterations for component v (production) 
-
-w_itera1	=   200       # Number of iterations for component w (equilibrium)   
-w_itera2	=   400       # Number of iterations for component w (production) 
-
-f_itera1	=   200       # Number of iterations for component f (equilibrium)   
-f_itera2	=   400       # Number of iterations for component f (production) 
-
-itera_steps     =   500       # Number of steps per iteration (total steps will be the number of iterations multiplied by this number)
-
 # OpenMM simulation options 
 
 itcheck = 100                # write checkpoint file every itcheck iterations

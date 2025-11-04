@@ -46,8 +46,8 @@ blocks = 5                                    # Number of blocks for block data 
 
 # Force constants
 
-rec_dihcf_force      =   0.0  # Protein conformational dihedral spring constant - kcal/mol/rad**2
-rec_discf_force      =   0.0  # Protein conformational distance spring constant - kcal/mol/Angstrom**2
+rec_dihcf_force      =  50.0  # Protein conformational dihedral spring constant - kcal/mol/rad**2
+rec_discf_force      =   5.0  # Protein conformational distance spring constant - kcal/mol/Angstrom**2
 lig_distance_force   =   5.0  # Ligand pulling distance spring constant kcal/mol/Angstrom**2
 lig_angle_force      = 250.0  # Ligand angle/dihedral spring constant - kcal/mol/rad**2
 lig_dihcf_force      =  70.0  # Ligand conformational dihedral spring constant - kcal/mol/rad**2
@@ -78,20 +78,6 @@ Temperature	=   298.15    # Temperature of simulation and analysis
 
 eq_steps1	=   100000    # Number of steps for equilibration gradual release 
 eq_steps2	=   1000000  # Number of steps for equilibration after release
-
-m_itera1	=   200       # Number of iterations for component m (equilibrium)   
-m_itera2	=   400       # Number of iterations for component m (production) 
-
-c_itera1	=   200       # Number of iterations for component c (equilibrium)   
-c_itera2	=   400       # Number of iterations for component c (production) 
-
-e_itera1	=   400       # Number of iterations for component e (equilibrium)   
-e_itera2	=   800       # Number of iterations for component e (production) 
-
-x_itera1	=   4000       # Number of iterations for component x (equilibrium)   
-x_itera2	=   1200       # Number of iterations for component x (production) 
-
-itera_steps     =   500       # Number of steps per iteration (total steps will be the number of iterations multiplied by this number)
 
 # OpenMM simulation options 
 

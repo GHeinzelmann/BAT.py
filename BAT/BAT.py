@@ -31,61 +31,67 @@ celp_st = []
 
 # Defaults
 
-a_steps1 = 0
-a_steps2 = 0
-l_steps1 = 0
-l_steps2 = 0
-t_steps1 = 0
-t_steps2 = 0
-m_steps1 = 0
-m_steps2 = 0
-n_steps1 = 0
-n_steps2 = 0
-c_steps1 = 0
-c_steps2 = 0
-r_steps1 = 0
-r_steps2 = 0
-e_steps1 = 0
-e_steps2 = 0
-v_steps1 = 0
-v_steps2 = 0
-f_steps1 = 0
-f_steps2 = 0
-w_steps1 = 0
-w_steps2 = 0
-x_steps1 = 0
-x_steps2 = 0
-ex_steps1 = 0
-ex_steps2 = 0
+# AMBER steps
 
-a_itera1 = 0
-a_itera2 = 0
-l_itera1 = 0
-l_itera2 = 0
-t_itera1 = 0
-t_itera2 = 0
-m_itera1 = 0
-m_itera2 = 0
-n_itera1 = 0
-n_itera2 = 0
-c_itera1 = 0
-c_itera2 = 0
-r_itera1 = 0
-r_itera2 = 0
-e_itera1 = 0
-e_itera2 = 0
-v_itera1 = 0
-v_itera2 = 0
-f_itera1 = 0
-f_itera2 = 0
-w_itera1 = 0
-w_itera2 = 0
-x_itera1 = 0
-x_itera2 = 0
-ex_itera1 = 0
-ex_itera2 = 0
-sp_itera1 = 0
-sp_itera2 = 0
+a_steps1 = 100000
+a_steps2 = 200000
+l_steps1 = 100000
+l_steps2 = 200000
+t_steps1 = 100000
+t_steps2 = 200000
+m_steps1 = 100000
+m_steps2 = 200000
+n_steps1 = 100000
+n_steps2 = 200000
+c_steps1 = 100000
+c_steps2 = 200000
+r_steps1 = 100000
+r_steps2 = 200000
+e_steps1 = 200000
+e_steps2 = 400000
+v_steps1 = 400000
+v_steps2 = 600000
+f_steps1 = 100000
+f_steps2 = 200000
+w_steps1 = 100000
+w_steps2 = 200000
+x_steps1 = 2000000
+x_steps2 = 600000
+ex_steps1 = 2000000
+ex_steps2 = 600000 
+
+# OpenMM iterations
+
+a_itera1 = 200
+a_itera2 = 400
+l_itera1 = 200
+l_itera2 = 400
+t_itera1 = 200
+t_itera2 = 400
+m_itera1 = 200
+m_itera2 = 400
+n_itera1 = 200
+n_itera2 = 400
+c_itera1 = 200
+c_itera2 = 400
+r_itera1 = 200
+r_itera2 = 400
+e_itera1 = 400
+e_itera2 = 800
+v_itera1 = 800
+v_itera2 = 1200
+f_itera1 = 200
+f_itera2 = 400
+w_itera1 = 200
+w_itera2 = 400
+x_itera1 = 4000
+x_itera2 = 1200
+ex_itera1 = 4000
+ex_itera2 = 1200
+sp_itera1 = 2000
+sp_itera2 = 1200
+
+itera_steps = 500
 
 sdr_dist = 0
 rng = 0
@@ -299,19 +305,21 @@ for i in range(0, len(lines)):
             for j in range(0, len(newline)):
                 mols.append(newline[j])
         elif lines[i][0] == 'fe_type':
-            if lines[i][1].lower() == 'rest':
-                fe_type = lines[i][1].lower()
-            elif lines[i][1].lower() == 'dd':
+            if lines[i][1].lower() == 'dd':
                 fe_type = lines[i][1].lower()
             elif lines[i][1].lower() == 'sdr':
                 fe_type = lines[i][1].lower()
             elif lines[i][1].lower() == 'sdr-rest':
                 fe_type = lines[i][1].lower()
-            elif lines[i][1].lower() == 'express':
-                fe_type = lines[i][1].lower()
             elif lines[i][1].lower() == 'dd-rest':
                 fe_type = lines[i][1].lower()
+            elif lines[i][1].lower() == 'express':
+                fe_type = lines[i][1].lower()
+            elif lines[i][1].lower() == 'express-TR':
+                fe_type = lines[i][1].lower()
             elif lines[i][1].lower() == 'relative':
+                fe_type = lines[i][1].lower()
+            elif lines[i][1].lower() == 'relative-TR':
                 fe_type = lines[i][1].lower()
             elif lines[i][1].lower() == 'relative-ex':
                 fe_type = lines[i][1].lower()
@@ -320,7 +328,7 @@ for i in range(0, len(lines)):
             elif lines[i][1].lower() == 'custom':
                 fe_type = lines[i][1].lower()
             else:
-                print('Free energy type not recognized, please choose rest (restraints only), dd (double decoupling only), sdr (simultaneous decoupling-recoupling only), express (sdr with simultaneous restraints), dd-rest (dd with restraints), sdr-rest (sdr with restraints), relative (using merged restraints), relative-ex, relative-sp or custom.')
+                print('Free energy type not recognized, please choose dd, sdr, dd-rest, sdr-rest, express, express-TR, relative, relative-TR, relative-ex, relative-sp or custom.')
                 sys.exit(1)
         elif lines[i][0] == 'dec_int':
             if lines[i][1].lower() == 'mbar':
