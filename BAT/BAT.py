@@ -315,11 +315,11 @@ for i in range(0, len(lines)):
                 fe_type = lines[i][1].lower()
             elif lines[i][1].lower() == 'express':
                 fe_type = lines[i][1].lower()
-            elif lines[i][1].lower() == 'express-TR':
+            elif lines[i][1].lower() == 'express-tr':
                 fe_type = lines[i][1].lower()
             elif lines[i][1].lower() == 'relative':
                 fe_type = lines[i][1].lower()
-            elif lines[i][1].lower() == 'relative-TR':
+            elif lines[i][1].lower() == 'relative-tr':
                 fe_type = lines[i][1].lower()
             elif lines[i][1].lower() == 'relative-ex':
                 fe_type = lines[i][1].lower()
@@ -328,7 +328,7 @@ for i in range(0, len(lines)):
             elif lines[i][1].lower() == 'custom':
                 fe_type = lines[i][1].lower()
             else:
-                print('Free energy type not recognized, please choose dd, sdr, dd-rest, sdr-rest, express, express-TR, relative, relative-TR, relative-ex, relative-sp or custom.')
+                print('Free energy type not recognized, please choose dd, sdr, dd-rest, sdr-rest, express, express-tr, relative, relative-tr, relative-ex, relative-sp or custom.')
                 sys.exit(1)
         elif lines[i][0] == 'dec_int':
             if lines[i][1].lower() == 'mbar':
@@ -557,7 +557,7 @@ elif fe_type == 'express':
   rec_dihcf_force = 0.0
   rec_discf_force = 0.0
   dec_method = 'sdr'
-elif fe_type == 'express-TR':
+elif fe_type == 'express-tr':
   components = ['t', 'e', 'v'] 
   rec_bb = 'no'
   rec_dihcf_force = 0.0
@@ -570,7 +570,7 @@ elif fe_type == 'relative':
   rec_dihcf_force = 0.0
   rec_discf_force = 0.0
   dec_method = 'exchange'
-elif fe_type == 'relative-TR':
+elif fe_type == 'relative-tr':
   components = ['t', 'e', 'x'] 
   rec_bb = 'no'
   rec_dihcf_force = 0.0

@@ -92,9 +92,21 @@ python BAT.py -i input-amber-rank.in -s analysis
 
 You should see a ./Results directory inside each ligand folder from the ./fe directory, containing all the components and the final calculated binding free energy, located in the Results.dat file. This folder also contains the results for each of the chosen data blocks, used to calculate the uncertainties, as well as the equilibrated structure of the protein-ligand complex used as the restraints reference state.
 
+The binding free energies of the five ligands are shown in the Table below, so they can be compared to the results obtained by BAT. 
+
+| Ligand      | Binding Free Energy   |
+| :---------: | :-------------------: |
+| 5uf0        |-5.2 kcal/mol          |
+| 5uez        |-8.3 kcal/mol          | 
+| 5uew        |-9.9 kcal/mol          |
+| 5ueu        |-10.7 kcal/mol         |
+| 5uey        |-11.4 kcal/mol         |
+
+There is usually a slight overestimation of the affinities in our calculations, but their correlation to experimental values should be good for this particular set of molecules that bind to BRD4(2).
+
 # Docked poses calculation
 
-If working with ligands that do not have a crystal structure available, not always the pose obtained by docking will be the experimental one. BAT offers the option of calculating the ABFEs of different docked poses of the same ligand in order to find the one with the lowest binding free energy, which in principle should be the correct pose [2]. The file input-amber-dock.in, located inside the ./BAT/example-input-files/ folder, provides an example for five docked poses of the 5uf0 ligand to the BRD4(2) receptor, the latter obtained from the 5uez crystal structure. The docked poses were generated and converted to PDB format using Autodock Vina and AutodockTools, as shown in the scripts inside the /docking-files/Vina-example folder. All the needed pdb files are already located inside the ./BAT/all-poses folder.
+If working with ligands that do not have a crystal structure available, not always the top pose obtained from docking will be the experimental one. BAT offers the option of calculating the ABFEs of different docked poses of the same ligand in order to find the one with the lowest binding free energy, which in principle should be the correct pose [2]. The file input-amber-dock.in, located inside the ./BAT/example-input-files/ folder, provides an example for five docked poses of the 5uf0 ligand to the BRD4(2) receptor, the latter obtained from the 5uez crystal structure. The docked poses were generated and converted to PDB format using Autodock Vina and AutodockTools, as shown in the scripts inside the /docking-files/Vina-example folder. All the needed pdb files are already located inside the ./BAT/all-poses folder.
 
 To run a docked poses example, inside the ./BAT folder just perform the same equilibration, free energy and analysis steps as above, and the associated simulations, but using the input-amber-dock.in file instead:
 
@@ -108,7 +120,7 @@ python BAT.py -i input-amber-dock.in -s fe
 
 python BAT.py -i input-amber-dock.in -s analysis
 
-The results are presented the same way as with the ligand ranking example, with the total binding free energies of each pose in the end of their Results.dat files. 
+The results are presented the same way as with the ligand ranking example, with the total binding free energy of each pose in the end of their Results.dat files. The poses that reproduce the 5uf0 experimental structure are pose1.pdb and pose4.pdb, so they should have the lowest binding free energies, which should also be similar to the 5uf0 ligand value from the table above.
 
 
 # Computational cost
@@ -130,7 +142,7 @@ The OpenMM simulations are fully integrated into the BAT workflow, with the equi
 
 In order to run the OpenMM equilibration and free energy simulations in their respective folders, inside them are included the run-local.bash script, to perform the simulations in a local machine, as well as the PBS-run and SLURMM-run scripts. Both of these files might have to be adjusted, depending on your computer or server configuration. After concluding the simulations and performing the final analysis step, the results will be written in the same location and in the same format as with the AMBER version.
 
-The BAT setup allows for systems equilibrated with AMBER (equilibration step) to serve as input for calculations using OpenMM (fe and analysis steps), and vice-versa. That way, the user can compare the AMBER and OpenMM free energy results calculated over the same equilibrated states.   
+The BAT setup allows for systems equilibrated with AMBER (equilibration step) to serve as input for calculations using AMBER and OpenMM, and vice-versa. However, if using OpenMM for equilibration, the fe step from OpenMM must always be performed before the AMBER one. This compatibility allows the user can compare the AMBER and OpenMM free energy results calculated over the same equilibrated states.   
 
 # RBFE calculations
 
@@ -149,7 +161,7 @@ The relative calculations from BAT.py can also use the separate topologies (SepT
 ![](doc/cycle.jpg)
 
 
-The SepTop calculations can be done using either the AMBER or OpenMM simulation engines, and we include sample BAT input files for them inside the ./example-input-files folder. For OpenMM the file is called input-relative-openmm.in, and for AMBER input-relative-amber.in, both for comparing different ligands.  
+The SepTop calculations can be done using either the AMBER or OpenMM simulation engines, and we include sample BAT input files for them inside the ./example-input-files folder. For OpenMM the file is called input-relative-openmm.in, and for AMBER input-relative-TR-amber.in, both for comparing different ligands with and without the use of ligand conformational restraints, respectively.  
 
 The BAT calculations using these input files use the same coordinate input files already present inside the ./BAT/all-poses/ folder, and the procedure to perform them is the same from the ABFE calculations. For instance, when using the OpenMM input file follow the steps below inside the ./BAT folder:
 
