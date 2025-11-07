@@ -66,7 +66,7 @@ The *ligand\_list* parameter in the input-amber-rank.in file sets up the calcula
 
 ![](doc/workflow.png)
 
-## Equilibration
+### Equilibration
 
 The equilibration step starts with the protein-ligand complex in solution, gradually releasing restraints applied on the ligand and then performing a final simulation with an unrestrained ligand. The necessary simulation parameters for the ligands are also generated in this stage, using the General Amber Force Field versions 1 and 2 (GAFF or GAFF2) [7], and the AM1-BCC charge model [8,9]. To run this step, inside the program main folder type:
 
@@ -75,7 +75,7 @@ python BAT.py -i input-amber-rank.in -s equil
 BAT.py is compatible with python 3.8 versions or later, and we recommend using the one from the Anaconda distribution (see the Quick-installation-tutorial.pdf file). This command will create an ./equil folder, with one folder inside for each of the ligands (lig-5uf0, lig-5uez, etc.). In order to run the simulations for each, you can use the run-local.bash script (to run them locally), or the provided PBS-run or SLURMM-run scripts, which are designed to run in a queue system such as TORQUE. Both of these files might have to be adjusted, depending on your computer or server configuration, which can be done in the templates located in the ./BAT/run\_files folder. The number of simulations and the applied restraints will depend on the *release\_eq* array defined in the input file. 
 
 
-## Free energy calculation 
+### Free energy calculation 
 
 
 Once the equilibration simulations for all ligands are finished, the user will now perform the free energy stage. Here, starting from the final state of the equilibrated system, BAT will reset the ligand anchor atoms and the restraints reference values for use in the free energy calculation. In this example we will use the SDR method with restraints, which is also applicable to ligands with net charge, which is not the case with the regular DD method due to artifacts arising from the periodicity of the system. Again in the program main folder, type:
@@ -84,7 +84,7 @@ python BAT.py -i input-amber-rank.in -s fe
 
 For each ligand, a folder will be created inside ./fe, and inside there will be two folders, ./rest and ./sdr. The restraints (rest) folder contains all the simulations needed for the application/removal of restraints. The ./sdr folder contains the simultaneous coupling and decoupling of the ligand electrostatic and LJ interactions. A script called run-express.bash, inside the ./run_files folder, can be used to run these simulations quickly from inside the ligand folder, using SLURMM scripts. A similar script can be written to do the same, using your particular running protocol. 
 
-## Analysis
+### Analysis
 
 Once all of the simulations are concluded, it is time to process the output files and obtain the binding free energies. Here we use a few parameters already set in the input file, such as using TI or MBAR [10] for the decoupling/recoupling components, and the number of data blocks used to calculate the uncertainties. Inside the main folder type:
 
@@ -104,7 +104,7 @@ The binding free energies of the five ligands are shown in the Table below, so t
 
 There is usually a slight overestimation of the affinities in our calculations, but their correlation to experimental values should be good for this particular set of molecules that bind to BRD4(2).
 
-# Docked poses calculation
+## Docked poses calculation
 
 If working with ligands that do not have a crystal structure available, not always the top pose obtained from docking will be the experimental one. BAT offers the option of calculating the ABFEs of different docked poses of the same ligand in order to find the one with the lowest binding free energy, which in principle should be the correct pose [2]. The file input-amber-dock.in, located inside the ./BAT/example-input-files/ folder, provides an example for five docked poses of the 5uf0 ligand to the BRD4(2) receptor, the latter obtained from the 5uez crystal structure. The docked poses were generated and converted to PDB format using Autodock Vina and AutodockTools, as shown in the scripts inside the /docking-files/Vina-example folder. All the needed pdb files are already located inside the ./BAT/all-poses folder.
 
@@ -123,38 +123,39 @@ python BAT.py -i input-amber-dock.in -s analysis
 The results are presented the same way as with the ligand ranking example, with the total binding free energy of each pose in the end of their Results.dat files. The poses that reproduce the 5uf0 experimental structure are pose1.pdb and pose4.pdb, so they should have the lowest binding free energies, which should also be similar to the 5uf0 ligand value from the table above.
 
 
-# Computational cost
-
-A full ABFE calculation for a single ligand or pose, using either AMBER or OpenMM, requires a total 100.8 ns, which can be achieved in less than one day using a single GTX 1070 NVIDIA GPU. This time is significantly reduced when using more modern GPUs, such as the NVIDIA RTX 20 and RTX 30 series. Furthermore, the free energy simulations from BAT are separated into several independent windows, which allows for trivial parallelization across multiple GPUs.
-
-Ref [1] shows how the simulation times of ABFE calculations using BAT can be reduced even more, to as little as 20 ns per calculation, and still produce accurate results. The files needed to reproduce the paper results were to published with the original paper, but were made available in a subsequent correction:
-
-https://pubs.acs.org/doi/10.1021/acs.jctc.4c01153
-
-The user should download the input-files.zip file from the link above. The README file included explains how to use these input files with the latest BAT2 distribution.
 
 
 # Performing ABFE calculations with OpenMM
 
-BAT also allows the user to run all simulations using the free OpenMM engine [11-15] with OpenMMTools [16]. In this case, instead of the _pmemd.cuda_ software from AMBER, OpenMM 7.7.0 or later and OpenMMTools 0.21.3 or later should be installed and in your path. See the Quick-installation-tutorial.pdf file, located inside the ./doc folder, for instructions on how to install these two programs.
+BAT also allows the user to run all simulations using the free OpenMM engine [11-15] with OpenMMTools [16]. In this case, instead of the _pmemd.cuda_ software from AMBER, OpenMM 7.7.0 or later and OpenMMTools 0.21.3 or later should be installed and in your path. See the Quick-installation-tutorial.pdf file, located inside the ./doc folder, for instructions on how to install these two programs and to run the OpenMM-based tutorial.
 
-The OpenMM simulations are fully integrated into the BAT workflow, with the equilibration, free energy and analysis steps performed the same way as explained in the tutorial above. Example input files are provided for the OpenMM software on the same BRD4(2) sample system: input-openmm-rank.in for calculating the ABFE values of different ligands, and ./example-input-files/input-openmm-dock.in to compare docked poses, both using the SDR method and with the same 100.8 ns of simulation time. More details on the OpenMM-specific BAT input variables can be found in the User Guide.  
+The OpenMM simulations are fully integrated into the BAT workflow, with the equilibration, free energy and analysis steps performed the same way as explained in the tutorial above. Example input files are provided for the OpenMM software on the same BRD4(2) sample system: input-openmm-rank.in for calculating the ABFE values of different ligands, and ./example-input-files/input-openmm-dock.in to compare docked poses, both using the SDR method. More details on the OpenMM-specific BAT input variables can be found in the User Guide.  
 
-In order to run the OpenMM equilibration and free energy simulations in their respective folders, inside them are included the run-local.bash script, to perform the simulations in a local machine, as well as the PBS-run and SLURMM-run scripts. Both of these files might have to be adjusted, depending on your computer or server configuration. After concluding the simulations and performing the final analysis step, the results will be written in the same location and in the same format as with the AMBER version.
+The BAT setup allows for systems equilibrated with AMBER (equilibration step) to serve as input for calculations using AMBER and OpenMM, and vice-versa. However, if using OpenMM for equilibration, the fe step from OpenMM must always be performed before the AMBER one. This compatibility allows the user to compare the AMBER and OpenMM free energy results calculated over the same equilibrated states. 
 
-The BAT setup allows for systems equilibrated with AMBER (equilibration step) to serve as input for calculations using AMBER and OpenMM, and vice-versa. However, if using OpenMM for equilibration, the fe step from OpenMM must always be performed before the AMBER one. This compatibility allows the user to compare the AMBER and OpenMM free energy results calculated over the same equilibrated states.   
+
+# Computational cost
+
+The ABFE calculations from the tutorial use the BAT default values for the number of simulation steps for the different free energy components, which we found to be a good balance between accuracy and cost for the protein systems we have tested so far. They add up to 100.8 ns of simulations for a single ligand or pose, which can be achieved in around 12 hours on a single GTX 1070 NVIDIA GPU if using OpenMM, and slightly more than that if using AMBER on the same hardware. This time is significantly reduced when using more modern GPUs, such as the NVIDIA RTX 20 and RTX 30 series. Furthermore, the free energy simulations from BAT are separated into several independent windows, which allows for trivial parallelization across multiple GPUs.
+
+### Super short simulations
+
+Ref [1] shows how the simulation times of ABFE calculations using BAT on BRD4(2) can be further reduced and still maintain accuracy, to as little as 20.4 ns per calculation when using ligand conformational and positional (or Boresch) restraints, and 17.4 ns when using only ligand positional restraints. We include example input files with these super short simulation times, which can be applied to rank the five ligands to BRD4(2) using the exact same procedure from the tutorial. They are located inside the ./BAT/example-input-files/ folder, named input-openmm-short.in (20.4 ns) and input-openmm-short2.in (17.4 ns) for OpenMM, and input-amber-short.in (20.4 ns) and input-amber-short2.in (17.4 ns) for AMBER.  
+
+Even with the possible loss in convergence and sampling brought by these short simulations, the results still maintain good correlation (R value) with experimental values on the five example ligands that bind to BRD4(2), which can be confirmed by running these calculations and comparing the values with the experimental binding free energies of the ligands provided in the table above. Even though for more complicated protein systems this might not always be the case, this example shows that ABFE calculations can be very cheap and quick to run in the search of high affinity ligands to a given receptor.         
+
 
 # RBFE calculations
 
-BAT also offers the choice of performing RBFE calculations, using either the common-core or the separate topologies approach. The calculation procedure is also fully automated, using the same workflow and steps from the tutorial above. Below a brief description of each RBFE method.
+Starting at the 2.4 version, BAT offers the choice of performing RBFE calculations, using either the common-core or the separate topologies approach. The calculation procedure is also fully automated, using the same workflow as the ABFE calculations. Below a brief description of each RBFE method.
 
-## Common-core approach (AMBER only)
+### Common-core approach (AMBER only)
 
 The common core approach, also known as regular RBFE, does not use restraints between the protein and the ligands, maintaining a common region between the two bound molecules that are being transformed. However, this method requires that the ligands have a high degree of similarity, which might not always be the case. 
 
 Inside the ./Common-core-RBFE folder we provide a detailed explanation of our AMBER common-core RBFE approach, and the associated BAT options for it. We also include a tutorial to obtain the relative binding free energies of three pairs of ligands that bind to the BRD4(2) bromodomain, and are similar enough to be suitable for this type of calculation. 
 
-## Using Separate Topologies
+### Using Separate Topologies
 
 The relative calculations from BAT.py can also use the separate topologies (SepTop) approach, which was proposed originally by Rocklin et al. [17], and recently reintroduced by Baumann et al. [18]. Here we propose three different paths with two possible thermodynamic cycles, introducing the new free energy components **x**, **ex** and **sp**. Our SDR approach makes our calculations also suitable for transformations between ligands that have different net charges. More details on the theory and methodology of RBFE calculations using SepTop are provided in the Relative User Guide, inside the ./doc folder. 
 
@@ -181,11 +182,11 @@ The same goes for ther AMBER case. Instructions on how to interpret the RBFE res
 
 # Extending the BAT workflow to other systems
 
-## Additional ligands to BRD4(2)
+### Additional ligands to BRD4(2)
 
-The sample systems shown here uses a set of ligands that bind to the second bromodomain of the BRD4 protein - BRD4(2). The system alignment, parameter generation and assignment of the ligand anchor atoms is done automatically, so these same calculations can be extended to any other ligand that binds to this receptor. The only thing needed is the files in the ./all-poses folder to be changed, including the docked receptor and poses/ligands pdb files, as well as the crystal structure if desired. 
+The sample systems shown here use a set of ligands that bind to the second bromodomain of the BRD4 protein - BRD4(2). The system alignment, parameter generation and assignment of the ligand anchor atoms is done automatically, so these same calculations can be extended to any other ligand that binds to this receptor. The only thing needed is the files in the ./all-poses folder to be changed, including the docked receptor and poses/ligands pdb files, as well as the crystal structure if desired. 
 
-## Additional receptors
+### Additional receptors
 
 To include a new receptor system, some additional input data is needed. They include a reference.pdb file to align the system using USalign, three chosen protein anchors, and possibly a few variables for ligand anchor atom search. An explanation on how to define these is provided in the User Guide, inside the ./doc folder. The ./systems-library folder also has setup examples for three other bromodomains (CREBBP, BRD4(1) and BAZ2B) and the T4 Lysozyme. BAT input parameters for the multi-chain HIV-1 system can be found in Ref. [1] at the link https://pubs.acs.org/doi/10.1021/acs.jctc.4c01153.
 
