@@ -54,7 +54,7 @@ rec_dihcf_force      =   0.0  # Protein conformational dihedral spring constant 
 rec_discf_force      =   0.0  # Protein conformational distance spring constant - kcal/mol/Angstrom**2 - zero for common-core RBFE
 lig_distance_force   =   5.0  # Ligand pulling distance spring constant kcal/mol/Angstrom**2
 lig_angle_force      = 250.0  # Ligand angle/dihedral spring constant - kcal/mol/rad**2
-lig_dihcf_force      =  70.0  # Ligand conformational dihedral spring constant - kcal/mol/rad**2
+lig_dihcf_force      =  30.0  # Ligand conformational dihedral spring constant - kcal/mol/rad**2
 rec_com_force        =  10.0  # Protein COM spring constant
 lig_com_force        =  10.0  # Ligand COM spring constant for simultaneous decoupling
 

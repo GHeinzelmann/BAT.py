@@ -44,12 +44,14 @@ Openbabel 2.4.1 [4] - https://github.com/openbabel/openbabel/releases/tag/openba
 
 USalign: Universal structural alignment [5] - https://zhanggroup.org/US-align/ (No installation needed.)
 
-AmberTools20 or later [6] - http://ambermd.org/AmberTools.php 
+Ambertools20 or later [6] - http://ambermd.org/AmberTools.php <sup>b
 
-_pmemd.cuda_ software from AMBER (version 20 or later) [6] - http://ambermd.org/GetAmber.php <sup>a
+_pmemd.cuda_ from AMBER20 or later [6] - http://ambermd.org/GetAmber.php <sup>a,b
 
 
  <sup>a</sup> Not needed if using OpenMM for the simulations
+ 
+ <sup>b</sup> Ambertools25 and _pmemd.cuda_ from AMBER24 were the latest versions tested with BAT
 
 A quick installation guide for all the dependencies, using the Anaconda package manager, is provided in the Quick-installation-tutorial.pdf file, located inside the ./doc folder. This file also provides a short and command-oriented tutorial for running the BAT program with OpenMM/OpenMMtools. 
 
@@ -92,7 +94,7 @@ python BAT.py -i input-amber-rank.in -s analysis
 
 You should see a ./Results directory inside each ligand folder from the ./fe directory, containing all the components and the final calculated binding free energy, located in the Results.dat file. This folder also contains the results for each of the chosen data blocks, used to calculate the uncertainties, as well as the equilibrated structure of the protein-ligand complex used as the restraints reference state.
 
-The binding free energies of the five ligands are shown in the Table below, so they can be compared to the results obtained by BAT. 
+The experimental binding free energies of the five ligands [11] are shown in the Table below, so they can be compared to the results obtained by BAT. 
 
 | Ligand      | Binding Free Energy   |
 | :---------: | :-------------------: |
@@ -127,7 +129,7 @@ The results are presented the same way as with the ligand ranking example, with 
 
 # Performing ABFE calculations with OpenMM
 
-BAT also allows the user to run all simulations using the free OpenMM engine [11-15] with OpenMMTools [16]. In this case, instead of the _pmemd.cuda_ software from AMBER, OpenMM 7.7.0 or later and OpenMMTools 0.21.3 or later should be installed and in your path. See the Quick-installation-tutorial.pdf file, located inside the ./doc folder, for instructions on how to install these two programs and to run the OpenMM-based tutorial.
+BAT also allows the user to run all simulations using the free OpenMM engine [12-16] with OpenMMTools [17]. In this case, instead of the _pmemd.cuda_ software from AMBER, OpenMM 7.7.0 or later and OpenMMTools 0.21.3 or later should be installed and in your path. Versions 8.4.0 from the former and 0.25.3 from the latter were the latest ones tested with BAT. See the Quick-installation-tutorial.pdf file, located inside the ./doc folder, for instructions on how to install these two programs and to run the OpenMM-based tutorial.
 
 The OpenMM simulations are fully integrated into the BAT workflow, with the equilibration, free energy and analysis steps performed the same way as explained in the tutorial above. Example input files are provided for the OpenMM software on the same BRD4(2) sample system: input-openmm-rank.in for calculating the ABFE values of different ligands, and ./example-input-files/input-openmm-dock.in to compare docked poses, both using the SDR method. More details on the OpenMM-specific BAT input variables can be found in the User Guide.  
 
@@ -157,7 +159,7 @@ Inside the ./Common-core-RBFE folder we provide a detailed explanation of our AM
 
 ### Using Separate Topologies
 
-The relative calculations from BAT.py can also use the separate topologies (SepTop) approach, which was proposed originally by Rocklin et al. [17], and recently reintroduced by Baumann et al. [18]. Here we propose three different paths with two possible thermodynamic cycles, introducing the new free energy components **x**, **ex** and **sp**. Our SDR approach makes our calculations also suitable for transformations between ligands that have different net charges. More details on the theory and methodology of RBFE calculations using SepTop are provided in the Relative User Guide, inside the ./doc folder. 
+The relative calculations from BAT.py can also use the separate topologies (SepTop) approach, which was proposed originally by Rocklin et al. [18], and recently reintroduced by Baumann et al. [19]. Here we propose three different paths with two possible thermodynamic cycles, introducing the new free energy components **x**, **ex** and **sp**. Our SDR approach makes our calculations also suitable for transformations between ligands that have different net charges. More details on the theory and methodology of RBFE calculations using SepTop are provided in the Relative User Guide, inside the ./doc folder. 
 
 ![](doc/cycle.jpg)
 
@@ -193,7 +195,7 @@ To include a new receptor system, some additional input data is needed. They inc
 
 # More information and BAT.py citations
 
-The complete BAT.py theoretical background and calculation procedures are available in Refs. [1,2]. The OpenMM calculations are based on David Huggins work on ABFE calculations, available at Ref [19]. Please cite these references if using the BAT code. For more information you can contact the author (me) directly:
+The complete BAT.py theoretical background and calculation procedures are available in Refs. [1,2]. The OpenMM calculations are based on David Huggins work on ABFE calculations, available at Ref [20]. Please cite these references if using the BAT code. For more information you can contact the author (me) directly:
 
 Germano Heinzelmann <br/>
 Departamento de Física, Universidade Federal de Santa Catarina <br/>
@@ -228,26 +230,28 @@ Germano Heinzelmann thanks FAPESC and CNPq for the research grants, also Michael
 
 10. M. R. Shirts and J. Chodera (2008) “Statistically optimal analysis of samples from multiple equilibrium states.” Journal of  Chemical Physics, 129, 129105.
 
-11. M. S. Friedrichs, P. Eastman , V. Vaidyanathan, M. Houston, S. LeGrand, A. L. Beberg, D. L. Ensign, C. M. Bruns, and V. S. Pande (2009). "Accelerating molecular dynamic simulations on graphics processing unit." Journal of Computational Chemistry, 30, 864.
+11.  Wang, L. et al. (2017) Fragment-Based, Structure-Enabled Discovery of Novel Pyridones and Pyridone Macrocycles as Potent Bromodomain and Extra-Terminal Domain (BET) Family Bromodomain Inhibitors. Journal of Medicinal Cheminstry, 60, 3828.
 
-12. P. Eastman and V. S. Pande (2010). "OpenMM: A hardware-independent framework for molecular simulations." Computing in science and engineering, 12, 34.
+12. M. S. Friedrichs, P. Eastman , V. Vaidyanathan, M. Houston, S. LeGrand, A. L. Beberg, D. L. Ensign, C. M. Bruns, and V. S. Pande (2009). "Accelerating molecular dynamic simulations on graphics processing unit." Journal of Computational Chemistry, 30, 864.
 
-13. P. Eastman and V. S. Pande (2010). "Efficient nonbonded interactions for molecular dynamics on a graphics processing unit." Journal of Computational Chemistry, 31, 1268.
+13. P. Eastman and V. S. Pande (2010). "OpenMM: A hardware-independent framework for molecular simulations." Computing in science and engineering, 12, 34.
 
-14. P. Eastman and V. S. Pande (2010). "Constant constraint matrix approximation: A robust, parallelizable constraint method for molecular simulations." Journal of Chemical Theory and Computation, 6, 434.
+14. P. Eastman and V. S. Pande (2010). "Efficient nonbonded interactions for molecular dynamics on a graphics processing unit." Journal of Computational Chemistry, 31, 1268.
 
-15. P. Eastman, J. Swails, J. D. Chodera, R. T. McGibbon, Y. Zhao, K. A. Beauchamp, L.-P. Wang, A. C. Simmonett, M. P. Harrigan, C. D. Stern, R. P. Wiewiora, B. R. Brooks, and V. S. Pande (2017). “OpenMM 7: Rapid development of high performance algorithms for molecular dynamics.” PLOS Computational Biology, 13, e1005659. 
+15. P. Eastman and V. S. Pande (2010). "Constant constraint matrix approximation: A robust, parallelizable constraint method for molecular simulations." Journal of Chemical Theory and Computation, 6, 434.
 
-16. J. D. Chodera and M. R. Shirts (2011). "Replica exchange and expanded ensemble simulations as Gibbs multistate: Simple improvements for enhanced mixing." Journal of Chemical Physics, 135, 194110.
+16. P. Eastman, J. Swails, J. D. Chodera, R. T. McGibbon, Y. Zhao, K. A. Beauchamp, L.-P. Wang, A. C. Simmonett, M. P. Harrigan, C. D. Stern, R. P. Wiewiora, B. R. Brooks, and V. S. Pande (2017). “OpenMM 7: Rapid development of high performance algorithms for molecular dynamics.” PLOS Computational Biology, 13, e1005659. 
 
-17.  G. J. Rocklin, D. L. Mobley and K. A. Dill (2023). “Separated topologies: A
+17. J. D. Chodera and M. R. Shirts (2011). "Replica exchange and expanded ensemble simulations as Gibbs multistate: Simple improvements for enhanced mixing." Journal of Chemical Physics, 135, 194110.
+
+18.  G. J. Rocklin, D. L. Mobley and K. A. Dill (2023). “Separated topologies: A
 method for relative binding free energy calculations using orientational
 restraints”. Journal of Chemical Physics, 138, 085104.
 
-18. H. M. Baumann, E. Dybeck, C. L. McClendon, F. C. Pickard IV, V. Gapsys,
+19. H. M. Baumann, E. Dybeck, C. L. McClendon, F. C. Pickard IV, V. Gapsys,
 L. Pérez-Benito, D. F. Hahn, G. Tresadern, A. M. Mathiowetz and D. L. Mobley (2023) “Broadening the Scope of Binding Free Energy Calculations Using a
 Separated Topologies Approach”. Journal of Chemical Theory and Computation, 19, 5058. 
 
-19. D. J. Huggins (2022) "Comparing the Performance of Different AMBER Protein Forcefields, Partial Charge Assignments, and Water Models for Absolute Binding Free Energy Calculations." Journal of Chemical Theory and Computation, 18, 2616. 
+20. D. J. Huggins (2022) "Comparing the Performance of Different AMBER Protein Forcefields, Partial Charge Assignments, and Water Models for Absolute Binding Free Energy Calculations." Journal of Chemical Theory and Computation, 18, 2616. 
 
 
