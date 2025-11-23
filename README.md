@@ -55,7 +55,7 @@ _pmemd.cuda_ from AMBER20 or later [6] - http://ambermd.org/GetAmber.php <sup>a,
 
 A quick installation guide for all the dependencies, using the Anaconda package manager, is provided in the Quick-installation-tutorial.pdf file, located inside the ./doc folder. This file also provides a short and command-oriented tutorial for running the BAT program with OpenMM/OpenMMtools. 
 
-The folder ./BAT/all-poses contain examples of input coordinate files for two types of calculations using either ABFE or RBFE, both applied to the second bromodomain of the BRD4 protein, or simply BRD4(2). The first will rank five ligands in terms of affinity, assuming that the docked pose is already known for all ligands. The second calculation will compute the affinity of five docked poses of the same ligand, which can be seen as a docking refinement procedure. 
+The folder ./BAT/all-poses contains examples of input coordinate files for two types of calculations using either ABFE or RBFE, both applied to the second bromodomain of the BRD4 protein, or simply BRD4(2). The first will rank five ligands in terms of affinity, assuming that the docked pose is already known for all ligands. The second calculation will compute the affinity of five docked poses of the same ligand, which can be seen as a docking refinement procedure. 
 
 Any other protein system can be quickly added to the BAT ABFE and RBFE workflows, by following the instructions in the User Guide, inside the ./doc folder. That includes proteins with multiple chains and in the presence of co-binders, with five different water models and associated ion parameters available. Membrane protein systems can also be set up, but that currently requires some workaround that might be system dependent.
 
@@ -190,7 +190,7 @@ The sample systems shown here use a set of ligands that bind to the second bromo
 
 ### Additional receptors
 
-To include a new receptor system, some additional input data is needed. They include a reference.pdb file to align the system using USalign, three chosen protein anchors, and possibly a few variables for ligand anchor atom search. An explanation on how to define these is provided in the User Guide, inside the ./doc folder. The ./systems-library folder also has setup examples for three other bromodomains (CREBBP, BRD4(1) and BAZ2B) and the T4 Lysozyme. BAT input parameters for the multi-chain HIV-1 system can be found in Ref. [1] at the link https://pubs.acs.org/doi/10.1021/acs.jctc.4c01153.
+To include a new receptor system, some additional input data is needed. They include a reference.pdb file to align the system using USalign, three chosen protein anchors, and possibly a few variables for ligand anchor atom search. An explanation on how to define these is provided in the User Guide, inside the ./doc folder. The ./systems-library folder also has setup examples for three other bromodomains (CREBBP, BRD4(1) and BAZ2B) and the T4 Lysozyme. BAT input parameters for the multi-chain HIV-1 protease system can be found in Ref. [1] at the link https://pubs.acs.org/doi/10.1021/acs.jctc.4c01153.
 
 
 # More information and BAT.py citations
