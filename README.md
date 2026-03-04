@@ -149,7 +149,7 @@ Even with the possible loss in convergence and sampling brought by these short s
 
 # RBFE calculations
 
-Starting at the 2.4 version, BAT offers the choice of performing RBFE calculations, using either the common-core or the separate topologies approach. The calculation procedure is also fully automated, using the same workflow as the ABFE calculations. Below a brief description of each RBFE method.
+Starting at the 2.4 version, BAT offers the choice of performing RBFE calculations, using either the common-core or the separate topologies approach. The calculation procedure is also fully automated, using the same workflow as the ABFE calculations. Below a brief description of each RBFE method, with more details in Ref. [18].
 
 ### Common-core approach (AMBER only)
 
@@ -159,7 +159,7 @@ Inside the ./Common-core-RBFE folder we provide a detailed explanation of our AM
 
 ### Using Separate Topologies
 
-The relative calculations from BAT.py can also use the separate topologies (SepTop) approach, which was proposed originally by Rocklin et al. [18], and recently reintroduced by Baumann et al. [19]. Here we propose three different paths with two possible thermodynamic cycles, introducing the new free energy components **x**, **ex** and **sp**. Our SDR approach makes our calculations also suitable for transformations between ligands that have different net charges. More details on the theory and methodology of RBFE calculations using SepTop are provided in the Relative User Guide, inside the ./doc folder. 
+The relative calculations from BAT.py can also use the separate topologies (SepTop) approach, which was proposed originally by Rocklin et al. [19], and recently reintroduced by Baumann et al. [20]. Here we propose three different paths with two possible thermodynamic cycles, introducing the new free energy components **x**, **ex** and **sp**. Our SDR approach makes our calculations also suitable for transformations between ligands that have different net charges. More details on the theory and methodology of RBFE calculations using SepTop are provided in the Relative User Guide, inside the ./doc folder. 
 
 ![](doc/cycle.jpg)
 
@@ -195,7 +195,7 @@ To include a new receptor system, some additional input data is needed. They inc
 
 # More information and BAT.py citations
 
-The complete BAT.py theoretical background and calculation procedures are available in Refs. [1,2]. The OpenMM calculations are based on David Huggins work on ABFE calculations, available at Ref [20]. Please cite these references if using the BAT code. For more information you can contact the author (me) directly:
+The complete BAT.py theoretical background for the ABFE and RBFE calculation procedures are available in Refs. [1,2,18]. The OpenMM calculations are based on David Huggins work on ABFE calculations, available at Ref [21]. Please cite these references if using the BAT code. For more information you can contact the author (me) directly:
 
 Germano Heinzelmann <br/>
 Departamento de Física, Universidade Federal de Santa Catarina <br/>
@@ -244,14 +244,16 @@ Germano Heinzelmann thanks FAPESC and CNPq for the research grants, also Michael
 
 17. J. D. Chodera and M. R. Shirts (2011). "Replica exchange and expanded ensemble simulations as Gibbs multistate: Simple improvements for enhanced mixing." Journal of Chemical Physics, 135, 194110.
 
-18.  G. J. Rocklin, D. L. Mobley and K. A. Dill (2023). “Separated topologies: A
+18. G. Heinzelmann, D. J. Huggins and M. K. Gilson (2025). “Relative BAT: An Automated Tool for Relative Binding Free Energy Calculations by the Separated Topologies Approach”. Journal of Chemical Information and Modeling, 65, 13020.
+
+19.  G. J. Rocklin, D. L. Mobley and K. A. Dill (2023). “Separated topologies: A
 method for relative binding free energy calculations using orientational
 restraints”. Journal of Chemical Physics, 138, 085104.
 
-19. H. M. Baumann, E. Dybeck, C. L. McClendon, F. C. Pickard IV, V. Gapsys,
+20. H. M. Baumann, E. Dybeck, C. L. McClendon, F. C. Pickard IV, V. Gapsys,
 L. Pérez-Benito, D. F. Hahn, G. Tresadern, A. M. Mathiowetz and D. L. Mobley (2023) “Broadening the Scope of Binding Free Energy Calculations Using a
 Separated Topologies Approach”. Journal of Chemical Theory and Computation, 19, 5058. 
 
-20. D. J. Huggins (2022) "Comparing the Performance of Different AMBER Protein Forcefields, Partial Charge Assignments, and Water Models for Absolute Binding Free Energy Calculations." Journal of Chemical Theory and Computation, 18, 2616. 
+21. D. J. Huggins (2022) "Comparing the Performance of Different AMBER Protein Forcefields, Partial Charge Assignments, and Water Models for Absolute Binding Free Energy Calculations." Journal of Chemical Theory and Computation, 18, 2616. 
 
 
